@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { memo, useMemo, useState } from 'react';
 import { Marker, useMap } from 'react-map-gl/maplibre';
 import ClockGlyph from './ClockGlyph.jsx';
 import { isHollow } from './PointLayers.jsx';
@@ -22,7 +22,7 @@ function captionFor(layer, m, metric) {
 }
 
 /** Marker-based clock glyphs, rendered at zoom >= 11 for the visible glyph layers. */
-export default function GlyphLayer({ featured, viewVersion }) {
+function GlyphLayer({ featured, viewVersion }) {
   const { current: mapRef } = useMap();
   const { geo, indexes } = useData();
   const { period, metric, hour, layerVisibility, selectedFeature } = useAppState();
@@ -98,3 +98,5 @@ export default function GlyphLayer({ featured, viewVersion }) {
     );
   });
 }
+
+export default memo(GlyphLayer);

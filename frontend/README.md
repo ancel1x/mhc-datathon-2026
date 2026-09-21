@@ -13,6 +13,8 @@ npm install
 node scripts/make-mock-data.mjs   # only needed when public/data/ is empty; never overwrites existing files
 npm run dev                       # http://localhost:5173, proxies /api -> http://127.0.0.1:8000
 npm run build && npm run preview  # production build
+npm test                        # bundle loading, fallback and cache regressions
+npm run test:browser             # Chrome interaction/performance checks against preview on :4173
 node scripts/screenshot.mjs "http://localhost:4173/?chapter=3" out.png 18000 [width] [height]   # headless Chrome capture
 ```
 
@@ -24,10 +26,12 @@ timeline bar, `→` or `Enter` jump to the next callout without waiting for its 
 
 ## Where the data comes from
 
-`src/lib/api.js#loadJson(name)` fetches `${VITE_API_BASE ?? '/api'}/bundle/<name>` for JSON bundles and
-`/api/geo/<layer>` for GeoJSON layers, and falls back to the static files in `public/data/`
-(`/data/<name>.json`, `/data/<layer>.geojson`) whenever the API is unreachable or returns something that is not JSON.
-Results are cached in a `Map`. The file shapes are specified in `../docs/DATA_CONTRACT.md`.
+`src/lib/api.js#loadJson(name)` reads the bundled files in `public/data/` directly
+(`/data/<name>.json`, `/data/<layer>.geojson`), so standalone startup does not wait for the optional API.
+To prefer the API, set `VITE_API_BASE=/api` in `frontend/.env.local` (or an API URL), then restart Vite/rebuild.
+This uses `<base>/bundle/<name>` and `<base>/geo/<layer>`, falling back to the bundled files on an error
+or after a 2.5-second API timeout. Concurrent requests share a cached promise; failed requests can be retried.
+The file shapes are specified in `../docs/DATA_CONTRACT.md`.
 
 `scripts/make-mock-data.mjs` writes contract-shaped placeholder files with real NYC coordinates and realistic magnitudes.
 It skips every file that already exists and stamps `"_mock": true` on every JSON object it writes; the UI shows a small
@@ -35,6 +39,17 @@ It skips every file that already exists and stamps `"_mock": true` on every JSON
 
 Core files are loaded at startup (`src/lib/data.jsx`, thin progress line); the series files
 (`aq_series`, `bt_series`, `crz_series`, `dot_matched`) are loaded lazily when a feature detail opens.
+The detail panel and Recharts code also load on demand, alongside the selected feature's series.
+
+The traffic canvas caches projected route geometry until the map moves or the layout changes. It stops
+scheduling frames when its layer is empty or the tab is hidden; reduced motion settles to a static frame.
+Hover hit testing coalesces bursts of pointer events, and moving within a feature only repositions its
+tooltip. Map layers are memoized, and zoom state updates only when crossing the clock-glyph threshold.
+
+For repeatable measurements, run `node scripts/performance.mjs http://127.0.0.1:4173 report.json` against a
+production preview. Add `--verify` to check performance invariants and desktop/mobile interactions.
+Set `CHROME` to the browser executable when it is not in the default Windows location. Timing results depend
+on hardware and background work; the script uses software WebGL, so they are not a hardware-GPU frame-rate benchmark.
 
 ## How the UI is organised
 

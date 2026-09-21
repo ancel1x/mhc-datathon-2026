@@ -1,3 +1,4 @@
+import { lazy, Suspense, useEffect } from 'react';
 import { useAppState, useDispatch } from '../../state/AppState.jsx';
 import { useData } from '../../lib/data.jsx';
 import { usePhone } from '../../hooks/useMediaQuery.js';
@@ -6,7 +7,19 @@ import { fmtHour } from '../../lib/format.js';
 import Segmented from '../Segmented.jsx';
 import CloseButton from '../CloseButton.jsx';
 import KeyLegend from './KeyLegend.jsx';
-import DetailContent from './DetailPanel.jsx';
+import { loadJson } from '../../lib/api.js';
+
+const DetailContent = lazy(() => import('./DetailPanel.jsx'));
+const SERIES_FILE = { aq_monitor: 'aq_series', bt_facility: 'bt_series', crz_entry: 'crz_series', dot_segment: 'dot_matched' };
+
+function FeatureDetail(props) {
+  // Start the series request alongside the chart chunk, rather than after it has loaded.
+  useEffect(() => {
+    const file = SERIES_FILE[props.layer];
+    if (file) loadJson(file).catch(() => {}); // DetailContent displays a request failure.
+  }, [props.layer]);
+  return <Suspense fallback={<p className="detail__hint" role="status">Loading detail…</p>}><DetailContent {...props} /></Suspense>;
+}
 
 const PERIOD_OPTIONS = [
   { value: 'pre_2024', label: '2024 · before' },
@@ -158,7 +171,7 @@ export default function SidePanel({ hasFeatured }) {
     }
     return (
       <aside className="side panel side--sheet" aria-label={live ? 'Feature detail' : 'Map controls'}>
-        {live ? <DetailContent layer={selectedFeature.layer} feature={live} onClose={closeDetail} /> : <ControlsContent onClose={() => dispatch({ type: 'TOGGLE_CONTROLS', open: false })} hasFeatured={hasFeatured} />}
+        {live ? <FeatureDetail layer={selectedFeature.layer} feature={live} onClose={closeDetail} /> : <ControlsContent onClose={() => dispatch({ type: 'TOGGLE_CONTROLS', open: false })} hasFeatured={hasFeatured} />}
       </aside>
     );
   }
@@ -168,7 +181,7 @@ export default function SidePanel({ hasFeatured }) {
   return (
     <>
       <aside className="side panel" data-collapsed={collapsed ? 'true' : 'false'} aria-hidden={collapsed} aria-label={live ? 'Feature detail' : 'Map controls'}>
-        {live ? <DetailContent layer={selectedFeature.layer} feature={live} onClose={closeDetail} /> : <ControlsContent onCollapse={() => dispatch({ type: 'TOGGLE_COLLAPSE', collapsed: true })} hasFeatured={hasFeatured} />}
+        {live ? <FeatureDetail layer={selectedFeature.layer} feature={live} onClose={closeDetail} /> : <ControlsContent onCollapse={() => dispatch({ type: 'TOGGLE_COLLAPSE', collapsed: true })} hasFeatured={hasFeatured} />}
       </aside>
       {collapsed ? (
         <button type="button" className="side-btn panel" aria-expanded="false" onClick={() => dispatch({ type: 'TOGGLE_COLLAPSE', collapsed: false })}>Map controls <Chevron /></button>

@@ -1,10 +1,11 @@
+import { memo } from 'react';
 import { Layer, Source } from 'react-map-gl/maplibre';
 import { useData } from '../../lib/data.jsx';
 import { useAppState } from '../../state/AppState.jsx';
 import { themeColors } from '../../lib/scales.js';
 
 /** Congestion Relief Zone: a 1.25 px outline at 70 % (white on dark, ink on light). No fill, no glow. */
-export default function ZoneLayer() {
+function ZoneLayer() {
   const { geo } = useData();
   const { layerVisibility, theme } = useAppState();
   const on = layerVisibility.zone !== false;
@@ -15,3 +16,5 @@ export default function ZoneLayer() {
     </Source>
   );
 }
+
+export default memo(ZoneLayer);

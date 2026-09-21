@@ -6,6 +6,7 @@ import { isNum } from '../../lib/format.js';
 const TAU = Math.PI * 2;
 const angleAt = (i) => (i / 24) * TAU;
 const TICKS = [0, 6, 12, 18];
+const PEAK = [5, 21];
 const OUTLINE = 'rgba(11,13,16,0.9)';
 
 /** Center mark that matches the layer's symbol below the glyph zoom: ring (entries) or disc (the rest). */
@@ -19,7 +20,7 @@ function CenterMark({ shape, color, hollow }) {
  * 24-hour radial glyph. Midnight at the top, clockwise. 1 px strokes: grey ring = baseline weekday profile,
  * colored ring = selected period. Radius is a sqrt scale from 0 to the layer maximum.
  */
-function ClockGlyph({ baseline, current, max, color = '#8E8E93', size = 64, hour = null, selected = false, peak = [5, 21], title, shape = 'monitor', hollow = false, dimmed = false }) {
+function ClockGlyph({ baseline, current, max, color = '#8E8E93', size = 64, hour = null, selected = false, peak = PEAK, title, shape = 'monitor', hollow = false, dimmed = false }) {
   const r = size / 2;
   const R = r - 7;
 
