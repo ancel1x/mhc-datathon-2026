@@ -204,7 +204,6 @@ export default function StoryPanel() {
           <div className="panel__sub">NYC since the $9 toll · official data</div>
           <div className="story__actions">
             <button type="button" className="story__action" aria-pressed={sourcesOpen} onClick={() => dispatch({ type: 'TOGGLE_SOURCES' })}>Sources</button>
-            <button type="button" className="story__action" onClick={() => dispatch({ type: 'AUTOPLAY_START', step: exploreMode || autoplay.on ? 0 : activeChapter })}>Play the story</button>
           </div>
         </div>
       </header>
