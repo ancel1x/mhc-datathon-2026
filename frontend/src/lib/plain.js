@@ -63,10 +63,10 @@ export function plainRange(lo, hi, digits = 2, unit = '') {
   return `range of doubt ${fmtSigned(lo, digits)} to ${fmtSigned(hi, digits)}${unit}`;
 }
 
-/** One-line reading of the three rush windows for a crossing. */
+/** One-line reading of the three rush windows for a crossing, each with its actual percentage. */
 export function plainRush(peak) {
   if (!peak) return null;
-  const part = (label, w) => (w && isNum(w.pct) ? `${label} ${plainPctShort(w.pct)}${w.status === 'increase' || w.status === 'decrease' ? ' (supported)' : w.status === 'uncertain' ? ' (uncertain)' : ''}` : null);
+  const part = (label, w) => (w && isNum(w.pct) ? `${label} ${fmtSigned(w.pct, 1)}% (${plainPctShort(w.pct)}${w.status === 'increase' || w.status === 'decrease' ? ', supported' : w.status === 'uncertain' ? ', uncertain' : ''})` : null);
   const bits = [part('morning rush', peak.am), part('evening rush', peak.pm), part('other hours', peak.other)].filter(Boolean);
   return bits.length ? bits.join('; ') : null;
 }

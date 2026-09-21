@@ -18,7 +18,8 @@ export function tourPadding() {
 /**
  * Runs the guided tour: walks each step's beats on a timer (pause keeps the remaining time), applies a beat's
  * year / metric so the map visibly changes, moves the camera for beats that ask for it, and hands over to
- * Explore at the end. Space pauses, Escape leaves the tour.
+ * Explore at the end. Space pauses, Escape leaves the tour, the arrow keys (or Enter, or the "Next" button on a
+ * callout) skip to the next / previous callout without waiting for its bar.
  * Outside the tour it also plays each step's own "before -> after" transition: a step with a `from` state
  * opens on the earlier year and tweens to its own after a short hold.
  */
@@ -56,12 +57,15 @@ export default function GuidePlayer({ guide }) {
       if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey) return;
       const tag = e.target?.tagName;
       if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+      const count = (guide?.[step] ?? []).length;
       if (e.key === 'Escape') { e.preventDefault(); dispatch({ type: 'AUTOPLAY_STOP' }); }
       else if (e.key === ' ') { e.preventDefault(); dispatch({ type: 'AUTOPLAY_TOGGLE_PAUSE' }); }
+      else if (e.key === 'ArrowRight' || e.key === 'Enter') { e.preventDefault(); dispatch({ type: 'AUTOPLAY_SKIP', dir: 1, count }); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); dispatch({ type: 'AUTOPLAY_SKIP', dir: -1, count }); }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [on, dispatch]);
+  }, [on, step, guide, dispatch]);
 
   // ---- step transitions when paging by hand: show the "before" year, then tween to the step's own ----
   useEffect(() => {

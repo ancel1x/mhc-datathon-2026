@@ -64,6 +64,16 @@ export default function Timeline({ guide }) {
         <PlayIcon paused={!autoplay.on || autoplay.paused} />
         <span className="tl__play-label">{autoplay.on ? (autoplay.paused ? 'Resume' : 'Pause') : 'Play the story'}</span>
       </button>
+      {autoplay.on ? (
+        <span className="tl__skips">
+          <button type="button" className="tl__skip" onClick={() => dispatch({ type: 'AUTOPLAY_SKIP', dir: -1, count: (guide?.[autoplay.step] ?? []).length })} aria-label="Previous callout" title="Previous callout (←)">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M8.5 1.8v8.4a.5.5 0 0 1-.8.4L2.4 6.4a.5.5 0 0 1 0-.8l5.3-4.2a.5.5 0 0 1 .8.4z" /><rect x="1.2" y="1.5" width="1.4" height="9" rx="0.5" /></svg>
+          </button>
+          <button type="button" className="tl__skip" onClick={() => dispatch({ type: 'AUTOPLAY_SKIP', dir: 1, count: (guide?.[autoplay.step] ?? []).length })} aria-label="Next callout" title="Next callout (→)">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M3.5 1.8v8.4a.5.5 0 0 0 .8.4l5.3-4.2a.5.5 0 0 0 0-.8L4.3 1.4a.5.5 0 0 0-.8.4z" /><rect x="9.4" y="1.5" width="1.4" height="9" rx="0.5" /></svg>
+          </button>
+        </span>
+      ) : null}
       <div className="tl__grid">
         <div className="tl__eras" aria-hidden="true">
           {GROUPS.map((g) => (

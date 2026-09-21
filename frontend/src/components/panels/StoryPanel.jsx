@@ -176,6 +176,7 @@ export default function StoryPanel() {
   const when = exploreMode ? EXPLORE_STEP.when : CHAPTERS[activeChapter]?.when ?? '';
 
   useEffect(() => {
+    if (autoplay.on) return undefined; // during the tour the arrow keys skip between callouts (GuidePlayer)
     const onKey = (e) => {
       if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey) return;
       const t = e.target;
@@ -186,7 +187,7 @@ export default function StoryPanel() {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [dispatch]);
+  }, [dispatch, autoplay.on]);
 
   useEffect(() => {
     bodyRef.current?.scrollTo?.({ top: 0 });
