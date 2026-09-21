@@ -23,7 +23,7 @@ function readStoredTheme() {
  * crz_entry, dot_segment, uhf42); ?controls=1 opens the controls sheet on phones.
  */
 function readUrlState() {
-  const out = { chapter: 0, explore: false, controlsOpen: false, selectedFeature: null, skipIntro: false, introHold: false, play: null };
+  const out = { chapter: 0, explore: false, controlsOpen: false, controlsCollapsed: false, selectedFeature: null, skipIntro: false, introHold: false, play: null };
   try {
     const q = new URLSearchParams(window.location.search);
     const raw = q.get('chapter');
@@ -39,6 +39,7 @@ function readUrlState() {
     const id = rest.join(':');
     if (layer && id) { out.selectedFeature = { layer, id }; out.skipIntro = true; }
     out.controlsOpen = q.get('controls') === '1';
+    out.controlsCollapsed = q.get('controls') === 'collapsed';
   } catch {
     /* no window */
   }
@@ -70,7 +71,7 @@ export const initialState = {
   theme: readStoredTheme(),
   sourcesOpen: false,
   controlsOpen: fromUrl.controlsOpen, // phone: controls sheet open
-  controlsCollapsed: false, // desktop: control panel collapsed to a pill
+  controlsCollapsed: Boolean(fromUrl.controlsCollapsed), // desktop: control panel collapsed to a pill (?controls=collapsed)
   dacMode: 'designated', // 'designated' | 'percentile'
   glyphMode: false, // map zoom >= 11 (clock glyphs on)
 };

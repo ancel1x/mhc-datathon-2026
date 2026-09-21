@@ -18,7 +18,8 @@ import GuidePlayer from './components/GuidePlayer.jsx';
  */
 function Shell() {
   const data = useData();
-  const { activeChapter, exploreMode, intro, autoplay } = useAppState();
+  const { activeChapter, exploreMode, intro, autoplay, controlsCollapsed, selectedFeature } = useAppState();
+  const controls = controlsCollapsed && !selectedFeature ? 'collapsed' : 'open';
 
   const featured = useMemo(() => {
     if (exploreMode || !data.indexes) return null;
@@ -38,7 +39,7 @@ function Shell() {
   const error = !data.loading && !data.summary ? `No data found (${Object.keys(data.errors).join(', ') || 'summary'}). Start the API or run: node scripts/make-mock-data.mjs` : null;
 
   return (
-    <div className="app" data-intro={intro} data-autoplay={autoplay.on ? 'true' : 'false'}>
+    <div className="app" data-intro={intro} data-autoplay={autoplay.on ? 'true' : 'false'} data-controls={controls}>
       {ready ? (
         <MapProvider>
           <MapView featured={featured} guide={guide} />
