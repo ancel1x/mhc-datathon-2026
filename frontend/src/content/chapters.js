@@ -1,6 +1,10 @@
 // Story steps, in time order. Each step sets the camera, which layers are on, which year the map shows
 // (`period`), whether symbols are colored by change or just sized by amount (`metric`), and which ids are
 // "featured" (everything else is faded). The Timeline bar groups steps by `era`.
+//
+// Every step answers one part of the Phase 1 brief: the three required layers (NYCCAS PM2.5 before/after,
+// MTA + DOT traffic, the zone + toll) and the four questions (headline vs daily/peak picture; eliminated vs
+// shifted and who lives there; the South Bronx monitor by monitor; a highway-removal scenario).
 export const LAYER_KEYS = ['zone', 'crz_entry', 'bt_facility', 'flow', 'dot_segment', 'aq_monitor', 'dac', 'uhf42'];
 
 export const LAYER_LABELS = {
@@ -18,10 +22,10 @@ export const LAYER_LABELS = {
 export const LAYER_HINTS = {
   zone: 'White outline · Manhattan below 60th St',
   crz_entry: 'Rings · where vehicles enter the zone',
-  bt_facility: 'Discs · the nine MTA crossings',
+  bt_facility: 'Discs · the nine MTA crossings; ring = uncertain',
   flow: 'Moving lines · which way traffic goes',
   dot_segment: 'Squares · one-week NYC DOT counts',
-  aq_monitor: 'Dots · fine-particle pollution (PM2.5)',
+  aq_monitor: 'Dots · PM2.5, weather-adjusted verdict',
   dac: 'Purple fill · state-designated areas',
   uhf42: 'Purple shading · ER visits per 10,000 children, 2023',
 };
@@ -41,6 +45,8 @@ export const LAYER_SYMBOL = {
 const layers = (on) => Object.fromEntries(LAYER_KEYS.map((k) => [k, on.includes(k)]));
 
 const idsOf = (list, key = 'id') => new Set((list ?? []).map((x) => x?.[key]).filter(Boolean));
+const supported = (rows) => idsOf((rows ?? []).filter((r) => r?.status === 'increase' || r?.status === 'decrease'));
+const SOUTH_BRONX = ['aq_36005NY11534', 'aq_36005NY12387', 'aq_36005NY11790'];
 
 export const CHAPTERS = [
   {
@@ -59,7 +65,7 @@ export const CHAPTERS = [
     id: 'toll',
     era: 'Jan 2025',
     when: 'January 5, 2025',
-    short: 'Toll begins',
+    short: 'Toll',
     title: 'The toll begins',
     camera: { center: [-73.975, 40.745], zoom: 11.5 },
     layers: layers(['zone']),
@@ -70,9 +76,9 @@ export const CHAPTERS = [
   {
     id: 'entries',
     era: '2025',
-    when: '2025 · year one',
-    short: 'Entries',
-    title: 'Half a million a day still come in',
+    when: '2025 · year one · the priced core',
+    short: 'Inside',
+    title: 'Inside the zone: what was measured',
     camera: { center: [-73.975, 40.755], zoom: 12.2 },
     layers: layers(['zone', 'crz_entry', 'flow']),
     period: 'post_2025',
@@ -80,94 +86,110 @@ export const CHAPTERS = [
     featured: ({ summary }) => ({ crz_entry: idsOf(summary?.crz?.top_entry_points_2025) }),
   },
   {
-    id: 'moved',
+    id: 'crossings',
     from: { period: 'pre_2024', metric: 'absolute' },
     era: '2025',
-    when: '2025 · year one',
-    short: 'Rerouting',
-    title: 'Traffic went around, not away',
+    when: '2025 vs 2024 · Jan 5–Dec 31',
+    short: 'Bridges',
+    title: 'Crossings: where volume changed',
     camera: { center: [-73.925, 40.73], zoom: 10.4 },
-    layers: layers(['zone', 'bt_facility', 'flow', 'dot_segment']),
+    layers: layers(['zone', 'bt_facility', 'flow']),
     period: 'post_2025',
     metric: 'change',
-    featured: ({ summary }) => ({
-      bt_facility: idsOf([...(summary?.bt?.facilities_up ?? []), ...(summary?.bt?.facilities_down ?? [])]),
-      dot_segment: new Set((summary?.dot?.highlights ?? []).map((h) => h?.id ?? (h?.segment_id ? `dot_${h.segment_id}` : null)).filter(Boolean)),
-    }),
+    featured: ({ summary }) => ({ bt_facility: supported(summary?.reconciled?.traffic) }),
   },
   {
-    id: 'monitors',
+    id: 'street',
+    era: '2025',
+    when: '2025 · sampled street counts',
+    short: 'Streets',
+    title: 'Street level: what DOT counters add',
+    camera: { center: [-73.975, 40.73], zoom: 11 },
+    layers: layers(['zone', 'dot_segment']),
+    period: 'post_2025',
+    metric: 'change',
+    featured: ({ summary }) => ({ dot_segment: idsOf(summary?.reconciled?.dot?.tiers?.same_month_2024?.rows) }),
+  },
+  {
+    id: 'air',
     from: { period: 'pre_2024', metric: 'absolute' },
     era: '2025',
-    when: '2025 · year one',
-    short: 'The air',
-    title: 'Cleaner by the bridges, not in the Bronx',
-    camera: { center: [-73.92, 40.81], zoom: 11.8 },
+    when: '2025 vs 2024 · matched months',
+    short: 'Air',
+    title: 'Air: where PM2.5 changed',
+    camera: { center: [-73.94, 40.745], zoom: 10.7 },
     layers: layers(['zone', 'aq_monitor']),
     period: 'post_2025',
     metric: 'change',
-    featured: ({ summary, aqIds }) => {
-      const ids = new Set();
-      for (const s of [...(summary?.aq?.south_bronx ?? []), ...(summary?.aq?.inside_sites ?? [])]) {
-        const id = s?.id ?? aqIds?.get(s?.site_id);
-        if (id) ids.add(id);
-      }
-      const c = summary?.aq?.control;
-      const cid = c?.id ?? aqIds?.get(c?.site_id);
-      if (cid) ids.add(cid);
-      return ids.size ? { aq_monitor: ids } : null;
-    },
+    featured: ({ summary }) => ({ aq_monitor: idsOf((summary?.reconciled?.air ?? []).filter((r) => r?.class === 'decrease' || r?.class === 'increase')) }),
+  },
+  {
+    id: 'bronx',
+    era: '2025',
+    when: '2025 vs 2024 · the South Bronx',
+    short: 'Bronx',
+    title: 'The South Bronx, monitor by monitor',
+    camera: { center: [-73.905, 40.825], zoom: 11.9 },
+    layers: layers(['zone', 'aq_monitor', 'uhf42', 'bt_facility']),
+    period: 'post_2025',
+    metric: 'change',
+    featured: () => ({ aq_monitor: new Set(SOUTH_BRONX), bt_facility: new Set(['rfk_bronx', 'whitestone', 'throgs_neck', 'henry_hudson']) }),
   },
   {
     id: 'burden',
     era: '2025',
-    when: '2025 · year one',
+    when: '2025 · overlap with vulnerable communities',
     short: 'Burden',
-    title: 'Who bears it',
+    title: 'Who was already carrying the most',
     camera: { center: [-73.93, 40.73], zoom: 10 },
     layers: layers(['zone', 'dac', 'aq_monitor', 'bt_facility']),
     period: 'post_2025',
     metric: 'change',
-    featured: ({ aq, bt }) => ({
-      aq_monitor: new Set((aq?.features ?? []).filter((f) => f.properties?.classification === 'worsened' && f.properties?.dac_designated).map((f) => f.properties.id)),
-      bt_facility: new Set((bt?.features ?? []).filter((f) => (f.properties?.change?.pct_2025_vs_2024 ?? 0) > 0 && f.properties?.dac_designated).map((f) => f.properties.id)),
-    }),
+    featured: ({ summary }) => {
+      const rc = summary?.reconciled;
+      const bt = idsOf((rc?.traffic ?? []).filter((r) => r?.status === 'increase' && r?.dac_designated));
+      const aq = new Set([...idsOf((rc?.air ?? []).filter((r) => r?.class === 'decrease')), ...SOUTH_BRONX]);
+      return { bt_facility: bt, aq_monitor: aq };
+    },
   },
   {
     id: 'year_two',
     from: { period: 'post_2025', metric: 'change' },
     era: '2026',
-    when: '2026 · year two, so far',
-    short: 'Year two',
-    title: 'Year two: the drop shows up',
-    camera: { center: [-73.95, 40.745], zoom: 10.9 },
-    layers: layers(['zone', 'crz_entry', 'bt_facility', 'flow']),
+    when: 'Jan 5–Aug 31 · 2024 vs 2025 vs 2026',
+    short: '2026',
+    title: '2026 so far: did year one persist?',
+    camera: { center: [-73.95, 40.745], zoom: 10.6 },
+    layers: layers(['zone', 'bt_facility', 'flow', 'aq_monitor']),
     period: 'post_2026_ytd',
     metric: 'change',
-    featured: () => null,
+    featured: ({ summary }) => ({
+      bt_facility: idsOf((summary?.reconciled?.persistence_highlights ?? []).filter((h) => h.kind === 'traffic')),
+      aq_monitor: idsOf((summary?.reconciled?.persistence_highlights ?? []).filter((h) => h.kind === 'air')),
+    }),
   },
   {
     id: 'what_if',
     era: 'What if',
-    when: 'What if a highway came down',
+    when: 'Scenario reasoning · the Major Deegan',
     short: 'What if',
-    title: 'If the Deegan or the BQE came down',
-    camera: { center: [-73.95, 40.77], zoom: 10.2 },
-    layers: layers(['zone', 'bt_facility', 'dot_segment', 'aq_monitor', 'dac']),
+    title: 'If the Major Deegan came down',
+    camera: { center: [-73.915, 40.835], zoom: 11.4 },
+    layers: layers(['zone', 'bt_facility', 'dot_segment', 'aq_monitor', 'uhf42']),
     dotAll: true, // the Deegan and Bruckner counts are post-toll only, so the single-count squares must show
     period: 'post_2025',
     metric: 'change',
     featured: () => ({
-      bt_facility: new Set(['rfk_bronx', 'henry_hudson', 'whitestone', 'throgs_neck', 'verrazzano']),
-      aq_monitor: new Set(['aq_36005NY11534', 'aq_36005NY12387', 'aq_36061NY12380', 'aq_36047NY07974']),
-      dot_segment: new Set(['dot_139020', 'dot_276694', 'dot_9014571', 'dot_140064', 'dot_140062', 'dot_142655', 'dot_142657', 'dot_153104', 'dot_144320']),
+      bt_facility: new Set(['rfk_bronx', 'henry_hudson', 'whitestone', 'throgs_neck']),
+      aq_monitor: new Set(['aq_36005NY11534', 'aq_36005NY12387', 'aq_36061NY12380']),
+      dot_segment: new Set(['dot_139020', 'dot_276694', 'dot_9014571', 'dot_140064', 'dot_140062']),
     }),
   },
   {
     id: 'caveats',
     era: 'Notes',
     when: 'Before you draw conclusions',
-    short: 'Caveats',
+    short: 'Notes',
     title: 'What this can’t say',
     camera: { center: [-73.94, 40.72], zoom: 10 },
     layers: layers(['zone', 'crz_entry', 'bt_facility', 'dot_segment', 'aq_monitor']),

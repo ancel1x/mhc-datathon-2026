@@ -5,6 +5,7 @@ import { useData } from '../../lib/data.jsx';
 import { useAppState, useDispatch } from '../../state/AppState.jsx';
 import { isNum } from '../../lib/format.js';
 import { StatRow } from '../charts/StatTile.jsx';
+import IntervalBars from '../charts/IntervalBar.jsx';
 import TollTable from './TollTable.jsx';
 import { SourcesList } from './SourcesSheet.jsx';
 import Segmented from '../Segmented.jsx';
@@ -42,7 +43,50 @@ function ChoroplethToggle() {
 }
 
 const toneClass = (tone) => (isNum(tone) && tone !== 0 ? (tone > 0 ? 'tone-worse' : 'tone-better') : '');
-const hasDetails = (d) => Boolean(d && (d.paragraphs?.length || d.bullets?.length || d.list?.rows?.length || d.table?.rows?.length || d.extra));
+const hasDetails = (d) => Boolean(d && (d.paragraphs?.length || d.bullets?.length || d.list?.rows?.length || d.table?.rows?.length || d.intervals?.rows?.length || d.extra));
+
+/** Compact list: label · value · sub. Rows may carry `tone` (number) or `cls` (result class) for the value color. */
+function KList({ list, main = false }) {
+  if (!list?.rows?.length) return null;
+  return (
+    <>
+      {list.title ? <div className={main ? 'chapter__section-title chapter__section-title--main' : 'chapter__section-title'}>{list.title}</div> : null}
+      <ul className={main ? 'klist klist--main' : 'klist'}>
+        {list.rows.map((r, i) => (
+          <li key={i}>
+            <span>{r.label}</span>
+            <span className={`num ${r.cls ? `cls-${r.cls}` : toneClass(r.tone)}`}>{r.value}</span>
+            <span className="num sub">{r.sub}</span>
+          </li>
+        ))}
+      </ul>
+    </>
+  );
+}
+
+/** Compact table. Cells are strings or { text, cls } objects; rows may carry `cls` for the whole row. */
+function Table({ table, main = false }) {
+  if (!table?.rows?.length) return null;
+  return (
+    <>
+      {table.title ? <div className={main ? 'chapter__section-title chapter__section-title--main' : 'chapter__section-title'}>{table.title}</div> : null}
+      <table className={main ? 'tbl tbl--main' : 'tbl'}>
+        <thead><tr>{table.head.map((h) => <th key={h} scope="col">{h}</th>)}</tr></thead>
+        <tbody>
+          {table.rows.map((r, i) => (
+            <tr key={i} className={r.cls ? `cls-${r.cls}` : undefined}>
+              {r.cells.map((cell, j) => {
+                const obj = cell && typeof cell === 'object';
+                return <td key={j} className={obj ? [cell.cls ? `cls-${cell.cls}` : '', cell.strong ? 'cell--strong' : ''].filter(Boolean).join(' ') || undefined : undefined}>{obj ? cell.text : cell}</td>;
+              })}
+            </tr>
+          ))}
+        </tbody>
+        {table.foot ? <tfoot><tr><td colSpan={table.head.length}>{table.foot}</td></tr></tfoot> : null}
+      </table>
+    </>
+  );
+}
 
 /** Everything that is not the headline, behind a collapsed "Details" disclosure. */
 function Details({ d, tolls, sources }) {
@@ -53,32 +97,13 @@ function Details({ d, tolls, sources }) {
         {(d.paragraphs ?? []).map((p, i) => <p key={i} className="chapter__body"><Rich text={p} /></p>)}
         {d.bullets?.length ? <ul className="chapter__bullets">{d.bullets.map((b, i) => <li key={i}><Rich text={b} /></li>)}</ul> : null}
         {d.extra === 'choropleth' ? <ChoroplethToggle /> : null}
-        {d.list?.rows?.length ? (
+        <KList list={d.list} />
+        <Table table={d.table} />
+        {d.intervals?.rows?.length ? (
           <>
-            <div className="chapter__section-title">{d.list.title}</div>
-            <ul className="klist">
-              {d.list.rows.map((r, i) => (
-                <li key={i}>
-                  <span>{r.label}</span>
-                  <span className={`num ${toneClass(r.tone)}`}>{r.value}</span>
-                  <span className="num sub">{r.sub}</span>
-                </li>
-              ))}
-            </ul>
-          </>
-        ) : null}
-        {d.table?.rows?.length ? (
-          <>
-            <div className="chapter__section-title">{d.table.title}</div>
-            <table className="tbl">
-              <thead><tr>{d.table.head.map((h) => <th key={h} scope="col">{h}</th>)}</tr></thead>
-              <tbody>
-                {d.table.rows.map((r, i) => (
-                  <tr key={i} className={r.cls ? `cls-${r.cls}` : undefined}>{r.cells.map((cell, j) => <td key={j}>{cell}</td>)}</tr>
-                ))}
-              </tbody>
-              <tfoot><tr><td colSpan={d.table.head.length}>{'“vs trend” = the site’s change minus the citywide trend at the control site. Color = the verdict.'}</td></tr></tfoot>
-            </table>
+            <div className="chapter__section-title">{d.intervals.title}</div>
+            <IntervalBars rows={d.intervals.rows} unit={d.intervals.unit ?? '%'} digits={d.intervals.digits ?? 1} />
+            {d.intervals.foot ? <p className="detail__hint">{d.intervals.foot}</p> : null}
           </>
         ) : null}
         {d.extra === 'tolls' ? <TollTable tolls={tolls} /> : null}
@@ -93,16 +118,22 @@ function Details({ d, tolls, sources }) {
   );
 }
 
-/** Strict step template: title, lede, body, three stat rows, Details. (The date lives in the footer.) */
+/**
+ * Step template: optional badge, title, lede, body, bullets, three stat rows, at most one compact table or list,
+ * then Details. (The date lives in the footer.)
+ */
 function ChapterView({ c, step, tolls, sources, onRestart }) {
   const isExplore = step >= TOTAL;
   return (
     <article className="chapter" aria-labelledby="chapter-title">
+      {c.badge ? <span className={c.badgeTone === 'warn' ? 'chapter__badge chapter__badge--warn' : 'chapter__badge'}>{c.badge}</span> : null}
       <h2 className="chapter__title" id="chapter-title">{c.title}</h2>
       {c.lede ? <p className="chapter__lede"><Rich text={c.lede} /></p> : null}
       {c.body ? <p className="chapter__body"><Rich text={c.body} /></p> : null}
       {c.bullets?.length ? <ul className="chapter__bullets">{c.bullets.map((b, i) => <li key={i}><Rich text={b} /></li>)}</ul> : null}
       {c.stats?.length ? <StatRow items={c.stats.slice(0, 3)} /> : null}
+      <Table table={c.table} main />
+      <KList list={c.list} main />
       {hasDetails(c.details) ? <Details d={c.details} tolls={tolls} sources={sources} /> : null}
       {isExplore ? <button type="button" className="btn btn--fill" onClick={onRestart}>Start the story again</button> : null}
     </article>

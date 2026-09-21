@@ -15,11 +15,13 @@ function Steps({ colors, from, to }) {
   );
 }
 
-const CLASS_TEXT = { improved: 'cleaner than the citywide trend', unchanged: 'followed the trend', worsened: 'dirtier than the trend' };
+const CLASS_TEXT = { decrease: 'supported decrease: cleaner than 2024', uncertain: 'uncertain: no clear change (range of doubt includes zero)', increase: 'supported increase: dirtier than 2024' };
 
 /**
  * "Key" section of the control panel: what the colors, sizes and moving lines mean, only for the layers
  * currently visible. One meaning system: green = less traffic / cleaner air, red = more / dirtier; purple = equity.
+ * Rings mean "not supported": a crossing whose 95% interval includes zero (or is coverage-limited), a monitor
+ * without an eligible baseline.
  */
 export default function KeyLegend({ hasFeatured = false }) {
   const { layerVisibility: v, period, metric, hour, dacMode, glyphMode } = useAppState();
@@ -31,10 +33,11 @@ export default function KeyLegend({ hasFeatured = false }) {
   const purplePct = v.dac && dacMode === 'percentile';
   const [lo, hi] = indexes?.asthmaRange ?? [0, 1];
   const when = `${PERIOD_LABELS[period] ?? period}${hour != null ? ` · ${fmtHour(hour)}` : ''}`;
+  const frame = period === 'post_2026_ytd' ? 'Jan–Aug 2026 with Jan–Aug 2024' : 'Jan 5–Dec 31, 2025 with the same window of 2024';
   const compareNote = [
-    v.bt_facility || v.aq_monitor ? `${v.bt_facility ? 'Crossings' : ''}${v.bt_facility && v.aq_monitor ? ' and ' : ''}${v.aq_monitor ? 'monitors' : ''} compare ${period === 'post_2026_ytd' ? 'Jan–Aug 2026' : '2025'} with ${period === 'post_2026_ytd' ? 'Jan–Aug 2024' : '2024'}.` : null,
+    v.bt_facility || v.aq_monitor ? `${v.bt_facility ? 'Crossings' : ''}${v.bt_facility && v.aq_monitor ? ' and ' : ''}${v.aq_monitor ? 'monitors' : ''} compare ${frame}.` : null,
     v.crz_entry ? (period === 'post_2026_ytd' ? 'Entry points compare Jan–Aug 2026 with Jan–Aug 2025; nobody counted them before the toll.' : 'Entry points were first counted the day the toll began, so 2025 has nothing earlier to compare with: they stay grey.') : null,
-    v.dot_segment ? 'Street counters compare the last count before the toll with the first after.' : null,
+    v.dot_segment ? 'Street counters compare one sampled week before the toll with one after; filled squares only.' : null,
   ].filter(Boolean).join(' ');
 
   if (!points && !v.dac && !v.uhf42 && !v.flow) return <p className="key__empty">Turn on a layer to see what its colors mean.</p>;
@@ -44,7 +47,12 @@ export default function KeyLegend({ hasFeatured = false }) {
       {traffic && isChange ? (
         <div className="key__block">
           <div className="key__label">Color = change since the toll · {when}</div>
-          <Steps colors={CHANGE_KEY} from="less traffic" to="more traffic" />
+          <Steps colors={CHANGE_KEY} from="fewer vehicles than 2024" to="more vehicles than 2024" />
+          {v.bt_facility ? (
+            <div className="key__classes" style={{ marginTop: 8 }}>
+              <span className="key__class"><LayerSymbol kind="hollow" />ring = no clear change (the range of doubt includes zero) or too few complete days</span>
+            </div>
+          ) : null}
           <div className="key__note">{compareNote}</div>
         </div>
       ) : null}
@@ -56,16 +64,16 @@ export default function KeyLegend({ hasFeatured = false }) {
       ) : null}
       {v.aq_monitor && isChange ? (
         <div className="key__block">
-          <div className="key__label">Air monitors · {when}</div>
+          <div className="key__label">Air monitors, weather-adjusted PM2.5 · {when}</div>
           <div className="key__classes">
-            {['improved', 'unchanged', 'worsened'].map((k) => <span key={k} className="key__class"><LayerSymbol kind="disc" color={CLASS_COLORS[k]} />{CLASS_TEXT[k]}</span>)}
-            <span className="key__class"><LayerSymbol kind="hollow" />not enough data</span>
+            {['decrease', 'uncertain', 'increase'].map((k) => <span key={k} className="key__class"><LayerSymbol kind="disc" color={CLASS_COLORS[k]} />{CLASS_TEXT[k]}</span>)}
+            <span className="key__class"><LayerSymbol kind="hollow" />no eligible baseline: nothing to compare with</span>
           </div>
           {!traffic ? <div className="key__note">{compareNote}</div> : null}
         </div>
       ) : null}
       {v.flow && (v.bt_facility || v.crz_entry) ? (
-        <div className="key__note"><LayerSymbol kind="line" size={12} /> Moving lines show which way traffic goes; thicker = more vehicles.</div>
+        <div className="key__note"><LayerSymbol kind="line" size={12} /> Moving lines show which way traffic goes; thicker = more vehicles{isChange && v.bt_facility ? '; grey = change not supported' : ''}.</div>
       ) : null}
       {v.dac && !purplePct ? (
         <div className="key__block">
@@ -82,6 +90,7 @@ export default function KeyLegend({ hasFeatured = false }) {
         <div className="key__block">
           <div className="key__label">Child asthma ER visits per 10,000 children{asthmaPeriod ? ` · ${asthmaPeriod}, newest published` : ''}</div>
           <Steps colors={PURPLE_STEPS} from={fmtInt(lo)} to={fmtInt(hi)} />
+          <div className="key__note">Click a neighborhood for its poverty and asthma context.</div>
         </div>
       ) : null}
       {hasFeatured && points ? <div className="key__note">Bright = the ones this step is about; the rest are faded.</div> : null}

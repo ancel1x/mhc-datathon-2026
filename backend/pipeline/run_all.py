@@ -20,6 +20,7 @@ STEPS = [
     ("s04_air_quality", "NYCCAS PM2.5 + neighborhood indicators"),
     ("s05_equity", "DAC / UHF42 / boundaries"),
     ("s06_bundle", "join + summary + frontend bundle"),
+    ("s07_reconcile", "merge the second pipeline's validated evidence (intervals, eligibility, persistence)"),
 ]
 
 

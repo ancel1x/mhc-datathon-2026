@@ -53,8 +53,9 @@ function tipFor(f) {
     return {
       title: p.name,
       lines: [
-        `Child asthma ER visits: ${fmtInt(p.asthma_ed_children)} per 10,000 children ages 5–17 in ${p.health_period ?? '2023'} (newest year published; health data lag about two years)`,
-        `PM2.5 in 2024: ${fmtNum(p.pm25_2024)} µg/m³ (${fmtNum(p.pm25_2009)} in 2009)`,
+        `Child asthma ER visits: ${fmtInt(p.asthma_ed_children)} per 10,000 ages 5–17 · adults ${fmtInt(p.asthma_ed_adults)} per 10,000 (${p.health_period ?? '2023'}, newest published)`,
+        `Below the poverty line: ${fmtNum(p.poverty_pct, 1)}% (ACS 2019–23) · PM2.5 in 2024: ${fmtNum(p.pm25_2024)} µg/m³`,
+        'pre-existing context, not an effect of the toll · click for detail',
       ],
     };
   }
@@ -139,7 +140,9 @@ export default function MapView({ featured, guide }) {
   const onClick = useCallback((e) => {
     const feats = e.features ?? [];
     const f = feats.find((x) => x.properties?._layer) ?? feats.find((x) => x.properties?._of);
+    const hood = feats.find((x) => x.layer?.id === POLYGON_LAYER_IDS.uhf42);
     if (f) dispatch({ type: 'SELECT_FEATURE', feature: { layer: f.properties._layer ?? f.properties._of, id: f.properties.id } });
+    else if (hood?.properties?.uhf_code != null) dispatch({ type: 'SELECT_FEATURE', feature: { layer: 'uhf42', id: String(hood.properties.uhf_code) } });
     else if (selectedFeature) dispatch({ type: 'SELECT_FEATURE', feature: null });
   }, [dispatch, selectedFeature]);
 

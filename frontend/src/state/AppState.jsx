@@ -17,10 +17,10 @@ function readStoredTheme() {
 }
 
 /**
- * Deep links: ?chapter=1..9 starts on that step, ?chapter=explore (or 10) on the explore step; either skips
+ * Deep links: ?chapter=1..11 starts on that step, ?chapter=explore (or 12) on the explore step; either skips
  * the intro. ?intro=0 skips the intro, ?intro=hold keeps it on screen. ?play=1 starts the guided tour
- * (?play=N from step N). ?feature=<layer>:<id> opens that feature's detail; ?controls=1 opens the controls
- * sheet on phones.
+ * (?play=N from step N). ?feature=<layer>:<id> opens that feature's detail (layers: bt_facility, aq_monitor,
+ * crz_entry, dot_segment, uhf42); ?controls=1 opens the controls sheet on phones.
  */
 function readUrlState() {
   const out = { chapter: 0, explore: false, controlsOpen: false, selectedFeature: null, skipIntro: false, introHold: false, play: null };

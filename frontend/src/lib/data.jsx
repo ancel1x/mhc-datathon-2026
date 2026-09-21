@@ -22,6 +22,8 @@ function buildIndexes(data) {
     byId[layer] = new Map(fc.features.map((f) => [f.properties?.id, f]));
     maxima[layer] = layerMaxima(fc, layer);
   }
+  // neighborhoods are selectable for their context card; keyed by UHF42 code
+  byId.uhf42 = new Map(asFC(data.uhf42).features.map((f) => [String(f.properties?.uhf_code), f]));
   const aqIds = new Map(asFC(data.aq_monitors).features.map((f) => [f.properties?.site_id, f.properties?.id]));
   const asthma = asFC(data.uhf42).features.map((f) => f.properties?.asthma_ed_children).filter((v) => typeof v === 'number');
   const asthmaRange = asthma.length ? [Math.min(...asthma), Math.max(...asthma)] : [0, 1];
@@ -58,6 +60,7 @@ export function DataProvider({ children }) {
       progress: state.progress,
       errors: state.errors,
       summary: d.summary ?? null,
+      reconciled: d.summary?.reconciled ?? null,
       tolls: d.tolls ?? null,
       sources: Array.isArray(d.sources) ? d.sources : [],
       geo: {

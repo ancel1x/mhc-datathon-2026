@@ -1932,5 +1932,2782 @@
   "dac_designated_tracts": 958,
   "dac_share": 0.442,
   "dac_population_share": 0.491
+ },
+ "reconciled": {
+  "generated": "2026-09-21",
+  "frames": {
+   "primary": {
+    "label": "Jan 5–Dec 31, 2024 vs 2025",
+    "note": "Year One comparison; February 29 excluded"
+   },
+   "secondary": {
+    "label": "Jan 5–Aug 31: 2024 vs 2025 vs 2026",
+    "note": "persistence only; 2026 is not a complete year"
+   }
+  },
+  "traffic": [
+   {
+    "id": "rfk_manhattan",
+    "name": "Robert F. Kennedy Bridge Manhattan",
+    "role": "Manhattan span (East Harlem, 125th St approach)",
+    "dac_designated": true,
+    "uhf42_name": "East Harlem",
+    "avg_daily_2024": 46848,
+    "avg_daily_2025": 47813,
+    "pct_existing": 2.1,
+    "pct": 2.05,
+    "ci_low": 1.09,
+    "ci_high": 3.21,
+    "status": "increase",
+    "matched_days": [
+     359,
+     359
+    ],
+    "matched_weekdays": [
+     "Mon",
+     "Tue",
+     "Wed",
+     "Thu",
+     "Fri",
+     "Sat",
+     "Sun"
+    ],
+    "peak": {
+     "am": {
+      "pct": 2.37,
+      "ci_low": 0.25,
+      "ci_high": 4.81,
+      "status": "increase"
+     },
+     "pm": {
+      "pct": 1.79,
+      "ci_low": 0.58,
+      "ci_high": 2.86,
+      "status": "increase"
+     },
+     "other": {
+      "pct": 2.06,
+      "ci_low": 1.07,
+      "ci_high": 3.12,
+      "status": "increase"
+     }
+    },
+    "jan_aug": {
+     "2025": {
+      "pct": 2.54,
+      "ci_low": 1.6,
+      "ci_high": 3.57,
+      "status": "increase"
+     },
+     "2026": {
+      "pct": 0.01,
+      "ci_low": -1.63,
+      "ci_high": 1.47,
+      "status": "uncertain"
+     }
+    },
+    "pct_2026ytd_existing": -0.2,
+    "persistence": "inconclusive",
+    "full_vs_jan_aug": "weakened"
+   },
+   {
+    "id": "whitestone",
+    "name": "Bronx - Whitestone Bridge",
+    "role": "Bronx-Queens bypass (Hutchinson River Pkwy / Cross Bronx corridor)",
+    "dac_designated": false,
+    "uhf42_name": null,
+    "avg_daily_2024": 136481,
+    "avg_daily_2025": 139123,
+    "pct_existing": 1.9,
+    "pct": 1.9,
+    "ci_low": 1.2,
+    "ci_high": 2.65,
+    "status": "increase",
+    "matched_days": [
+     359,
+     359
+    ],
+    "matched_weekdays": [
+     "Mon",
+     "Tue",
+     "Wed",
+     "Thu",
+     "Fri",
+     "Sat",
+     "Sun"
+    ],
+    "peak": {
+     "am": {
+      "pct": 4.73,
+      "ci_low": 3.11,
+      "ci_high": 6.36,
+      "status": "increase"
+     },
+     "pm": {
+      "pct": 0.08,
+      "ci_low": -0.69,
+      "ci_high": 0.86,
+      "status": "uncertain"
+     },
+     "other": {
+      "pct": 1.78,
+      "ci_low": 0.93,
+      "ci_high": 2.52,
+      "status": "increase"
+     }
+    },
+    "jan_aug": {
+     "2025": {
+      "pct": 2.3,
+      "ci_low": 1.56,
+      "ci_high": 3.17,
+      "status": "increase"
+     },
+     "2026": {
+      "pct": 0.28,
+      "ci_low": -1.29,
+      "ci_high": 1.71,
+      "status": "uncertain"
+     }
+    },
+    "pct_2026ytd_existing": 0.2,
+    "persistence": "inconclusive",
+    "full_vs_jan_aug": "weakened"
+   },
+   {
+    "id": "marine_parkway",
+    "name": "Marine Parkway Bridge",
+    "role": "Rockaways (far from the zone; quasi-control)",
+    "dac_designated": false,
+    "uhf42_name": null,
+    "avg_daily_2024": 21879,
+    "avg_daily_2025": 22284,
+    "pct_existing": 1.9,
+    "pct": 1.62,
+    "ci_low": 0.19,
+    "ci_high": 3.43,
+    "status": "increase",
+    "matched_days": [
+     357,
+     359
+    ],
+    "matched_weekdays": [
+     "Mon",
+     "Tue",
+     "Wed",
+     "Thu",
+     "Fri",
+     "Sat",
+     "Sun"
+    ],
+    "peak": {
+     "am": {
+      "pct": 2.03,
+      "ci_low": -0.57,
+      "ci_high": 5.06,
+      "status": "uncertain"
+     },
+     "pm": {
+      "pct": 1.03,
+      "ci_low": -1.3,
+      "ci_high": 3.34,
+      "status": "uncertain"
+     },
+     "other": {
+      "pct": 1.62,
+      "ci_low": 0.13,
+      "ci_high": 3.55,
+      "status": "increase"
+     }
+    },
+    "jan_aug": {
+     "2025": {
+      "pct": 2.79,
+      "ci_low": 0.89,
+      "ci_high": 4.86,
+      "status": "increase"
+     },
+     "2026": {
+      "pct": 0.07,
+      "ci_low": -2.24,
+      "ci_high": 2.68,
+      "status": "uncertain"
+     }
+    },
+    "pct_2026ytd_existing": -0.2,
+    "persistence": "inconclusive",
+    "full_vs_jan_aug": "weakened"
+   },
+   {
+    "id": "cross_bay",
+    "name": "Cross Bay Bridge",
+    "role": "Rockaways (far from the zone; quasi-control)",
+    "dac_designated": false,
+    "uhf42_name": null,
+    "avg_daily_2024": 21268,
+    "avg_daily_2025": 21475,
+    "pct_existing": 1.0,
+    "pct": 0.87,
+    "ci_low": -0.58,
+    "ci_high": 2.29,
+    "status": "uncertain",
+    "matched_days": [
+     359,
+     359
+    ],
+    "matched_weekdays": [
+     "Mon",
+     "Tue",
+     "Wed",
+     "Thu",
+     "Fri",
+     "Sat",
+     "Sun"
+    ],
+    "peak": {
+     "am": {
+      "pct": 1.95,
+      "ci_low": -0.49,
+      "ci_high": 4.84,
+      "status": "uncertain"
+     },
+     "pm": {
+      "pct": 1.6,
+      "ci_low": -0.46,
+      "ci_high": 3.51,
+      "status": "uncertain"
+     },
+     "other": {
+      "pct": 0.52,
+      "ci_low": -0.97,
+      "ci_high": 2.12,
+      "status": "uncertain"
+     }
+    },
+    "jan_aug": {
+     "2025": {
+      "pct": 2.72,
+      "ci_low": 0.97,
+      "ci_high": 4.49,
+      "status": "increase"
+     },
+     "2026": {
+      "pct": -3.29,
+      "ci_low": -5.08,
+      "ci_high": -1.24,
+      "status": "decrease"
+     }
+    },
+    "pct_2026ytd_existing": -3.5,
+    "persistence": "reversed",
+    "full_vs_jan_aug": "inconclusive"
+   },
+   {
+    "id": "henry_hudson",
+    "name": "Henry Hudson Bridge",
+    "role": "Bronx-Manhattan north (Henry Hudson Pkwy)",
+    "dac_designated": false,
+    "uhf42_name": null,
+    "avg_daily_2024": 69124,
+    "avg_daily_2025": 69556,
+    "pct_existing": 0.6,
+    "pct": 0.48,
+    "ci_low": -1.21,
+    "ci_high": 1.8,
+    "status": "uncertain",
+    "matched_days": [
+     358,
+     358
+    ],
+    "matched_weekdays": [
+     "Mon",
+     "Tue",
+     "Wed",
+     "Thu",
+     "Fri",
+     "Sat",
+     "Sun"
+    ],
+    "peak": {
+     "am": {
+      "pct": 4.02,
+      "ci_low": 0.41,
+      "ci_high": 7.33,
+      "status": "increase"
+     },
+     "pm": {
+      "pct": -0.19,
+      "ci_low": -2.04,
+      "ci_high": 1.41,
+      "status": "uncertain"
+     },
+     "other": {
+      "pct": -0.03,
+      "ci_low": -1.55,
+      "ci_high": 1.24,
+      "status": "uncertain"
+     }
+    },
+    "jan_aug": {
+     "2025": {
+      "pct": 0.71,
+      "ci_low": -0.99,
+      "ci_high": 2.14,
+      "status": "uncertain"
+     },
+     "2026": {
+      "pct": -0.7,
+      "ci_low": -2.75,
+      "ci_high": 1.83,
+      "status": "uncertain"
+     }
+    },
+    "pct_2026ytd_existing": -1.0,
+    "persistence": "inconclusive",
+    "full_vs_jan_aug": "inconclusive"
+   },
+   {
+    "id": "verrazzano",
+    "name": "Verrazzano - Narrows Bridge",
+    "role": "Staten Island-Brooklyn (Gowanus / BQE corridor)",
+    "dac_designated": false,
+    "uhf42_name": null,
+    "avg_daily_2024": 221467,
+    "avg_daily_2025": 222609,
+    "pct_existing": 0.5,
+    "pct": 0.47,
+    "ci_low": -0.17,
+    "ci_high": 1.24,
+    "status": "uncertain",
+    "matched_days": [
+     359,
+     359
+    ],
+    "matched_weekdays": [
+     "Mon",
+     "Tue",
+     "Wed",
+     "Thu",
+     "Fri",
+     "Sat",
+     "Sun"
+    ],
+    "peak": {
+     "am": {
+      "pct": 1.84,
+      "ci_low": 0.27,
+      "ci_high": 3.4,
+      "status": "increase"
+     },
+     "pm": {
+      "pct": 0.29,
+      "ci_low": -0.4,
+      "ci_high": 0.99,
+      "status": "uncertain"
+     },
+     "other": {
+      "pct": 0.28,
+      "ci_low": -0.45,
+      "ci_high": 0.89,
+      "status": "uncertain"
+     }
+    },
+    "jan_aug": {
+     "2025": {
+      "pct": 1.0,
+      "ci_low": 0.18,
+      "ci_high": 1.69,
+      "status": "increase"
+     },
+     "2026": {
+      "pct": -0.69,
+      "ci_low": -2.26,
+      "ci_high": 1.04,
+      "status": "uncertain"
+     }
+    },
+    "pct_2026ytd_existing": -0.7,
+    "persistence": "inconclusive",
+    "full_vs_jan_aug": "inconclusive"
+   },
+   {
+    "id": "throgs_neck",
+    "name": "Throgs Neck Bridge",
+    "role": "Bronx-Queens bypass (Cross Bronx / Clearview corridor)",
+    "dac_designated": true,
+    "uhf42_name": null,
+    "avg_daily_2024": 123609,
+    "avg_daily_2025": 124151,
+    "pct_existing": 0.4,
+    "pct": 0.4,
+    "ci_low": -0.19,
+    "ci_high": 1.14,
+    "status": "uncertain",
+    "matched_days": [
+     359,
+     359
+    ],
+    "matched_weekdays": [
+     "Mon",
+     "Tue",
+     "Wed",
+     "Thu",
+     "Fri",
+     "Sat",
+     "Sun"
+    ],
+    "peak": {
+     "am": {
+      "pct": -0.89,
+      "ci_low": -2.93,
+      "ci_high": 1.24,
+      "status": "uncertain"
+     },
+     "pm": {
+      "pct": 2.33,
+      "ci_low": 1.37,
+      "ci_high": 3.44,
+      "status": "increase"
+     },
+     "other": {
+      "pct": 0.29,
+      "ci_low": -0.65,
+      "ci_high": 1.08,
+      "status": "uncertain"
+     }
+    },
+    "jan_aug": {
+     "2025": {
+      "pct": 1.3,
+      "ci_low": 0.45,
+      "ci_high": 2.27,
+      "status": "increase"
+     },
+     "2026": {
+      "pct": 0.14,
+      "ci_low": -1.26,
+      "ci_high": 1.58,
+      "status": "uncertain"
+     }
+    },
+    "pct_2026ytd_existing": 0.1,
+    "persistence": "inconclusive",
+    "full_vs_jan_aug": "inconclusive"
+   },
+   {
+    "id": "rfk_bronx",
+    "name": "Robert F. Kennedy Bridge Bronx",
+    "role": "Bronx-Randalls Island span (Mott Haven / Port Morris approach)",
+    "dac_designated": true,
+    "uhf42_name": "East Harlem",
+    "avg_daily_2024": 143627,
+    "avg_daily_2025": 144256,
+    "pct_existing": 0.4,
+    "pct": 0.34,
+    "ci_low": -0.5,
+    "ci_high": 1.06,
+    "status": "uncertain",
+    "matched_days": [
+     358,
+     358
+    ],
+    "matched_weekdays": [
+     "Mon",
+     "Tue",
+     "Wed",
+     "Thu",
+     "Fri",
+     "Sat",
+     "Sun"
+    ],
+    "peak": {
+     "am": {
+      "pct": 0.4,
+      "ci_low": -1.58,
+      "ci_high": 2.4,
+      "status": "uncertain"
+     },
+     "pm": {
+      "pct": -0.4,
+      "ci_low": -1.13,
+      "ci_high": 0.38,
+      "status": "uncertain"
+     },
+     "other": {
+      "pct": 0.43,
+      "ci_low": -0.4,
+      "ci_high": 1.29,
+      "status": "uncertain"
+     }
+    },
+    "jan_aug": {
+     "2025": {
+      "pct": 0.97,
+      "ci_low": 0.04,
+      "ci_high": 1.87,
+      "status": "increase"
+     },
+     "2026": {
+      "pct": -0.98,
+      "ci_low": -2.67,
+      "ci_high": 0.44,
+      "status": "uncertain"
+     }
+    },
+    "pct_2026ytd_existing": -1.1,
+    "persistence": "inconclusive",
+    "full_vs_jan_aug": "inconclusive"
+   },
+   {
+    "id": "qmt",
+    "name": "Queens Midtown Tunnel",
+    "role": "Into the zone from Queens (crossing credit applies)",
+    "dac_designated": false,
+    "uhf42_name": null,
+    "avg_daily_2024": 83286,
+    "avg_daily_2025": 82454,
+    "pct_existing": -1.0,
+    "pct": -1.11,
+    "ci_low": -2.39,
+    "ci_high": 0.52,
+    "status": "uncertain",
+    "matched_days": [
+     355,
+     352
+    ],
+    "matched_weekdays": [
+     "Mon",
+     "Tue",
+     "Wed",
+     "Thu",
+     "Fri",
+     "Sat",
+     "Sun"
+    ],
+    "peak": {
+     "am": {
+      "pct": -0.7,
+      "ci_low": -3.15,
+      "ci_high": 1.53,
+      "status": "uncertain"
+     },
+     "pm": {
+      "pct": -1.79,
+      "ci_low": -3.34,
+      "ci_high": -0.35,
+      "status": "decrease"
+     },
+     "other": {
+      "pct": -1.05,
+      "ci_low": -2.66,
+      "ci_high": 0.46,
+      "status": "uncertain"
+     }
+    },
+    "jan_aug": {
+     "2025": {
+      "pct": -1.67,
+      "ci_low": -2.96,
+      "ci_high": -0.38,
+      "status": "decrease"
+     },
+     "2026": {
+      "pct": -4.73,
+      "ci_low": -6.51,
+      "ci_high": -3.21,
+      "status": "decrease"
+     }
+    },
+    "pct_2026ytd_existing": -4.8,
+    "persistence": "strengthened",
+    "full_vs_jan_aug": "inconclusive"
+   },
+   {
+    "id": "hlc",
+    "name": "Hugh L. Carey Tunnel",
+    "role": "Into the zone from Brooklyn (crossing credit applies)",
+    "dac_designated": false,
+    "uhf42_name": null,
+    "avg_daily_2024": 61896,
+    "avg_daily_2025": 60338,
+    "pct_existing": -2.5,
+    "pct": -6.05,
+    "ci_low": -9.12,
+    "ci_high": -3.36,
+    "status": "limited",
+    "matched_days": [
+     75,
+     68
+    ],
+    "matched_weekdays": [
+     "Sat",
+     "Sun"
+    ],
+    "peak": {
+     "am": {
+      "pct": -0.27,
+      "ci_low": -2.82,
+      "ci_high": 2.7,
+      "status": "uncertain"
+     },
+     "pm": {
+      "pct": -0.74,
+      "ci_low": -1.54,
+      "ci_high": 0.45,
+      "status": "uncertain"
+     },
+     "other": {
+      "pct": -6.05,
+      "ci_low": -8.23,
+      "ci_high": -3.3,
+      "status": "limited"
+     }
+    },
+    "jan_aug": {
+     "2025": {
+      "pct": -6.28,
+      "ci_low": -9.0,
+      "ci_high": -3.51,
+      "status": "limited"
+     },
+     "2026": {
+      "pct": -7.75,
+      "ci_low": -11.36,
+      "ci_high": -4.39,
+      "status": "limited"
+     }
+    },
+    "pct_2026ytd_existing": -6.1,
+    "persistence": "inconclusive",
+    "full_vs_jan_aug": "inconclusive"
+   }
+  ],
+  "traffic_counts": {
+   "increase": 3,
+   "decrease": 0,
+   "uncertain": 6,
+   "limited": 1
+  },
+  "traffic_peak_definition": "weekday AM 07:00–09:59 and PM 16:00–18:59; other hours include weekends",
+  "air": [
+   {
+    "id": "aq_36061NY08552",
+    "site_id": "36061NY08552",
+    "name": "Williamsburg Bridge",
+    "crz_status": "inside",
+    "role": "site",
+    "dac_designated": true,
+    "uhf42_name": "Union Square - Lower East Side",
+    "uhf42_asthma_ed_children": 159.7,
+    "uhf42_poverty_pct": 20.1,
+    "class": "decrease",
+    "months": [
+     "03",
+     "04",
+     "05",
+     "06",
+     "08",
+     "09",
+     "10",
+     "11"
+    ],
+    "month_names": [
+     "Mar",
+     "Apr",
+     "May",
+     "Jun",
+     "Aug",
+     "Sep",
+     "Oct",
+     "Nov"
+    ],
+    "month_count": 8,
+    "pre_mean": 8.64,
+    "post_mean": 7.01,
+    "delta_raw": -1.63,
+    "pct_raw": -18.81,
+    "ci_low": -2.41,
+    "ci_high": -0.71,
+    "raw_status": "decrease",
+    "adj_delta": -2.55,
+    "adj_ci_low": -3.42,
+    "adj_ci_high": -1.67,
+    "adj_status": "decrease",
+    "coverage_status": "partial matched months; not complete-year estimate",
+    "existing": {
+     "pre_mean": 8.42,
+     "post_mean": 6.81,
+     "delta_raw": -1.6,
+     "delta_adj_control": -0.78,
+     "relative_to_control": "beat control",
+     "classification": "improved"
+    },
+    "jan_aug": {
+     "2025": {
+      "class": "decrease",
+      "delta_raw": -2.15,
+      "adj_delta": -3.27,
+      "ci_low": -3.43,
+      "ci_high": -0.79,
+      "adj_ci_low": -4.47,
+      "adj_ci_high": -2.07,
+      "pct_raw": -21.86
+     },
+     "2026": {
+      "class": "decrease",
+      "delta_raw": -3.12,
+      "adj_delta": -4.23,
+      "ci_low": -4.27,
+      "ci_high": -1.9,
+      "adj_ci_low": -5.25,
+      "adj_ci_high": -3.21,
+      "pct_raw": -31.75
+     }
+    },
+    "persistence": "strengthened",
+    "persistence_adjusted": "strengthened",
+    "context": {
+     "uhf42_id": "309",
+     "neighborhood": "Union Square - Lower East Side",
+     "nta": "Lower East Side",
+     "inside_geofence": true,
+     "poverty_pct": 20.06,
+     "poverty_period": "2019-23",
+     "child_asthma_ed": 159.7,
+     "adult_asthma_ed": 44.6,
+     "asthma_period": "2023",
+     "asthma_unit": "ED visits per 10,000 residents (children ages 5–17; adults age-adjusted)",
+     "interpretation": "monitor location context; not population exposure or causal disparity"
+    }
+   },
+   {
+    "id": "aq_36061NY08454",
+    "site_id": "36061NY08454",
+    "name": "Manhattan Bridge",
+    "crz_status": "inside",
+    "role": "site",
+    "dac_designated": true,
+    "uhf42_name": "Greenwich Village - SoHo",
+    "uhf42_asthma_ed_children": 47.9,
+    "uhf42_poverty_pct": 8.9,
+    "class": "decrease",
+    "months": [
+     "01",
+     "03",
+     "04",
+     "05",
+     "06",
+     "07",
+     "08",
+     "09",
+     "10",
+     "11",
+     "12"
+    ],
+    "month_names": [
+     "Jan",
+     "Mar",
+     "Apr",
+     "May",
+     "Jun",
+     "Jul",
+     "Aug",
+     "Sep",
+     "Oct",
+     "Nov",
+     "Dec"
+    ],
+    "month_count": 11,
+    "pre_mean": 9.43,
+    "post_mean": 8.0,
+    "delta_raw": -1.43,
+    "pct_raw": -15.13,
+    "ci_low": -2.58,
+    "ci_high": -0.53,
+    "raw_status": "decrease",
+    "adj_delta": -1.97,
+    "adj_ci_low": -2.91,
+    "adj_ci_high": -1.03,
+    "adj_status": "decrease",
+    "coverage_status": "partial matched months; not complete-year estimate",
+    "existing": {
+     "pre_mean": 9.2,
+     "post_mean": 7.82,
+     "delta_raw": -1.38,
+     "delta_adj_control": -0.79,
+     "relative_to_control": "beat control",
+     "classification": "improved"
+    },
+    "jan_aug": {
+     "2025": {
+      "class": "decrease",
+      "delta_raw": -2.22,
+      "adj_delta": -3.1,
+      "ci_low": -3.85,
+      "ci_high": -0.95,
+      "adj_ci_low": -4.46,
+      "adj_ci_high": -1.74,
+      "pct_raw": -20.38
+     },
+     "2026": {
+      "class": "decrease",
+      "delta_raw": -1.85,
+      "adj_delta": -2.61,
+      "ci_low": -3.72,
+      "ci_high": 0.29,
+      "adj_ci_low": -4.9,
+      "adj_ci_high": -0.33,
+      "pct_raw": -16.99
+     }
+    },
+    "persistence": "inconclusive",
+    "persistence_adjusted": "weakened",
+    "context": {
+     "uhf42_id": "308",
+     "neighborhood": "Greenwich Village - Soho",
+     "nta": "Chinatown-Two Bridges",
+     "inside_geofence": true,
+     "poverty_pct": 8.89,
+     "poverty_period": "2019-23",
+     "child_asthma_ed": 47.9,
+     "adult_asthma_ed": 7.7,
+     "asthma_period": "2023",
+     "asthma_unit": "ED visits per 10,000 residents (children ages 5–17; adults age-adjusted)",
+     "interpretation": "monitor location context; not population exposure or causal disparity"
+    }
+   },
+   {
+    "id": "aq_36081NY07615",
+    "site_id": "36081NY07615",
+    "name": "Van Wyck",
+    "crz_status": "outside",
+    "role": "control",
+    "dac_designated": true,
+    "uhf42_name": "Jamaica",
+    "uhf42_asthma_ed_children": 139.3,
+    "uhf42_poverty_pct": 12.7,
+    "class": "decrease",
+    "months": [
+     "03",
+     "04",
+     "05",
+     "06",
+     "08",
+     "09",
+     "10",
+     "12"
+    ],
+    "month_names": [
+     "Mar",
+     "Apr",
+     "May",
+     "Jun",
+     "Aug",
+     "Sep",
+     "Oct",
+     "Dec"
+    ],
+    "month_count": 8,
+    "pre_mean": 7.22,
+    "post_mean": 6.35,
+    "delta_raw": -0.87,
+    "pct_raw": -12.0,
+    "ci_low": -1.82,
+    "ci_high": -0.12,
+    "raw_status": "decrease",
+    "adj_delta": -1.4,
+    "adj_ci_low": -2.18,
+    "adj_ci_high": -0.61,
+    "adj_status": "decrease",
+    "coverage_status": "partial matched months; not complete-year estimate",
+    "existing": {
+     "pre_mean": 7.25,
+     "post_mean": 6.34,
+     "delta_raw": -0.91,
+     "delta_adj_control": null,
+     "relative_to_control": null,
+     "classification": "improved"
+    },
+    "jan_aug": {
+     "2025": {
+      "class": "decrease",
+      "delta_raw": -1.48,
+      "adj_delta": -2.39,
+      "ci_low": -2.77,
+      "ci_high": -0.25,
+      "adj_ci_low": -3.43,
+      "adj_ci_high": -1.35,
+      "pct_raw": -17.82
+     },
+     "2026": {
+      "class": "decrease",
+      "delta_raw": -1.61,
+      "adj_delta": -2.69,
+      "ci_low": -2.86,
+      "ci_high": -0.49,
+      "adj_ci_low": -3.58,
+      "adj_ci_high": -1.8,
+      "pct_raw": -19.42
+     }
+    },
+    "persistence": "confirmed",
+    "persistence_adjusted": "strengthened",
+    "context": {
+     "uhf42_id": "408",
+     "neighborhood": "Jamaica",
+     "nta": "South Jamaica",
+     "inside_geofence": false,
+     "poverty_pct": 12.7,
+     "poverty_period": "2019-23",
+     "child_asthma_ed": 139.3,
+     "adult_asthma_ed": 55.8,
+     "asthma_period": "2023",
+     "asthma_unit": "ED visits per 10,000 residents (children ages 5–17; adults age-adjusted)",
+     "interpretation": "monitor location context; not population exposure or causal disparity"
+    }
+   },
+   {
+    "id": "aq_36061NY09734",
+    "site_id": "36061NY09734",
+    "name": "Broadway/35th St",
+    "crz_status": "inside",
+    "role": "site",
+    "dac_designated": true,
+    "uhf42_name": "Chelsea - Clinton",
+    "uhf42_asthma_ed_children": 129.9,
+    "uhf42_poverty_pct": 11.9,
+    "class": "decrease",
+    "months": [
+     "01",
+     "02",
+     "03",
+     "04",
+     "05",
+     "06",
+     "07",
+     "08",
+     "09",
+     "10",
+     "11",
+     "12"
+    ],
+    "month_names": [
+     "Jan",
+     "Feb",
+     "Mar",
+     "Apr",
+     "May",
+     "Jun",
+     "Jul",
+     "Aug",
+     "Sep",
+     "Oct",
+     "Nov",
+     "Dec"
+    ],
+    "month_count": 12,
+    "pre_mean": 8.92,
+    "post_mean": 8.0,
+    "delta_raw": -0.92,
+    "pct_raw": -10.27,
+    "ci_low": -1.62,
+    "ci_high": -0.25,
+    "raw_status": "decrease",
+    "adj_delta": -1.32,
+    "adj_ci_low": -2.12,
+    "adj_ci_high": -0.51,
+    "adj_status": "decrease",
+    "coverage_status": "all 12 months eligible",
+    "existing": {
+     "pre_mean": 8.91,
+     "post_mean": 8.01,
+     "delta_raw": -0.91,
+     "delta_adj_control": -0.1,
+     "relative_to_control": "tracked control",
+     "classification": "unchanged"
+    },
+    "jan_aug": {
+     "2025": {
+      "class": "decrease",
+      "delta_raw": -1.71,
+      "adj_delta": -2.31,
+      "ci_low": -2.8,
+      "ci_high": -0.64,
+      "adj_ci_low": -3.39,
+      "adj_ci_high": -1.23,
+      "pct_raw": -17.36
+     },
+     "2026": {
+      "class": "uncertain",
+      "delta_raw": -0.42,
+      "adj_delta": -1.19,
+      "ci_low": -2.03,
+      "ci_high": 1.61,
+      "adj_ci_low": -3.09,
+      "adj_ci_high": 0.7,
+      "pct_raw": -4.24
+     }
+    },
+    "persistence": "inconclusive",
+    "persistence_adjusted": "inconclusive",
+    "context": {
+     "uhf42_id": "306",
+     "neighborhood": "Chelsea - Clinton",
+     "nta": "Midtown-Times Square",
+     "inside_geofence": true,
+     "poverty_pct": 11.95,
+     "poverty_period": "2019-23",
+     "child_asthma_ed": 129.9,
+     "adult_asthma_ed": 33.0,
+     "asthma_period": "2023",
+     "asthma_unit": "ED visits per 10,000 residents (children ages 5–17; adults age-adjusted)",
+     "interpretation": "monitor location context; not population exposure or causal disparity"
+    }
+   },
+   {
+    "id": "aq_36061NY10130",
+    "site_id": "36061NY10130",
+    "name": "Queensboro Bridge",
+    "crz_status": "boundary",
+    "role": "site",
+    "dac_designated": false,
+    "uhf42_name": "Upper East Side",
+    "uhf42_asthma_ed_children": 23.9,
+    "uhf42_poverty_pct": 7.3,
+    "class": "decrease",
+    "months": [
+     "01",
+     "02",
+     "03",
+     "04",
+     "07",
+     "08",
+     "09",
+     "10",
+     "11",
+     "12"
+    ],
+    "month_names": [
+     "Jan",
+     "Feb",
+     "Mar",
+     "Apr",
+     "Jul",
+     "Aug",
+     "Sep",
+     "Oct",
+     "Nov",
+     "Dec"
+    ],
+    "month_count": 10,
+    "pre_mean": 7.55,
+    "post_mean": 6.57,
+    "delta_raw": -0.99,
+    "pct_raw": -13.04,
+    "ci_low": -1.59,
+    "ci_high": -0.32,
+    "raw_status": "decrease",
+    "adj_delta": -1.26,
+    "adj_ci_low": -1.9,
+    "adj_ci_high": -0.62,
+    "adj_status": "decrease",
+    "coverage_status": "partial matched months; not complete-year estimate",
+    "existing": {
+     "pre_mean": 7.52,
+     "post_mean": 6.57,
+     "delta_raw": -0.95,
+     "delta_adj_control": -0.16,
+     "relative_to_control": "tracked control",
+     "classification": "unchanged"
+    },
+    "jan_aug": {
+     "2025": {
+      "class": "decrease",
+      "delta_raw": -1.58,
+      "adj_delta": -1.95,
+      "ci_low": -2.56,
+      "ci_high": -0.44,
+      "adj_ci_low": -2.91,
+      "adj_ci_high": -0.98,
+      "pct_raw": -18.39
+     },
+     "2026": {
+      "class": "uncertain",
+      "delta_raw": -0.41,
+      "adj_delta": -1.22,
+      "ci_low": -1.9,
+      "ci_high": 1.53,
+      "adj_ci_low": -3.37,
+      "adj_ci_high": 0.92,
+      "pct_raw": -4.8
+     }
+    },
+    "persistence": "inconclusive",
+    "persistence_adjusted": "inconclusive",
+    "context": {
+     "uhf42_id": "305",
+     "neighborhood": "Upper East Side",
+     "nta": "Upper East Side-Lenox Hill-Roosevelt Island",
+     "inside_geofence": true,
+     "poverty_pct": 7.33,
+     "poverty_period": "2019-23",
+     "child_asthma_ed": 23.9,
+     "adult_asthma_ed": 14.5,
+     "asthma_period": "2023",
+     "asthma_unit": "ED visits per 10,000 residents (children ages 5–17; adults age-adjusted)",
+     "interpretation": "monitor location context; not population exposure or causal disparity"
+    }
+   },
+   {
+    "id": "aq_36061NY08653",
+    "site_id": "36061NY08653",
+    "name": "FDR",
+    "crz_status": "boundary",
+    "role": "site",
+    "dac_designated": true,
+    "uhf42_name": "Union Square - Lower East Side",
+    "uhf42_asthma_ed_children": 159.7,
+    "uhf42_poverty_pct": 20.1,
+    "class": "decrease",
+    "months": [
+     "03",
+     "04",
+     "05",
+     "06",
+     "08",
+     "09",
+     "10",
+     "11",
+     "12"
+    ],
+    "month_names": [
+     "Mar",
+     "Apr",
+     "May",
+     "Jun",
+     "Aug",
+     "Sep",
+     "Oct",
+     "Nov",
+     "Dec"
+    ],
+    "month_count": 9,
+    "pre_mean": 7.58,
+    "post_mean": 6.85,
+    "delta_raw": -0.73,
+    "pct_raw": -9.66,
+    "ci_low": -1.48,
+    "ci_high": 0.04,
+    "raw_status": "uncertain",
+    "adj_delta": -1.11,
+    "adj_ci_low": -1.92,
+    "adj_ci_high": -0.31,
+    "adj_status": "decrease",
+    "coverage_status": "partial matched months; not complete-year estimate",
+    "existing": {
+     "pre_mean": 7.48,
+     "post_mean": 6.7,
+     "delta_raw": -0.78,
+     "delta_adj_control": -0.04,
+     "relative_to_control": "tracked control",
+     "classification": "unchanged"
+    },
+    "jan_aug": {
+     "2025": {
+      "class": "decrease",
+      "delta_raw": -1.9,
+      "adj_delta": -2.71,
+      "ci_low": -2.97,
+      "ci_high": -0.66,
+      "adj_ci_low": -3.92,
+      "adj_ci_high": -1.51,
+      "pct_raw": -20.92
+     },
+     "2026": {
+      "class": "decrease",
+      "delta_raw": -1.87,
+      "adj_delta": -2.97,
+      "ci_low": -2.9,
+      "ci_high": -0.99,
+      "adj_ci_low": -3.87,
+      "adj_ci_high": -2.07,
+      "pct_raw": -19.99
+     }
+    },
+    "persistence": "inconclusive",
+    "persistence_adjusted": "inconclusive",
+    "context": {
+     "uhf42_id": "309",
+     "neighborhood": "Union Square - Lower East Side",
+     "nta": "East Village",
+     "inside_geofence": false,
+     "poverty_pct": 20.06,
+     "poverty_period": "2019-23",
+     "child_asthma_ed": 159.7,
+     "adult_asthma_ed": 44.6,
+     "asthma_period": "2023",
+     "asthma_unit": "ED visits per 10,000 residents (children ages 5–17; adults age-adjusted)",
+     "interpretation": "monitor location context; not population exposure or causal disparity"
+    }
+   },
+   {
+    "id": "aq_36081NY09285",
+    "site_id": "36081NY09285",
+    "name": "Queens College",
+    "crz_status": "outside",
+    "role": "reference",
+    "dac_designated": false,
+    "uhf42_name": "Fresh Meadows",
+    "uhf42_asthma_ed_children": 76.3,
+    "uhf42_poverty_pct": 11.5,
+    "class": "decrease",
+    "months": [
+     "01",
+     "02",
+     "03",
+     "04",
+     "08",
+     "09",
+     "12"
+    ],
+    "month_names": [
+     "Jan",
+     "Feb",
+     "Mar",
+     "Apr",
+     "Aug",
+     "Sep",
+     "Dec"
+    ],
+    "month_count": 7,
+    "pre_mean": 6.4,
+    "post_mean": 6.14,
+    "delta_raw": -0.25,
+    "pct_raw": -3.98,
+    "ci_low": -0.96,
+    "ci_high": 0.58,
+    "raw_status": "uncertain",
+    "adj_delta": -0.78,
+    "adj_ci_low": -1.41,
+    "adj_ci_high": -0.15,
+    "adj_status": "decrease",
+    "coverage_status": "partial matched months; not complete-year estimate",
+    "existing": {
+     "pre_mean": 6.44,
+     "post_mean": 6.0,
+     "delta_raw": -0.44,
+     "delta_adj_control": 0.8,
+     "relative_to_control": "lagged control",
+     "classification": "unchanged"
+    },
+    "jan_aug": {
+     "2025": {
+      "class": "decrease",
+      "delta_raw": -0.85,
+      "adj_delta": -1.38,
+      "ci_low": -1.77,
+      "ci_high": 0.18,
+      "adj_ci_low": -2.1,
+      "adj_ci_high": -0.66,
+      "pct_raw": -12.41
+     },
+     "2026": {
+      "class": "decrease",
+      "delta_raw": -1.54,
+      "adj_delta": -3.15,
+      "ci_low": -2.81,
+      "ci_high": -0.41,
+      "adj_ci_low": -4.56,
+      "adj_ci_high": -1.73,
+      "pct_raw": -21.0
+     }
+    },
+    "persistence": "inconclusive",
+    "persistence_adjusted": "inconclusive",
+    "context": {
+     "uhf42_id": "406",
+     "neighborhood": "Fresh Meadows",
+     "nta": "Kew Gardens Hills",
+     "inside_geofence": false,
+     "poverty_pct": 11.53,
+     "poverty_period": "2019-23",
+     "child_asthma_ed": 76.3,
+     "adult_asthma_ed": 23.9,
+     "asthma_period": "2023",
+     "asthma_unit": "ED visits per 10,000 residents (children ages 5–17; adults age-adjusted)",
+     "interpretation": "monitor location context; not population exposure or causal disparity"
+    }
+   },
+   {
+    "id": "aq_36005NY12387",
+    "site_id": "36005NY12387",
+    "name": "Cross Bronx Expy",
+    "crz_status": "outside",
+    "role": "site",
+    "dac_designated": true,
+    "uhf42_name": "Crotona - Tremont",
+    "uhf42_asthma_ed_children": 258.9,
+    "uhf42_poverty_pct": 33.9,
+    "class": "uncertain",
+    "months": [
+     "01",
+     "02",
+     "03",
+     "04",
+     "05",
+     "06",
+     "07",
+     "08",
+     "12"
+    ],
+    "month_names": [
+     "Jan",
+     "Feb",
+     "Mar",
+     "Apr",
+     "May",
+     "Jun",
+     "Jul",
+     "Aug",
+     "Dec"
+    ],
+    "month_count": 9,
+    "pre_mean": 9.24,
+    "post_mean": 9.05,
+    "delta_raw": -0.19,
+    "pct_raw": -2.11,
+    "ci_low": -1.31,
+    "ci_high": 0.78,
+    "raw_status": "uncertain",
+    "adj_delta": -0.65,
+    "adj_ci_low": -1.71,
+    "adj_ci_high": 0.41,
+    "adj_status": "uncertain",
+    "coverage_status": "partial matched months; not complete-year estimate",
+    "existing": {
+     "pre_mean": 9.26,
+     "post_mean": 9.02,
+     "delta_raw": -0.24,
+     "delta_adj_control": 0.87,
+     "relative_to_control": "lagged control",
+     "classification": "unchanged"
+    },
+    "jan_aug": {
+     "2025": {
+      "class": "uncertain",
+      "delta_raw": -0.26,
+      "adj_delta": -0.93,
+      "ci_low": -1.43,
+      "ci_high": 0.8,
+      "adj_ci_low": -2.1,
+      "adj_ci_high": 0.23,
+      "pct_raw": -2.75
+     },
+     "2026": {
+      "class": "uncertain",
+      "delta_raw": -0.04,
+      "adj_delta": -1.14,
+      "ci_low": -1.48,
+      "ci_high": 1.75,
+      "adj_ci_low": -2.76,
+      "adj_ci_high": 0.48,
+      "pct_raw": -0.38
+     }
+    },
+    "persistence": "inconclusive",
+    "persistence_adjusted": "inconclusive",
+    "context": {
+     "uhf42_id": "105",
+     "neighborhood": "Crotona - Tremont",
+     "nta": "Mount Hope",
+     "inside_geofence": false,
+     "poverty_pct": 33.91,
+     "poverty_period": "2019-23",
+     "child_asthma_ed": 258.9,
+     "adult_asthma_ed": 171.0,
+     "asthma_period": "2023",
+     "asthma_unit": "ED visits per 10,000 residents (children ages 5–17; adults age-adjusted)",
+     "interpretation": "monitor location context; not population exposure or causal disparity"
+    }
+   },
+   {
+    "id": "aq_36005NY11534",
+    "site_id": "36005NY11534",
+    "name": "Mott Haven",
+    "crz_status": "outside",
+    "role": "site",
+    "dac_designated": true,
+    "uhf42_name": "Hunts Point - Mott Haven",
+    "uhf42_asthma_ed_children": 266.2,
+    "uhf42_poverty_pct": 35.8,
+    "class": "uncertain",
+    "months": [
+     "04",
+     "05",
+     "06",
+     "07",
+     "08",
+     "09",
+     "10",
+     "11",
+     "12"
+    ],
+    "month_names": [
+     "Apr",
+     "May",
+     "Jun",
+     "Jul",
+     "Aug",
+     "Sep",
+     "Oct",
+     "Nov",
+     "Dec"
+    ],
+    "month_count": 9,
+    "pre_mean": 7.34,
+    "post_mean": 7.42,
+    "delta_raw": 0.09,
+    "pct_raw": 1.16,
+    "ci_low": -0.68,
+    "ci_high": 0.83,
+    "raw_status": "uncertain",
+    "adj_delta": -0.36,
+    "adj_ci_low": -1.23,
+    "adj_ci_high": 0.51,
+    "adj_status": "uncertain",
+    "coverage_status": "partial matched months; not complete-year estimate",
+    "existing": {
+     "pre_mean": 7.61,
+     "post_mean": 7.59,
+     "delta_raw": -0.02,
+     "delta_adj_control": 0.85,
+     "relative_to_control": "lagged control",
+     "classification": "unchanged"
+    },
+    "jan_aug": {
+     "2025": {
+      "class": "uncertain",
+      "delta_raw": 0.14,
+      "adj_delta": -0.5,
+      "ci_low": -1.03,
+      "ci_high": 1.41,
+      "adj_ci_low": -1.89,
+      "adj_ci_high": 0.9,
+      "pct_raw": 1.69
+     },
+     "2026": {
+      "class": "uncertain",
+      "delta_raw": 0.3,
+      "adj_delta": -0.74,
+      "ci_low": -1.78,
+      "ci_high": 3.75,
+      "adj_ci_low": -2.7,
+      "adj_ci_high": 1.22,
+      "pct_raw": 3.58
+     }
+    },
+    "persistence": "inconclusive",
+    "persistence_adjusted": "inconclusive",
+    "context": {
+     "uhf42_id": "107",
+     "neighborhood": "Hunts Point - Mott Haven",
+     "nta": "Mott Haven-Port Morris",
+     "inside_geofence": false,
+     "poverty_pct": 35.79,
+     "poverty_period": "2019-23",
+     "child_asthma_ed": 266.2,
+     "adult_asthma_ed": 193.5,
+     "asthma_period": "2023",
+     "asthma_unit": "ED visits per 10,000 residents (children ages 5–17; adults age-adjusted)",
+     "interpretation": "monitor location context; not population exposure or causal disparity"
+    }
+   },
+   {
+    "id": "aq_36047NY07974",
+    "site_id": "36047NY07974",
+    "name": "BQE",
+    "crz_status": "outside",
+    "role": "site",
+    "dac_designated": true,
+    "uhf42_name": "Greenpoint",
+    "uhf42_asthma_ed_children": 48.9,
+    "uhf42_poverty_pct": 16.7,
+    "class": "uncertain",
+    "months": [
+     "08",
+     "09",
+     "10",
+     "11",
+     "12"
+    ],
+    "month_names": [
+     "Aug",
+     "Sep",
+     "Oct",
+     "Nov",
+     "Dec"
+    ],
+    "month_count": 5,
+    "pre_mean": 6.09,
+    "post_mean": 6.07,
+    "delta_raw": -0.02,
+    "pct_raw": -0.34,
+    "ci_low": -0.86,
+    "ci_high": 1.15,
+    "raw_status": "uncertain",
+    "adj_delta": -0.33,
+    "adj_ci_low": -1.07,
+    "adj_ci_high": 0.41,
+    "adj_status": "uncertain",
+    "coverage_status": "partial matched months; not complete-year estimate",
+    "existing": {
+     "pre_mean": 5.45,
+     "post_mean": 5.61,
+     "delta_raw": 0.16,
+     "delta_adj_control": 0.15,
+     "relative_to_control": "tracked control",
+     "classification": "unchanged"
+    },
+    "jan_aug": {
+     "2025": {
+      "class": "uncertain",
+      "delta_raw": -0.8,
+      "adj_delta": null,
+      "ci_low": -4.2,
+      "ci_high": 4.27,
+      "adj_ci_low": null,
+      "adj_ci_high": null,
+      "pct_raw": -9.18
+     },
+     "2026": {
+      "class": "uncertain",
+      "delta_raw": -1.35,
+      "adj_delta": null,
+      "ci_low": -3.57,
+      "ci_high": 2.07,
+      "adj_ci_low": null,
+      "adj_ci_high": null,
+      "pct_raw": -15.52
+     }
+    },
+    "persistence": "inconclusive",
+    "persistence_adjusted": "inconclusive",
+    "context": {
+     "uhf42_id": "201",
+     "neighborhood": "Greenpoint",
+     "nta": "South Williamsburg",
+     "inside_geofence": false,
+     "poverty_pct": 16.7,
+     "poverty_period": "2019-23",
+     "child_asthma_ed": 48.9,
+     "adult_asthma_ed": 38.5,
+     "asthma_period": "2023",
+     "asthma_unit": "ED visits per 10,000 residents (children ages 5–17; adults age-adjusted)",
+     "interpretation": "monitor location context; not population exposure or causal disparity"
+    }
+   },
+   {
+    "id": "aq_36061NY09929",
+    "site_id": "36061NY09929",
+    "name": "Midtown West",
+    "crz_status": "inside",
+    "role": "site",
+    "dac_designated": false,
+    "uhf42_name": "Chelsea - Clinton",
+    "uhf42_asthma_ed_children": 129.9,
+    "uhf42_poverty_pct": 11.9,
+    "class": "uncertain",
+    "months": [
+     "08",
+     "09",
+     "10",
+     "11",
+     "12"
+    ],
+    "month_names": [
+     "Aug",
+     "Sep",
+     "Oct",
+     "Nov",
+     "Dec"
+    ],
+    "month_count": 5,
+    "pre_mean": 10.03,
+    "post_mean": 10.09,
+    "delta_raw": 0.06,
+    "pct_raw": 0.59,
+    "ci_low": -1.11,
+    "ci_high": 1.44,
+    "raw_status": "uncertain",
+    "adj_delta": -0.27,
+    "adj_ci_low": -1.32,
+    "adj_ci_high": 0.77,
+    "adj_status": "uncertain",
+    "coverage_status": "partial matched months; not complete-year estimate",
+    "existing": {
+     "pre_mean": 9.13,
+     "post_mean": 9.55,
+     "delta_raw": 0.42,
+     "delta_adj_control": 0.45,
+     "relative_to_control": "tracked control",
+     "classification": "unchanged"
+    },
+    "jan_aug": {
+     "2025": {
+      "class": "uncertain",
+      "delta_raw": -1.45,
+      "adj_delta": null,
+      "ci_low": -5.87,
+      "ci_high": 4.34,
+      "adj_ci_low": null,
+      "adj_ci_high": null,
+      "pct_raw": -10.57
+     },
+     "2026": {
+      "class": "no_baseline",
+      "delta_raw": null,
+      "adj_delta": null,
+      "ci_low": null,
+      "ci_high": null,
+      "adj_ci_low": null,
+      "adj_ci_high": null,
+      "pct_raw": null
+     }
+    },
+    "persistence": "inconclusive",
+    "persistence_adjusted": "inconclusive",
+    "context": {
+     "uhf42_id": "306",
+     "neighborhood": "Chelsea - Clinton",
+     "nta": "Midtown-Times Square",
+     "inside_geofence": true,
+     "poverty_pct": 11.95,
+     "poverty_period": "2019-23",
+     "child_asthma_ed": 129.9,
+     "adult_asthma_ed": 33.0,
+     "asthma_period": "2023",
+     "asthma_unit": "ED visits per 10,000 residents (children ages 5–17; adults age-adjusted)",
+     "interpretation": "monitor location context; not population exposure or causal disparity"
+    }
+   },
+   {
+    "id": "aq_36085NY03820",
+    "site_id": "36085NY03820",
+    "name": "SI Expwy",
+    "crz_status": "outside",
+    "role": "site",
+    "dac_designated": false,
+    "uhf42_name": "Willowbrook",
+    "uhf42_asthma_ed_children": 29.2,
+    "uhf42_poverty_pct": 10.1,
+    "class": "uncertain",
+    "months": [
+     "08",
+     "10",
+     "11",
+     "12"
+    ],
+    "month_names": [
+     "Aug",
+     "Oct",
+     "Nov",
+     "Dec"
+    ],
+    "month_count": 4,
+    "pre_mean": 7.34,
+    "post_mean": 7.96,
+    "delta_raw": 0.62,
+    "pct_raw": 8.51,
+    "ci_low": -0.8,
+    "ci_high": 2.28,
+    "raw_status": "uncertain",
+    "adj_delta": 0.86,
+    "adj_ci_low": -0.55,
+    "adj_ci_high": 2.26,
+    "adj_status": "uncertain",
+    "coverage_status": "partial matched months; not complete-year estimate",
+    "existing": {
+     "pre_mean": 7.11,
+     "post_mean": 8.0,
+     "delta_raw": 0.89,
+     "delta_adj_control": 1.12,
+     "relative_to_control": "lagged control",
+     "classification": "worsened"
+    },
+    "jan_aug": {
+     "2025": {
+      "class": "uncertain",
+      "delta_raw": 0.39,
+      "adj_delta": null,
+      "ci_low": -4.37,
+      "ci_high": 5.27,
+      "adj_ci_low": null,
+      "adj_ci_high": null,
+      "pct_raw": 4.02
+     },
+     "2026": {
+      "class": "uncertain",
+      "delta_raw": -1.12,
+      "adj_delta": null,
+      "ci_low": -3.93,
+      "ci_high": 3.26,
+      "adj_ci_low": null,
+      "adj_ci_high": null,
+      "pct_raw": -11.47
+     }
+    },
+    "persistence": "inconclusive",
+    "persistence_adjusted": "inconclusive",
+    "context": {
+     "uhf42_id": "503",
+     "neighborhood": "Willowbrook",
+     "nta": "New Springville-Willowbrook-Bulls Head-Travis",
+     "inside_geofence": false,
+     "poverty_pct": 10.1,
+     "poverty_period": "2019-23",
+     "child_asthma_ed": 29.2,
+     "adult_asthma_ed": 26.1,
+     "asthma_period": "2023",
+     "asthma_unit": "ED visits per 10,000 residents (children ages 5–17; adults age-adjusted)",
+     "interpretation": "monitor location context; not population exposure or causal disparity"
+    }
+   },
+   {
+    "id": "aq_36061NY12380",
+    "site_id": "36061NY12380",
+    "name": "Hamilton Bridge",
+    "crz_status": "outside",
+    "role": "site",
+    "dac_designated": true,
+    "uhf42_name": "Washington Heights",
+    "uhf42_asthma_ed_children": 153.7,
+    "uhf42_poverty_pct": 18.7,
+    "class": "uncertain",
+    "months": [
+     "06",
+     "08",
+     "09",
+     "10",
+     "11"
+    ],
+    "month_names": [
+     "Jun",
+     "Aug",
+     "Sep",
+     "Oct",
+     "Nov"
+    ],
+    "month_count": 5,
+    "pre_mean": 6.99,
+    "post_mean": 9.16,
+    "delta_raw": 2.17,
+    "pct_raw": 31.08,
+    "ci_low": 0.82,
+    "ci_high": 3.32,
+    "raw_status": "increase",
+    "adj_delta": 1.28,
+    "adj_ci_low": 0.04,
+    "adj_ci_high": 2.51,
+    "adj_status": "uncertain",
+    "coverage_status": "partial matched months; not complete-year estimate",
+    "existing": {
+     "pre_mean": 6.9,
+     "post_mean": 9.15,
+     "delta_raw": 2.25,
+     "delta_adj_control": 2.1,
+     "relative_to_control": "lagged control",
+     "classification": "worsened"
+    },
+    "jan_aug": {
+     "2025": {
+      "class": "uncertain",
+      "delta_raw": 2.27,
+      "adj_delta": 0.87,
+      "ci_low": -0.48,
+      "ci_high": 5.29,
+      "adj_ci_low": -2.33,
+      "adj_ci_high": 4.06,
+      "pct_raw": 22.8
+     },
+     "2026": {
+      "class": "decrease",
+      "delta_raw": -0.81,
+      "adj_delta": -2.38,
+      "ci_low": -2.69,
+      "ci_high": 1.83,
+      "adj_ci_low": -4.39,
+      "adj_ci_high": -0.38,
+      "pct_raw": -8.15
+     }
+    },
+    "persistence": "inconclusive",
+    "persistence_adjusted": "inconclusive",
+    "context": {
+     "uhf42_id": "301",
+     "neighborhood": "Washington Heights - Inwood",
+     "nta": "Washington Heights (South)",
+     "inside_geofence": false,
+     "poverty_pct": 18.66,
+     "poverty_period": "2019-23",
+     "child_asthma_ed": 153.7,
+     "adult_asthma_ed": 52.6,
+     "asthma_period": "2023",
+     "asthma_unit": "ED visits per 10,000 residents (children ages 5–17; adults age-adjusted)",
+     "interpretation": "monitor location context; not population exposure or causal disparity"
+    }
+   },
+   {
+    "id": "aq_36005NY11790",
+    "site_id": "36005NY11790",
+    "name": "Hunts Point",
+    "crz_status": "outside",
+    "role": "site",
+    "dac_designated": true,
+    "uhf42_name": "Hunts Point - Mott Haven",
+    "uhf42_asthma_ed_children": 266.2,
+    "uhf42_poverty_pct": 35.8,
+    "class": "no_baseline",
+    "months": [],
+    "month_names": [],
+    "month_count": 0,
+    "pre_mean": null,
+    "post_mean": null,
+    "delta_raw": null,
+    "pct_raw": null,
+    "ci_low": null,
+    "ci_high": null,
+    "raw_status": "no_baseline",
+    "adj_delta": null,
+    "adj_ci_low": null,
+    "adj_ci_high": null,
+    "adj_status": null,
+    "coverage_status": "no eligible baseline",
+    "existing": {
+     "pre_mean": null,
+     "post_mean": null,
+     "delta_raw": null,
+     "delta_adj_control": null,
+     "relative_to_control": null,
+     "classification": "insufficient"
+    },
+    "jan_aug": {
+     "2025": {
+      "class": "no_baseline",
+      "delta_raw": null,
+      "adj_delta": null,
+      "ci_low": null,
+      "ci_high": null,
+      "adj_ci_low": null,
+      "adj_ci_high": null,
+      "pct_raw": null
+     },
+     "2026": {
+      "class": "no_baseline",
+      "delta_raw": null,
+      "adj_delta": null,
+      "ci_low": null,
+      "ci_high": null,
+      "adj_ci_low": null,
+      "adj_ci_high": null,
+      "pct_raw": null
+     }
+    },
+    "persistence": "inconclusive",
+    "persistence_adjusted": "inconclusive",
+    "context": {
+     "uhf42_id": "107",
+     "neighborhood": "Hunts Point - Mott Haven",
+     "nta": "Hunts Point",
+     "inside_geofence": false,
+     "poverty_pct": 35.79,
+     "poverty_period": "2019-23",
+     "child_asthma_ed": 266.2,
+     "adult_asthma_ed": 193.5,
+     "asthma_period": "2023",
+     "asthma_unit": "ED visits per 10,000 residents (children ages 5–17; adults age-adjusted)",
+     "interpretation": "monitor location context; not population exposure or causal disparity"
+    }
+   },
+   {
+    "id": "aq_36081NY08198",
+    "site_id": "36081NY08198",
+    "name": "Glendale",
+    "crz_status": "outside",
+    "role": "site",
+    "dac_designated": false,
+    "uhf42_name": "Ridgewood - Forest Hills",
+    "uhf42_asthma_ed_children": 51.2,
+    "uhf42_poverty_pct": 10.3,
+    "class": "no_baseline",
+    "months": [],
+    "month_names": [],
+    "month_count": 0,
+    "pre_mean": null,
+    "post_mean": null,
+    "delta_raw": null,
+    "pct_raw": null,
+    "ci_low": null,
+    "ci_high": null,
+    "raw_status": "no_baseline",
+    "adj_delta": null,
+    "adj_ci_low": null,
+    "adj_ci_high": null,
+    "adj_status": null,
+    "coverage_status": "no eligible baseline",
+    "existing": {
+     "pre_mean": null,
+     "post_mean": null,
+     "delta_raw": null,
+     "delta_adj_control": null,
+     "relative_to_control": null,
+     "classification": "insufficient"
+    },
+    "jan_aug": {
+     "2025": {
+      "class": "no_baseline",
+      "delta_raw": null,
+      "adj_delta": null,
+      "ci_low": null,
+      "ci_high": null,
+      "adj_ci_low": null,
+      "adj_ci_high": null,
+      "pct_raw": null
+     },
+     "2026": {
+      "class": "no_baseline",
+      "delta_raw": null,
+      "adj_delta": null,
+      "ci_low": null,
+      "ci_high": null,
+      "adj_ci_low": null,
+      "adj_ci_high": null,
+      "pct_raw": null
+     }
+    },
+    "persistence": "inconclusive",
+    "persistence_adjusted": "inconclusive",
+    "context": {
+     "uhf42_id": "405",
+     "neighborhood": "Ridgewood - Forest Hills",
+     "nta": "Glendale",
+     "inside_geofence": false,
+     "poverty_pct": 10.35,
+     "poverty_period": "2019-23",
+     "child_asthma_ed": 51.2,
+     "adult_asthma_ed": 25.9,
+     "asthma_period": "2023",
+     "asthma_unit": "ED visits per 10,000 residents (children ages 5–17; adults age-adjusted)",
+     "interpretation": "monitor location context; not population exposure or causal disparity"
+    }
+   },
+   {
+    "id": "aq_36085NY04805",
+    "site_id": "36085NY04805",
+    "name": "Port Richmond",
+    "crz_status": "outside",
+    "role": "site",
+    "dac_designated": true,
+    "uhf42_name": "Port Richmond",
+    "uhf42_asthma_ed_children": 101.8,
+    "uhf42_poverty_pct": 17.1,
+    "class": "no_baseline",
+    "months": [],
+    "month_names": [],
+    "month_count": 0,
+    "pre_mean": null,
+    "post_mean": null,
+    "delta_raw": null,
+    "pct_raw": null,
+    "ci_low": null,
+    "ci_high": null,
+    "raw_status": null,
+    "adj_delta": null,
+    "adj_ci_low": null,
+    "adj_ci_high": null,
+    "adj_status": null,
+    "coverage_status": null,
+    "existing": {
+     "pre_mean": null,
+     "post_mean": null,
+     "delta_raw": null,
+     "delta_adj_control": null,
+     "relative_to_control": null,
+     "classification": "insufficient"
+    },
+    "jan_aug": {},
+    "persistence": "inconclusive",
+    "persistence_adjusted": "inconclusive",
+    "context": null
+   }
+  ],
+  "air_counts": {
+   "decrease": 7,
+   "uncertain": 6,
+   "increase": 0,
+   "no_baseline": 3
+  },
+  "air_full_coverage_ids": [
+   "aq_36061NY09734"
+  ],
+  "south_bronx": [
+   {
+    "id": "aq_36005NY11534",
+    "site_id": "36005NY11534",
+    "name": "Mott Haven",
+    "crz_status": "outside",
+    "role": "site",
+    "dac_designated": true,
+    "uhf42_name": "Hunts Point - Mott Haven",
+    "uhf42_asthma_ed_children": 266.2,
+    "uhf42_poverty_pct": 35.8,
+    "class": "uncertain",
+    "months": [
+     "04",
+     "05",
+     "06",
+     "07",
+     "08",
+     "09",
+     "10",
+     "11",
+     "12"
+    ],
+    "month_names": [
+     "Apr",
+     "May",
+     "Jun",
+     "Jul",
+     "Aug",
+     "Sep",
+     "Oct",
+     "Nov",
+     "Dec"
+    ],
+    "month_count": 9,
+    "pre_mean": 7.34,
+    "post_mean": 7.42,
+    "delta_raw": 0.09,
+    "pct_raw": 1.16,
+    "ci_low": -0.68,
+    "ci_high": 0.83,
+    "raw_status": "uncertain",
+    "adj_delta": -0.36,
+    "adj_ci_low": -1.23,
+    "adj_ci_high": 0.51,
+    "adj_status": "uncertain",
+    "coverage_status": "partial matched months; not complete-year estimate",
+    "existing": {
+     "pre_mean": 7.61,
+     "post_mean": 7.59,
+     "delta_raw": -0.02,
+     "delta_adj_control": 0.85,
+     "relative_to_control": "lagged control",
+     "classification": "unchanged"
+    },
+    "jan_aug": {
+     "2025": {
+      "class": "uncertain",
+      "delta_raw": 0.14,
+      "adj_delta": -0.5,
+      "ci_low": -1.03,
+      "ci_high": 1.41,
+      "adj_ci_low": -1.89,
+      "adj_ci_high": 0.9,
+      "pct_raw": 1.69
+     },
+     "2026": {
+      "class": "uncertain",
+      "delta_raw": 0.3,
+      "adj_delta": -0.74,
+      "ci_low": -1.78,
+      "ci_high": 3.75,
+      "adj_ci_low": -2.7,
+      "adj_ci_high": 1.22,
+      "pct_raw": 3.58
+     }
+    },
+    "persistence": "inconclusive",
+    "persistence_adjusted": "inconclusive",
+    "context": {
+     "uhf42_id": "107",
+     "neighborhood": "Hunts Point - Mott Haven",
+     "nta": "Mott Haven-Port Morris",
+     "inside_geofence": false,
+     "poverty_pct": 35.79,
+     "poverty_period": "2019-23",
+     "child_asthma_ed": 266.2,
+     "adult_asthma_ed": 193.5,
+     "asthma_period": "2023",
+     "asthma_unit": "ED visits per 10,000 residents (children ages 5–17; adults age-adjusted)",
+     "interpretation": "monitor location context; not population exposure or causal disparity"
+    }
+   },
+   {
+    "id": "aq_36005NY12387",
+    "site_id": "36005NY12387",
+    "name": "Cross Bronx Expy",
+    "crz_status": "outside",
+    "role": "site",
+    "dac_designated": true,
+    "uhf42_name": "Crotona - Tremont",
+    "uhf42_asthma_ed_children": 258.9,
+    "uhf42_poverty_pct": 33.9,
+    "class": "uncertain",
+    "months": [
+     "01",
+     "02",
+     "03",
+     "04",
+     "05",
+     "06",
+     "07",
+     "08",
+     "12"
+    ],
+    "month_names": [
+     "Jan",
+     "Feb",
+     "Mar",
+     "Apr",
+     "May",
+     "Jun",
+     "Jul",
+     "Aug",
+     "Dec"
+    ],
+    "month_count": 9,
+    "pre_mean": 9.24,
+    "post_mean": 9.05,
+    "delta_raw": -0.19,
+    "pct_raw": -2.11,
+    "ci_low": -1.31,
+    "ci_high": 0.78,
+    "raw_status": "uncertain",
+    "adj_delta": -0.65,
+    "adj_ci_low": -1.71,
+    "adj_ci_high": 0.41,
+    "adj_status": "uncertain",
+    "coverage_status": "partial matched months; not complete-year estimate",
+    "existing": {
+     "pre_mean": 9.26,
+     "post_mean": 9.02,
+     "delta_raw": -0.24,
+     "delta_adj_control": 0.87,
+     "relative_to_control": "lagged control",
+     "classification": "unchanged"
+    },
+    "jan_aug": {
+     "2025": {
+      "class": "uncertain",
+      "delta_raw": -0.26,
+      "adj_delta": -0.93,
+      "ci_low": -1.43,
+      "ci_high": 0.8,
+      "adj_ci_low": -2.1,
+      "adj_ci_high": 0.23,
+      "pct_raw": -2.75
+     },
+     "2026": {
+      "class": "uncertain",
+      "delta_raw": -0.04,
+      "adj_delta": -1.14,
+      "ci_low": -1.48,
+      "ci_high": 1.75,
+      "adj_ci_low": -2.76,
+      "adj_ci_high": 0.48,
+      "pct_raw": -0.38
+     }
+    },
+    "persistence": "inconclusive",
+    "persistence_adjusted": "inconclusive",
+    "context": {
+     "uhf42_id": "105",
+     "neighborhood": "Crotona - Tremont",
+     "nta": "Mount Hope",
+     "inside_geofence": false,
+     "poverty_pct": 33.91,
+     "poverty_period": "2019-23",
+     "child_asthma_ed": 258.9,
+     "adult_asthma_ed": 171.0,
+     "asthma_period": "2023",
+     "asthma_unit": "ED visits per 10,000 residents (children ages 5–17; adults age-adjusted)",
+     "interpretation": "monitor location context; not population exposure or causal disparity"
+    }
+   },
+   {
+    "id": "aq_36005NY11790",
+    "site_id": "36005NY11790",
+    "name": "Hunts Point",
+    "crz_status": "outside",
+    "role": "site",
+    "dac_designated": true,
+    "uhf42_name": "Hunts Point - Mott Haven",
+    "uhf42_asthma_ed_children": 266.2,
+    "uhf42_poverty_pct": 35.8,
+    "class": "no_baseline",
+    "months": [],
+    "month_names": [],
+    "month_count": 0,
+    "pre_mean": null,
+    "post_mean": null,
+    "delta_raw": null,
+    "pct_raw": null,
+    "ci_low": null,
+    "ci_high": null,
+    "raw_status": "no_baseline",
+    "adj_delta": null,
+    "adj_ci_low": null,
+    "adj_ci_high": null,
+    "adj_status": null,
+    "coverage_status": "no eligible baseline",
+    "existing": {
+     "pre_mean": null,
+     "post_mean": null,
+     "delta_raw": null,
+     "delta_adj_control": null,
+     "relative_to_control": null,
+     "classification": "insufficient"
+    },
+    "jan_aug": {
+     "2025": {
+      "class": "no_baseline",
+      "delta_raw": null,
+      "adj_delta": null,
+      "ci_low": null,
+      "ci_high": null,
+      "adj_ci_low": null,
+      "adj_ci_high": null,
+      "pct_raw": null
+     },
+     "2026": {
+      "class": "no_baseline",
+      "delta_raw": null,
+      "adj_delta": null,
+      "ci_low": null,
+      "ci_high": null,
+      "adj_ci_low": null,
+      "adj_ci_high": null,
+      "pct_raw": null
+     }
+    },
+    "persistence": "inconclusive",
+    "persistence_adjusted": "inconclusive",
+    "context": {
+     "uhf42_id": "107",
+     "neighborhood": "Hunts Point - Mott Haven",
+     "nta": "Hunts Point",
+     "inside_geofence": false,
+     "poverty_pct": 35.79,
+     "poverty_period": "2019-23",
+     "child_asthma_ed": 266.2,
+     "adult_asthma_ed": 193.5,
+     "asthma_period": "2023",
+     "asthma_unit": "ED visits per 10,000 residents (children ages 5–17; adults age-adjusted)",
+     "interpretation": "monitor location context; not population exposure or causal disparity"
+    }
+   }
+  ],
+  "persistence_highlights": [
+   {
+    "kind": "traffic",
+    "id": "cross_bay",
+    "name": "Cross Bay Bridge",
+    "label": "reversed",
+    "y2025": 2.72,
+    "y2026": -3.29,
+    "unit": "%"
+   },
+   {
+    "kind": "traffic",
+    "id": "qmt",
+    "name": "Queens Midtown Tunnel",
+    "label": "strengthened",
+    "y2025": -1.67,
+    "y2026": -4.73,
+    "unit": "%"
+   },
+   {
+    "kind": "air",
+    "id": "aq_36061NY08552",
+    "name": "Williamsburg Bridge",
+    "label": "strengthened",
+    "basis": "raw",
+    "label_raw": "strengthened",
+    "label_adjusted": "strengthened",
+    "y2025": -2.15,
+    "y2026": -3.12,
+    "unit": "µg/m³"
+   },
+   {
+    "kind": "air",
+    "id": "aq_36081NY07615",
+    "name": "Van Wyck",
+    "label": "confirmed",
+    "basis": "raw",
+    "label_raw": "confirmed",
+    "label_adjusted": "strengthened",
+    "y2025": -1.48,
+    "y2026": -1.61,
+    "unit": "µg/m³"
+   }
+  ],
+  "dot": {
+   "strict_result": "The independent matched-month analysis found no eligible repeated street comparisons, so there is no citywide street-level change estimate.",
+   "matched_total": 23,
+   "on_map": 316,
+   "tiers": {
+    "same_month_2024": {
+     "label": "same calendar month, 2024 baseline",
+     "rows": [
+      {
+       "id": "dot_36369",
+       "street": "EAST 58 STREET",
+       "name": "EAST 58 STREET (Ed Koch Queensboro Bridge Appr to 2 Avenue)",
+       "boro": "Manhattan",
+       "pre_adv": 3668,
+       "post_adv": 2284,
+       "pct_change": -37.7,
+       "pre_months": [
+        "2024-10"
+       ],
+       "post_months": [
+        "2025-10"
+       ],
+       "uhf42_name": "Gramercy Park - Murray Hill",
+       "dac_designated": false
+      },
+      {
+       "id": "dot_34332",
+       "street": "WEST END AVENUE",
+       "name": "WEST END AVENUE (West 60 Street to West 61 Street)",
+       "boro": "Manhattan",
+       "pre_adv": 16750,
+       "post_adv": 15651,
+       "pct_change": -6.6,
+       "pre_months": [
+        "2024-10"
+       ],
+       "post_months": [
+        "2025-10"
+       ],
+       "uhf42_name": "Upper West Side",
+       "dac_designated": false
+      },
+      {
+       "id": "dot_252708",
+       "street": "WILLIAMSBURG BR APPROACH",
+       "name": "WILLIAMSBURG BR APPROACH (Dead End to Dead end)",
+       "boro": "Manhattan",
+       "pre_adv": 46210,
+       "post_adv": 43994,
+       "pct_change": -4.8,
+       "pre_months": [
+        "2024-10"
+       ],
+       "post_months": [
+        "2025-10"
+       ],
+       "uhf42_name": "Union Square - Lower East Side",
+       "dac_designated": true
+      },
+      {
+       "id": "dot_252704",
+       "street": "WILLIAMSBURG BR APPROACH",
+       "name": "WILLIAMSBURG BR APPROACH (Dead end to Dead End)",
+       "boro": "Manhattan",
+       "pre_adv": 41777,
+       "post_adv": 40786,
+       "pct_change": -2.4,
+       "pre_months": [
+        "2024-10"
+       ],
+       "post_months": [
+        "2025-10"
+       ],
+       "uhf42_name": "Union Square - Lower East Side",
+       "dac_designated": true
+      },
+      {
+       "id": "dot_72887",
+       "street": "UNIVERSITY HEIGHTS BRIDGE",
+       "name": "UNIVERSITY HEIGHTS BRIDGE (Harlem River Shoreline to Harlem River Shoreline)",
+       "boro": "Manhattan",
+       "pre_adv": 36220,
+       "post_adv": 36442,
+       "pct_change": 0.6,
+       "pre_months": [
+        "2024-10"
+       ],
+       "post_months": [
+        "2025-10"
+       ],
+       "uhf42_name": null,
+       "dac_designated": true
+      }
+     ]
+    },
+    "same_month_older": {
+     "label": "same calendar month, older baseline",
+     "rows": [
+      {
+       "id": "dot_9009491",
+       "street": "12 AVENUE",
+       "name": "12 AVENUE (Dead End to Dead end)",
+       "boro": "Manhattan",
+       "pre_adv": 52710,
+       "post_adv": 50248,
+       "pct_change": -4.7,
+       "pre_months": [
+        "2022-11"
+       ],
+       "post_months": [
+        "2025-11"
+       ],
+       "uhf42_name": "Upper West Side",
+       "dac_designated": true
+      },
+      {
+       "id": "dot_191118",
+       "street": "OCEAN PARKWAY",
+       "name": "OCEAN PARKWAY (Dead End to Dead end)",
+       "boro": "Brooklyn",
+       "pre_adv": 1159,
+       "post_adv": 1410,
+       "pct_change": 21.7,
+       "pre_months": [
+        "2021-07"
+       ],
+       "post_months": [
+        "2025-07"
+       ],
+       "uhf42_name": "Coney Island - Sheepshead Bay",
+       "dac_designated": true
+      }
+     ]
+    },
+    "different_month": {
+     "label": "different months or years",
+     "rows": [
+      {
+       "id": "dot_148076",
+       "street": "ADAMS STREET",
+       "name": "ADAMS STREET (Tillary Street to Johnson Street)",
+       "boro": "Brooklyn",
+       "pre_adv": 14237,
+       "post_adv": 9788,
+       "pct_change": -31.2,
+       "pre_months": [
+        "2024-11"
+       ],
+       "post_months": [
+        "2025-05",
+        "2025-06"
+       ],
+       "uhf42_name": "Downtown - Heights - Slope",
+       "dac_designated": true
+      },
+      {
+       "id": "dot_140031",
+       "street": "ED KOCH QUEENSBORO BRIDGE",
+       "name": "ED KOCH QUEENSBORO BRIDGE (Ed Koch Queensboro Bridge Exit to Dead end)",
+       "boro": "Manhattan",
+       "pre_adv": 14626,
+       "post_adv": 10796,
+       "pct_change": -26.2,
+       "pre_months": [
+        "2023-10"
+       ],
+       "post_months": [
+        "2025-11"
+       ],
+       "uhf42_name": "Gramercy Park - Murray Hill",
+       "dac_designated": false
+      },
+      {
+       "id": "dot_165609",
+       "street": "ED KOCH QUEENSBORO BRIDGE APPR",
+       "name": "ED KOCH QUEENSBORO BRIDGE APPR (2 Avenue to Dead end)",
+       "boro": "Manhattan",
+       "pre_adv": 37639,
+       "post_adv": 30939,
+       "pct_change": -17.8,
+       "pre_months": [
+        "2022-10"
+       ],
+       "post_months": [
+        "2025-11"
+       ],
+       "uhf42_name": "Gramercy Park - Murray Hill",
+       "dac_designated": false
+      },
+      {
+       "id": "dot_142655",
+       "street": "BROOKLYN QUEENS EXPRESSWAY",
+       "name": "BROOKLYN QUEENS EXPRESSWAY (Joralemon Street to Dead end)",
+       "boro": "Brooklyn",
+       "pre_adv": 72455,
+       "post_adv": 63346,
+       "pct_change": -12.6,
+       "pre_months": [
+        "2019-10",
+        "2019-11"
+       ],
+       "post_months": [
+        "2025-05"
+       ],
+       "uhf42_name": "Downtown - Heights - Slope",
+       "dac_designated": false
+      },
+      {
+       "id": "dot_142657",
+       "street": "BROOKLYN QUEENS EXPRESSWAY",
+       "name": "BROOKLYN QUEENS EXPRESSWAY (Dead end to Joralemon Street)",
+       "boro": "Brooklyn",
+       "pre_adv": 73053,
+       "post_adv": 65711,
+       "pct_change": -10.0,
+       "pre_months": [
+        "2019-10",
+        "2019-11"
+       ],
+       "post_months": [
+        "2025-05"
+       ],
+       "uhf42_name": "Downtown - Heights - Slope",
+       "dac_designated": false
+      },
+      {
+       "id": "dot_157886",
+       "street": "MC GUINNESS BLVD SOUTH",
+       "name": "MC GUINNESS BLVD SOUTH (Humboldt Street to Newton Street)",
+       "boro": "Brooklyn",
+       "pre_adv": 11456,
+       "post_adv": 10584,
+       "pct_change": -7.6,
+       "pre_months": [
+        "2023-11"
+       ],
+       "post_months": [
+        "2025-07"
+       ],
+       "uhf42_name": "Greenpoint",
+       "dac_designated": false
+      },
+      {
+       "id": "dot_50963",
+       "street": "SUTTER AVENUE",
+       "name": "SUTTER AVENUE (South Conduit Avenue to Dead end)",
+       "boro": "Brooklyn",
+       "pre_adv": 5241,
+       "post_adv": 4847,
+       "pct_change": -7.5,
+       "pre_months": [
+        "2024-06"
+       ],
+       "post_months": [
+        "2025-02"
+       ],
+       "uhf42_name": "East New York",
+       "dac_designated": true
+      },
+      {
+       "id": "dot_157798",
+       "street": "MC GUINNESS BLVD SOUTH",
+       "name": "MC GUINNESS BLVD SOUTH (Newton Street to Bayard Street)",
+       "boro": "Brooklyn",
+       "pre_adv": 12351,
+       "post_adv": 11488,
+       "pct_change": -7.0,
+       "pre_months": [
+        "2023-11"
+       ],
+       "post_months": [
+        "2025-07"
+       ],
+       "uhf42_name": "Greenpoint",
+       "dac_designated": false
+      },
+      {
+       "id": "dot_196368",
+       "street": "SUTTER AVENUE",
+       "name": "SUTTER AVENUE (Dead End to North Conduit Avenue)",
+       "boro": "Queens",
+       "pre_adv": 7804,
+       "post_adv": 7334,
+       "pct_change": -6.0,
+       "pre_months": [
+        "2024-06"
+       ],
+       "post_months": [
+        "2025-02"
+       ],
+       "uhf42_name": "Southwest Queens",
+       "dac_designated": true
+      },
+      {
+       "id": "dot_144320",
+       "street": "KOSCIUSZKO BRIDGE",
+       "name": "KOSCIUSZKO BRIDGE (Dead End to Newtown Creek Shoreline)",
+       "boro": "Queens",
+       "pre_adv": 97635,
+       "post_adv": 91941,
+       "pct_change": -5.8,
+       "pre_months": [
+        "2019-06"
+       ],
+       "post_months": [
+        "2025-03"
+       ],
+       "uhf42_name": "West Queens",
+       "dac_designated": true
+      },
+      {
+       "id": "dot_9014212",
+       "street": "BROOKLYN BRIDGE",
+       "name": "BROOKLYN BRIDGE (Dead End to East River Shoreline)",
+       "boro": "Manhattan",
+       "pre_adv": 56586,
+       "post_adv": 56064,
+       "pct_change": -0.9,
+       "pre_months": [
+        "2022-10"
+       ],
+       "post_months": [
+        "2025-11"
+       ],
+       "uhf42_name": null,
+       "dac_designated": false
+      },
+      {
+       "id": "dot_149198",
+       "street": "FRESH KILLS BRIDGE",
+       "name": "FRESH KILLS BRIDGE (Richmond Avenue to Dead end)",
+       "boro": "Staten Island",
+       "pre_adv": 27305,
+       "post_adv": 27185,
+       "pct_change": -0.4,
+       "pre_months": [
+        "2022-05"
+       ],
+       "post_months": [
+        "2025-02"
+       ],
+       "uhf42_name": "South Beach - Tottenville",
+       "dac_designated": false
+      },
+      {
+       "id": "dot_140062",
+       "street": "ALEXANDER HAMILTON BRIDGE",
+       "name": "ALEXANDER HAMILTON BRIDGE (Dead End to Harlem River Shoreline)",
+       "boro": "Manhattan",
+       "pre_adv": 63466,
+       "post_adv": 64021,
+       "pct_change": 0.9,
+       "pre_months": [
+        "2023-10"
+       ],
+       "post_months": [
+        "2025-11"
+       ],
+       "uhf42_name": null,
+       "dac_designated": false
+      },
+      {
+       "id": "dot_155310",
+       "street": "FRESH KILLS BRIDGE",
+       "name": "FRESH KILLS BRIDGE (Richmond Avenue to Dead end)",
+       "boro": "Staten Island",
+       "pre_adv": 22842,
+       "post_adv": 23789,
+       "pct_change": 4.1,
+       "pre_months": [
+        "2021-03"
+       ],
+       "post_months": [
+        "2025-02"
+       ],
+       "uhf42_name": "South Beach - Tottenville",
+       "dac_designated": false
+      },
+      {
+       "id": "dot_153104",
+       "street": "KOSCIUSZKO BRIDGE",
+       "name": "KOSCIUSZKO BRIDGE (Dead End to Newtown Creek Shoreline)",
+       "boro": "Queens",
+       "pre_adv": 94513,
+       "post_adv": 102143,
+       "pct_change": 8.1,
+       "pre_months": [
+        "2019-06"
+       ],
+       "post_months": [
+        "2025-03"
+       ],
+       "uhf42_name": "West Queens",
+       "dac_designated": true
+      },
+      {
+       "id": "dot_140064",
+       "street": "ALEXANDER HAMILTON BRIDGE",
+       "name": "ALEXANDER HAMILTON BRIDGE (Dead End to Harlem River Shoreline)",
+       "boro": "Manhattan",
+       "pre_adv": 61418,
+       "post_adv": 74930,
+       "pct_change": 22.0,
+       "pre_months": [
+        "2023-10"
+       ],
+       "post_months": [
+        "2025-11"
+       ],
+       "uhf42_name": null,
+       "dac_designated": false
+      }
+     ]
+    }
+   },
+   "post_only_context": [
+    {
+     "id": "dot_139020",
+     "street": "MAJOR DEEGAN EXPRESSWAY",
+     "latest_adv": 45904,
+     "months": [
+      "2025-10",
+      "2025-11"
+     ],
+     "uhf42_name": "High Bridge - Morrisania"
+    },
+    {
+     "id": "dot_276694",
+     "street": "MDE NB ENTRANCE WILLIS AVENUE BR",
+     "latest_adv": 26108,
+     "months": [
+      "2025-12"
+     ],
+     "uhf42_name": "Hunts Point - Mott Haven"
+    },
+    {
+     "id": "dot_9014571",
+     "street": "BRUCKNER BOULEVARD",
+     "latest_adv": 8315,
+     "months": [
+      "2025-03"
+     ],
+     "uhf42_name": "Hunts Point - Mott Haven"
+    }
+   ],
+   "sampling_note": "NYC DOT automated counts are one-week samples at rotating locations; a pair compares one sample with another."
+  },
+  "methods": {
+   "traffic": "standardized vehicles per complete day, equal month × weekday weights; 95% seven-day-cluster bootstrap (200 draws)",
+   "air_raw": "equal-weight eligible matched-month means; 95% interval from 400 within-month seven-day block draws",
+   "air_adjusted": "regression on a regional weather proxy; Benjamini–Hochberg correction across monitors",
+   "air_control": "existing pipeline: difference against DOHMH's Van Wyck control site on shared months (descriptive, no interval)",
+   "causal": "all results are associations; none identifies a causal congestion-pricing effect or tracked rerouting"
+  },
+  "external_context": {
+   "headline_22pct": "Cornell University, npj Clean Air (Dec 2025): a modeled 22% drop in daily-maximum PM2.5 inside the zone (Jan–Jun 2025) against a projected no-toll level; MTA reports entry declines against a modeled baseline. Neither is this project's result.",
+   "url": "https://news.cornell.edu/stories/2025/12/congestion-pricing-improved-air-quality-nyc-and-suburbs"
+  }
  }
 }

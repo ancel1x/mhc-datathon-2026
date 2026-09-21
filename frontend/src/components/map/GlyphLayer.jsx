@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Marker, useMap } from 'react-map-gl/maplibre';
 import ClockGlyph from './ClockGlyph.jsx';
+import { isHollow } from './PointLayers.jsx';
 import { useData } from '../../lib/data.jsx';
 import { useAppState, useDispatch } from '../../state/AppState.jsx';
 import { featureMetrics, GLYPH_LAYERS, LAYER_META } from '../../lib/metrics.js';
@@ -15,7 +16,7 @@ const fmtVal = (layer, v) => (layer === 'aq_monitor' ? (isNum(v) ? `${fmtNum(v, 
 /** Caption text under the ring: change for traffic, class for monitors, value when the metric is absolute. */
 function captionFor(layer, m, metric) {
   if (metric === 'absolute') return layer === 'aq_monitor' ? (isNum(m.value) ? `${fmtNum(m.value, 1)} µg/m³` : '—') : fmtCompact(m.value);
-  if (layer === 'aq_monitor') return CLASS_LABELS[m.classification] ?? 'no data';
+  if (layer === 'aq_monitor') return CLASS_LABELS[m.classification] ?? 'no eligible baseline';
   if (!isNum(m.change) && isNum(m.value)) return fmtCompact(m.value);
   return fmtPct(m.change);
 }
@@ -43,7 +44,7 @@ export default function GlyphLayer({ featured, viewVersion }) {
         if (!isNum(lon) || !isNum(lat) || !inView(lon, lat)) continue;
         const p = f.properties ?? {};
         const m = featureMetrics(p, layer, period, hour, metric);
-        const hollow = layer === 'aq_monitor' && metric === 'change' && (m.classification ?? 'insufficient') === 'insufficient';
+        const hollow = isHollow(layer, m, metric, period);
         out.push({ key: `${layer}:${p.id}`, layer, id: p.id, lon, lat, name: p.name ?? p.id, m, max, hollow, featured: Boolean(fset && fset.has(p.id)), dimmed: Boolean(fset && !fset.has(p.id)) });
       }
     }
@@ -56,6 +57,7 @@ export default function GlyphLayer({ featured, viewVersion }) {
     const isSelected = selectedFeature?.layer === it.layer && selectedFeature?.id === it.id;
     const isHovered = hovered === it.key;
     const caption = captionFor(it.layer, it.m, metric);
+    const support = it.layer === 'bt_facility' && metric === 'change' && it.m.support ? CLASS_LABELS[it.m.support] ?? it.m.support : null;
     return (
       <Marker
         key={it.key}
@@ -71,7 +73,7 @@ export default function GlyphLayer({ featured, viewVersion }) {
           data-selected={isSelected ? 'true' : 'false'}
           tabIndex={0}
           role="button"
-          aria-label={`${it.name}: ${LAYER_META[it.layer].label}. ${it.m.baselineLabel} ${fmtVal(it.layer, it.m.baseline)}, ${it.m.currentLabel} ${fmtVal(it.layer, it.m.value)}, change ${fmtPct(it.m.change)}.`}
+          aria-label={`${it.name}: ${LAYER_META[it.layer].label}. ${it.m.baselineLabel} ${fmtVal(it.layer, it.m.baseline)}, ${it.m.currentLabel} ${fmtVal(it.layer, it.m.value)}, change ${fmtPct(it.m.change)}${support ? `, ${support}` : ''}.`}
           onMouseEnter={() => setHovered(it.key)}
           onMouseLeave={() => setHovered(null)}
           onFocus={() => setHovered(it.key)}
@@ -88,7 +90,7 @@ export default function GlyphLayer({ featured, viewVersion }) {
               <b>{it.name}</b>
               <div className="row"><span>{it.m.baselineLabel}</span><span className="num">{fmtVal(it.layer, it.m.baseline)}</span></div>
               <div className="row"><span>{it.m.currentLabel}</span><span className="num">{fmtVal(it.layer, it.m.value)}</span></div>
-              <div className="row"><span>change</span><span className="num" style={{ color: it.m.color }}>{fmtPct(it.m.change)}</span></div>
+              <div className="row"><span>change</span><span className="num" style={{ color: it.m.color }}>{fmtPct(it.m.change)}{support ? ` · ${support}` : ''}</span></div>
             </div>
           ) : null}
         </div>

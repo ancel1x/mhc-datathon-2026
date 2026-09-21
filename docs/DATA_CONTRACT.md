@@ -85,3 +85,49 @@ props: `uhf_code, name, borough, pm25_2024, pm25_2009, pm25_change_pct_2009_2024
 ## boroughs.geojson — props `boro_name`, `boro_code`
 ## tolls.json — the MTA toll table (see backend/config.py `TOLLS`)
 ## sources.json — `[{name, publisher, portal, dataset_id, url, used_for}]`
+
+## Reconciled evidence (step 07, `backend/pipeline/s07_reconcile.py`)
+
+Added beside the existing fields, never replacing them. Source: `data/reference/second_pipeline/*.csv`
+(the independent analysis); decisions in `DATA_RECONCILIATION.md`. Missing values stay `null`.
+
+### bt_facilities.geojson → `evidence`
+`{ mta_facility_id, full_year: { frame, pre_mean, post_mean, pct, ci_low, ci_high, status ("increase"|"decrease"|"uncertain"|"limited"),
+matched_days_2024, matched_days_2025, complete_days_2024, complete_days_2025, expected_days, matched_weekdays:[...], coverage_status,
+peak: { am|pm|other: { pct, ci_low, ci_high, status, n_2024, n_2025 } }, peak_definition },
+jan_aug: { "2025"|"2026": { pct, ci_low, ci_high, status, months:[...], days_2024, days_<year> } },
+persistence ("reversed"|"strengthened"|"confirmed"|"weakened"|"inconclusive"), full_vs_jan_aug, limitation, unit }`.
+`status = "limited"` marks the coverage-limited full-day estimate (Hugh L. Carey: complete weekend days only). The map draws
+uncertain / limited crossings as rings and their flow lines in neutral grey when the metric is "change".
+
+### aq_monitors.geojson → `evidence`, `evidence_class`, `source_name`, `geometry_note`
+`evidence = { display_name|null, second_pipeline_name, geometry:{lat, lon, status},
+full_year: { frame, months:["04",...], month_names, month_count, pre_mean, post_mean, delta_raw, pct_raw, ci_low, ci_high,
+raw_status ("decrease"|"increase"|"uncertain"|"no_baseline"), adj_delta, adj_ci_low, adj_ci_high, adj_status (same set or null), q_value,
+class ("decrease"|"uncertain"|"increase"|"no_baseline"), coverage_status, days_2024, days_2025, completeness_2024, completeness_2025,
+eligible_months_2024, eligible_months_2025, interval_method, adjustment },
+jan_aug: { "2025"|"2026": { months, month_names, pre_mean, post_mean, delta_raw, pct_raw, ci_low, ci_high, raw_status, adj_delta, adj_ci_low,
+adj_ci_high, adj_status, class, days_2024, days_<year>, note } | null },
+persistence, persistence_adjusted, full_vs_jan_aug, limitation,
+context: { uhf42_id, neighborhood, nta, inside_geofence, poverty_pct, poverty_period, child_asthma_ed, adult_asthma_ed, asthma_period, asthma_unit, interpretation } }`.
+`evidence_class` = `evidence.full_year.class`, or `"no_baseline"` for a site outside the validated set (Port Richmond).
+`class` = `no_baseline` when there is no eligible baseline, else the weather-adjusted status, else the raw status.
+Midtown West (`36061NY09929`, source name "Midtown-DOT") uses its documented original coordinates; `geometry_note` records the 2026-07-23 move.
+The existing `comparisons` block (control-site method) is unchanged and is shown as "Against the citywide trend".
+
+### summary.json → `reconciled`
+`{ generated, frames:{primary, secondary}, traffic:[{ id, name, role, dac_designated, uhf42_name, avg_daily_2024, avg_daily_2025, pct_existing, pct,
+ci_low, ci_high, status, matched_days, matched_weekdays, peak:{am,pm,other}, jan_aug:{"2025","2026"}, pct_2026ytd_existing, persistence, full_vs_jan_aug }],
+traffic_counts:{increase, decrease, uncertain, limited}, traffic_peak_definition,
+air:[{ id, site_id, name, crz_status, role, dac_designated, uhf42_name, uhf42_asthma_ed_children, uhf42_poverty_pct, class, months, month_names, month_count,
+pre_mean, post_mean, delta_raw, pct_raw, ci_low, ci_high, raw_status, adj_delta, adj_ci_low, adj_ci_high, adj_status, coverage_status,
+existing:{pre_mean, post_mean, delta_raw, delta_adj_control, relative_to_control, classification}, jan_aug:{...}, persistence, persistence_adjusted, context }],
+air_counts:{decrease, uncertain, increase, no_baseline}, air_full_coverage_ids:[...], south_bronx:[3 air rows],
+persistence_highlights:[{kind ("traffic"|"air"), id, name, label, basis?, y2025, y2026, unit}],
+dot:{ strict_result, matched_total, on_map, tiers:{ same_month_2024|same_month_older|different_month: {label, rows:[{id, street, name, boro, pre_adv, post_adv, pct_change, pre_months, post_months, uhf42_name, dac_designated}]} }, post_only_context:[...], sampling_note },
+methods:{traffic, air_raw, air_adjusted, air_control, causal}, external_context:{headline_22pct, url} }`.
+The story (`frontend/src/content/story.js`) and the guided tour read this block; the inspectors read the per-feature `evidence`.
+
+### uhf42.geojson (unchanged fields, now selectable)
+Clicking a neighborhood polygon selects `{ layer: "uhf42", id: uhf_code }` and opens the community context card
+(poverty_pct, asthma_ed_children, asthma_ed_adults, health_period, pm25_2024) with the monitors and crossings inside it.
