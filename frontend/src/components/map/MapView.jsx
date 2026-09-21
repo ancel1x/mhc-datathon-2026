@@ -66,7 +66,7 @@ export default function MapView({ featured, guide }) {
   const mapRef = useRef(null);
   const flownRef = useRef(null);
   const { geo } = useData();
-  const { activeChapter, exploreMode, theme, layerVisibility, selectedFeature, intro, autoplay, period } = useAppState();
+  const { activeChapter, exploreMode, theme, layerVisibility, selectedFeature, intro, autoplay, period, controlsCollapsed } = useAppState();
   const dispatch = useDispatch();
   const isPhone = usePhone();
   const reduced = useReducedMotion();
@@ -98,7 +98,7 @@ export default function MapView({ featured, guide }) {
       ? tourPadding()
       : isPhone
         ? { top: 64, bottom: Math.round(window.innerHeight * 0.55) + 16, left: 12, right: 12 }
-        : { top: 40, bottom: cssPx('--timeline-h', 64) + inset + 28, left: cssPx('--story-w', 360) + inset + 24, right: cssPx('--side-w', 264) + inset + 24 };
+        : { top: 40, bottom: cssPx('--timeline-h', 64) + inset + 28, left: cssPx('--story-w', 360) + inset + 24, right: (controlsCollapsed && !selectedFeature ? 0 : cssPx('--side-w', 264)) + inset + 24 };
     if (intro === 'show') {
       map.jumpTo({ center: INTRO_CAMERA.center, zoom: INTRO_CAMERA.zoom, padding });
       flownRef.current = null;
@@ -116,7 +116,7 @@ export default function MapView({ featured, guide }) {
     const fromIntro = intro === 'leaving';
     if (reduced) map.jumpTo(opts);
     else map.flyTo({ ...opts, duration: fromIntro ? 3200 : touring ? 2600 : 1400, easing: easeInOutCubic, curve: fromIntro || touring ? 0.9 : 1.1 });
-  }, [activeChapter, exploreMode, loaded, isPhone, reduced, intro, touring]);
+  }, [activeChapter, exploreMode, loaded, isPhone, reduced, intro, touring, controlsCollapsed, selectedFeature]);
 
   useEffect(() => {
     dispatch({ type: 'SET_GLYPH_MODE', on: loaded && zoom >= GLYPH_ZOOM && !touring });

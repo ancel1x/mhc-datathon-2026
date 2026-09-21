@@ -18,7 +18,7 @@ node scripts/screenshot.mjs "http://localhost:4173/?chapter=3" out.png 18000 [wi
 
 Deep links: `?chapter=1..11` starts on that step, `?chapter=explore` on the explore step, `?intro=0` skips the title card, `?play=N`
 starts the guided tour from step N, `?feature=<layer>:<id>` opens a feature's detail (e.g. `bt_facility:whitestone`,
-`aq_monitor:aq_36005NY11534`, `uhf42:107` for a neighborhood card), `?controls=1` opens the controls sheet on phones,
+`aq_monitor:aq_36005NY11534`, `uhf42:107` for a neighborhood card), `?controls=1` opens the controls sheet on phones, `?controls=collapsed` starts with the control panel collapsed,
 `?theme=light|dark` forces a theme. During the guided tour, the Next button on a callout, the skip buttons in the
 timeline bar, `→` or `Enter` jump to the next callout without waiting for its bar; `←` goes back; `Space` pauses; `Esc` exits.
 

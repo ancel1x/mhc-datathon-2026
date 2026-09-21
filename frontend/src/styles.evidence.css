@@ -300,6 +300,66 @@
   pointer-events: none;
 }
 
+/* collapsing the map controls: the panel slides out to the right, the pill fades in, and the year stamp,
+   flow canvas and timeline take the freed space */
+.side {
+  transition: transform 280ms ease, opacity 200ms ease, visibility 0s linear 0s;
+}
+.side[data-collapsed='true'] {
+  transform: translateX(calc(100% + var(--inset) + 12px));
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: transform 280ms ease, opacity 200ms ease, visibility 0s linear 280ms;
+}
+.side-btn {
+  animation: side-btn-in 260ms ease both;
+}
+@keyframes side-btn-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.yearstamp {
+  transition: right 280ms ease, top 280ms ease;
+}
+.app[data-controls='collapsed'][data-autoplay='false'] .yearstamp {
+  top: calc(var(--inset) + 32px + 12px);
+  right: calc(var(--inset) + 12px);
+}
+.app[data-controls='collapsed'][data-autoplay='false'] .flow-canvas {
+  right: var(--inset);
+}
+.timeline {
+  transition: right 280ms ease;
+}
+.app[data-controls='collapsed'][data-autoplay='false'] .timeline {
+  right: var(--inset);
+}
+@media (prefers-reduced-motion: reduce) {
+  .side,
+  .side-btn,
+  .yearstamp,
+  .timeline {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+@media (max-width: 720px) {
+  .side[data-collapsed='true'] {
+    transform: none;
+  }
+  .app[data-controls='collapsed'][data-autoplay='false'] .yearstamp {
+    top: 68px;
+    right: 12px;
+  }
+}
+
 /* community (neighborhood) card */
 .community__note {
   font-size: 12px;

@@ -163,12 +163,16 @@ export default function SidePanel({ hasFeatured }) {
     );
   }
 
-  if (controlsCollapsed && !live) {
-    return <button type="button" className="side-btn panel" aria-expanded="false" onClick={() => dispatch({ type: 'TOGGLE_COLLAPSE', collapsed: false })}>Map controls <Chevron /></button>;
-  }
+  // The panel stays mounted while collapsed so it can slide out of view; the pill fades in beside it.
+  const collapsed = controlsCollapsed && !live;
   return (
-    <aside className="side panel" aria-label={live ? 'Feature detail' : 'Map controls'}>
-      {live ? <DetailContent layer={selectedFeature.layer} feature={live} onClose={closeDetail} /> : <ControlsContent onCollapse={() => dispatch({ type: 'TOGGLE_COLLAPSE', collapsed: true })} hasFeatured={hasFeatured} />}
-    </aside>
+    <>
+      <aside className="side panel" data-collapsed={collapsed ? 'true' : 'false'} aria-hidden={collapsed} aria-label={live ? 'Feature detail' : 'Map controls'}>
+        {live ? <DetailContent layer={selectedFeature.layer} feature={live} onClose={closeDetail} /> : <ControlsContent onCollapse={() => dispatch({ type: 'TOGGLE_COLLAPSE', collapsed: true })} hasFeatured={hasFeatured} />}
+      </aside>
+      {collapsed ? (
+        <button type="button" className="side-btn panel" aria-expanded="false" onClick={() => dispatch({ type: 'TOGGLE_COLLAPSE', collapsed: false })}>Map controls <Chevron /></button>
+      ) : null}
+    </>
   );
 }
