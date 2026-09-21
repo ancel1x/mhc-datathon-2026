@@ -22,3 +22,6 @@ Thumbs.db
 __MACOSX/
 *.log
 .env
+
+# temporary headless captures
+tmp_shots/
