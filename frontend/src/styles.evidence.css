@@ -341,6 +341,13 @@
 .app[data-controls='collapsed'][data-autoplay='false'] .timeline {
   right: var(--inset);
 }
+.maplibregl-ctrl-bottom-right {
+  transition: right 280ms ease;
+}
+.app[data-controls='collapsed'][data-autoplay='false'] .maplibregl-ctrl-bottom-right,
+.app[data-autoplay='true'] .maplibregl-ctrl-bottom-right {
+  right: calc(var(--inset) + 12px);
+}
 @media (prefers-reduced-motion: reduce) {
   .side,
   .side-btn,
