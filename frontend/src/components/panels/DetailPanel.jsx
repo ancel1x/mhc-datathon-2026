@@ -82,7 +82,7 @@ function TrafficEvidence({ p, period }) {
           </p>
         ) : null}
         <IntervalBars rows={[main]} />
-        <p className="detail__plain"><strong>In plain words:</strong> {plainPct(main?.est, { status: main?.status, base: is26 ? 'Jan–Aug 2024' : '2024' })}.</p>
+        <p className="detail__plain"><strong>In plain words:</strong> <span className="num">{fmtPct(main?.est)}</span> means {plainPct(main?.est, { status: main?.status, base: is26 ? 'Jan–Aug 2024' : '2024' })}.</p>
         <p className="detail__hint">The bar is the 95% interval, the range of doubt around the estimate (matched-day analysis, equal month × weekday weights, seven-day-cluster bootstrap). Green or red = the whole range stays on one side of zero; grey = it includes zero. Counts are crossing events, not tracked trips.</p>
       </Section>
       <Section title="Rush hours vs the rest of the day">
@@ -141,7 +141,7 @@ function AirEvidence({ p, period }) {
                 { label: 'Weather-adjusted', sub: 'model-derived', est: e.adj_delta, lo: e.adj_ci_low, hi: e.adj_ci_high, status: e.adj_status ?? 'none' },
               ]}
             />
-            <p className="detail__plain"><strong>In plain words:</strong> {plainAir(isNum(e.adj_delta) ? e.adj_delta : e.delta_raw, e.pre_mean, { status: e.class, base: is26 ? 'Jan–Aug 2024' : '2024' })}{isNum(e.adj_delta) ? ' (after weather adjustment)' : ''}.</p>
+            <p className="detail__plain"><strong>In plain words:</strong> <span className="num">{fmtDelta(isNum(e.adj_delta) ? e.adj_delta : e.delta_raw, 'µg/m³', 2)}</span>{isNum(e.adj_delta) ? ' after weather adjustment' : ' raw'} means {plainAir(isNum(e.adj_delta) ? e.adj_delta : e.delta_raw, e.pre_mean, { status: e.class, base: is26 ? 'Jan–Aug 2024' : '2024' })}.</p>
             <MonthChips months={e.months} total={is26 ? 8 : 12} label={is26 ? 'matched months, Jan–Aug' : 'matched months'} />
             <p className="detail__hint">
               {is26 ? 'Jan 5–Aug 31 only.' : e.month_count === 12 ? 'All 12 months eligible: a complete-year estimate.' : `Within the Jan–Dec frame this monitor had ${e.month_count} eligible matched months, so this is a partial-year estimate, not a full-year one.`}

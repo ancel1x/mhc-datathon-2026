@@ -341,7 +341,7 @@
 }
 .callout__count {
   display: block;
-  margin-top: 6px;
+  margin-top: 0;
   font-size: 11px;
   color: var(--text-3);
 }

@@ -247,6 +247,59 @@
   margin-top: 4px;
 }
 
+/* guided tour: skip to the next / previous callout instead of waiting for the bar */
+.callout__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 6px;
+}
+.callout__skip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-2);
+  padding: 2px 6px;
+  margin: -2px -6px -2px 0;
+  border-radius: 6px;
+  transition: background var(--dur) ease, color var(--dur) ease;
+}
+.callout__skip:hover {
+  background: var(--fill);
+  color: var(--text);
+}
+.tl__skip {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-inner);
+  color: var(--text-2);
+  transition: background var(--dur) ease, color var(--dur) ease;
+}
+.tl__skip:hover {
+  background: var(--fill);
+  color: var(--text);
+}
+.tl__skips {
+  flex: none;
+  display: inline-flex;
+  gap: 2px;
+  margin-left: -6px;
+}
+/* the callout card must take clicks (its Next button); the ring on the feature is decorative */
+.callout,
+.callout--screen {
+  pointer-events: auto;
+}
+.callout__ring {
+  pointer-events: none;
+}
+
 /* community (neighborhood) card */
 .community__note {
   font-size: 12px;

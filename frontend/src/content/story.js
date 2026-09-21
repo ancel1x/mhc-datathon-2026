@@ -202,9 +202,9 @@ export function buildStory({ summary, tolls, sources, geo }) {
       ],
       table: {
         title: 'Supported decreases, 2025 vs 2024',
-        head: ['Monitor', 'Months', 'Adjusted µg/m³', 'In plain words'],
-        rows: aDec.map((r) => ({ cells: [r.name, `${fmtInt(r.month_count)} / 12`, cell(fmtDelta(r.adj_delta, '', 2), 'decrease', true), cell(plainAirShort(r.adj_delta, r.pre_mean), 'decrease')] })),
-        foot: 'Adjusted = weather-adjusted change in micrograms of fine soot per cubic metre of air; "≈29% less soot" compares it with that monitor’s 2024 level. Months = months with enough data in both years; 12 / 12 is a complete year, anything less is a partial window. Raw changes are under Details.',
+        head: ['Monitor', 'Months', 'Raw', 'Adjusted', 'In plain words'],
+        rows: aDec.map((r) => ({ cells: [r.name, `${fmtInt(r.month_count)} / 12`, cell(fmtDelta(r.delta_raw, '', 2), r.raw_status), cell(fmtDelta(r.adj_delta, '', 2), 'decrease', true), cell(plainAirShort(r.adj_delta, r.pre_mean), 'decrease')] })),
+        foot: 'Raw and adjusted are changes in µg/m³ (micrograms of fine soot per cubic metre of air); adjusted = after weather adjustment, and "≈29% less soot" compares it with that monitor’s own 2024 level. Months = months with enough data in both years; 12 / 12 is a complete year, anything less is a partial window.',
       },
       details: {
         paragraphs: [

@@ -121,6 +121,16 @@ export function reducer(state, action) {
     }
     case 'AUTOPLAY_BEAT':
       return state.autoplay.on ? { ...state, autoplay: { ...state.autoplay, beat: Math.max(0, Number(action.beat) || 0), startedAt: now(), elapsed: 0 } } : state;
+    case 'AUTOPLAY_SKIP': {
+      // Skip to the next / previous callout without waiting for its bar; past the last one, move on to the next
+      // step (or Explore); before the first, back to the previous step. Skipping resumes a paused tour.
+      if (!state.autoplay.on) return state;
+      const n = Math.max(1, Number(action.count) || 1);
+      const next = state.autoplay.beat + (action.dir < 0 ? -1 : 1);
+      if (next >= n) return reducer(state, state.autoplay.step >= CHAPTERS.length - 1 ? { type: 'AUTOPLAY_END' } : { type: 'AUTOPLAY_START', step: state.autoplay.step + 1 });
+      if (next < 0) return reducer(state, { type: 'AUTOPLAY_START', step: Math.max(0, state.autoplay.step - 1) });
+      return { ...state, autoplay: { ...state.autoplay, beat: next, paused: false, startedAt: now(), elapsed: 0 } };
+    }
     case 'AUTOPLAY_TOGGLE_PAUSE': {
       if (!state.autoplay.on) return state;
       const a = state.autoplay;

@@ -1,45 +1,67 @@
-# The real story of congestion pricing — MHC Datathon, Phase 1
+# The real story of congestion pricing
 
-An interactive map of New York City that shows what happened to traffic and fine-particle air pollution (PM2.5)
-after the Congestion Relief Zone toll started on January 5, 2025, and whether the patterns overlap neighborhoods
-that were already carrying the most. Everything is built from official public data (MTA, NYC DOT, NYC Health
-Department, NY State). The map tells the story in eleven steps along a timeline, then opens up for exploring.
+An interactive map of New York City showing what happened to traffic and fine-particle air pollution (PM2.5)
+after the Congestion Relief Zone toll started on January 5, 2025, and whether the changes overlap neighborhoods
+that already carry the highest asthma and poverty burden. Built for the MHC Datathon 2026, Phase 1.
 
-Findings are written up in [docs/PHASE1_FINDINGS.md](docs/PHASE1_FINDINGS.md). Two independent analysis pipelines
-were reconciled to produce the final numbers; every decision is recorded in
-[DATA_RECONCILIATION.md](DATA_RECONCILIATION.md), and the brief-by-brief audit is
+Everything on the map comes from official public data: MTA bridge and tunnel crossings, MTA zone entries,
+NYC DOT street counts, NYCCAS street-level PM2.5 monitors, NYC Health Department neighborhood health indicators
+and the New York State Disadvantaged Communities map.
+
+## What it shows
+
+The app plays as a story along a timeline, one step at a time, then opens up for exploring:
+
+1. **Before the toll**: the 2024 baseline for the nine MTA crossings and the air monitors.
+2. **The toll begins**: the zone boundary and the toll structure.
+3. **Inside the zone**: how many vehicles still enter, and when.
+4. **Crossings**: which bridges and tunnels changed in 2025, with 95% intervals, and how rush hours differ from the whole day.
+5. **Street level**: what NYC DOT's sampled street counts add, and what they cannot say.
+6. **Air**: which monitors show a supported decrease in PM2.5 after weather adjustment, which are uncertain, and which have no baseline.
+7. **The South Bronx**: Mott Haven, Cross Bronx and Hunts Point read on their own, next to the neighborhood's pre-existing asthma and poverty burden.
+8. **Who was already carrying the most**: the traffic and air results laid over the state's Disadvantaged Communities.
+9. **2026 so far**: whether the year-one patterns persisted in January to August 2026.
+10. **If the Major Deegan came down**: one highway scenario, reasoned from the observed data and labelled as such.
+11. **What this can't say**: the caveats, and the sources.
+
+Every number keeps its unit and gets a plain-English reading next to it. Click any crossing, monitor, street
+counter or neighborhood to open its evidence: before and after values, the 95% interval, matched-month coverage,
+rush-hour windows, monthly series with the toll-start marker, hour-of-day profiles and the 2026 status.
+"Play the story" runs a guided tour with callouts on the map; the arrow keys or the Next button on a callout skip
+ahead without waiting.
+
+Two independent analyses of the same sources were reconciled to produce the numbers. The comparison of the two,
+metric by metric, is in [DATA_RECONCILIATION.md](DATA_RECONCILIATION.md); the findings are in
+[docs/PHASE1_FINDINGS.md](docs/PHASE1_FINDINGS.md); the checklist against the datathon requirements is in
 [PHASE1_COVERAGE_CHECK.md](PHASE1_COVERAGE_CHECK.md).
 
-## What the brief asked, and where the map answers it
+## Tech stack
 
-The Phase 1 brief requires three things on one map: air quality (NYCCAS monitors, before/after PM2.5), traffic
-volumes (MTA bridge and tunnel counts, NYC DOT counts) and the congestion pricing zone boundary with its toll
-structure, with an overlay showing whether the patterns fall on historically vulnerable communities. All are
-layers in the app. The brief's four questions, and the step that answers each:
+| Layer | What |
+|---|---|
+| Map | MapLibre GL 5 via react-map-gl, OpenFreeMap vector tiles with a custom dark style, a 2D canvas overlay for the animated traffic flow |
+| App | React 19, Vite 7, plain JavaScript and JSX, Recharts 3 and d3-shape / d3-scale for the charts and clock glyphs |
+| Data pipeline | Python 3.12, pandas, DuckDB (for the 1 GB zone-entry file), shapely, pyproj |
+| API (optional) | FastAPI serving the same files plus two "compare any two date ranges" endpoints |
+| Tests | pytest on the pipeline helpers and the generated data |
 
-| Question from the brief | Step | Short answer |
-|---|---|---|
-| Has congestion pricing reduced pollution and traffic, or has the 22% headline hidden a more mixed daily / peak-hour picture? | 2, 3, 4, 6 | Mixed. The 22% is a modeled figure (external context). Measured: about 502k vehicles still enter on a weekday, 77% in tolled hours; around the zone three crossings show supported increases and six are uncertain, and the morning rush rose at Whitestone (+4.7%), Henry Hudson (+4.0%) and the Verrazzano even where whole days are uncertain; seven monitors show supported PM2.5 decreases, six are uncertain. |
-| Is pollution and traffic being eliminated, or shifted to other parts of the five boroughs? Are those areas already vulnerable? | 4, 8 | Partly both; counts cannot show which vehicles moved. Entries into the core fell; three surrounding crossings rose with intervals above zero (RFK Manhattan +2.1%, Whitestone +1.9%, Marine Parkway +1.9%), the nine together were +0.5%. One of the three (RFK Manhattan, East Harlem) is in a state Disadvantaged Community; the supported air improvements sit in and beside the priced core, in lower-burden neighborhoods. |
-| If traffic is diverting into the South Bronx, what do the monitor-level data show in Mott Haven, Cross Bronx and Hunts Point, separate from the citywide average? | 7 | No statistically clear PM2.5 increase or decrease at Mott Haven (−0.36 µg/m³, −1.23 to +0.51) or Cross Bronx (−0.65, −1.71 to +0.41) after weather adjustment; Hunts Point has no eligible 2024 baseline. Those neighborhoods carry the highest pre-existing burden (child asthma ED 266 and 259 per 10,000, 2023). |
-| What would happen to traffic, air and equity if a major highway like the BQE or the Major Deegan were removed or repurposed? | 10 | One corridor, the Major Deegan, reasoned from observed counts, monitors and burden and labelled "data-grounded scenario reasoning, not a forecast": a local exhaust source removed and land freed, against the risk that the same volumes move onto Bruckner, the Grand Concourse and Third Avenue in the same tracts. No percentage or outcome is invented. |
+## How it works
 
-## Run the app (2 minutes, no data work)
+1. `backend/pipeline/s00` to `s06` download the small public inputs, read the two large raw CSVs (or their
+   saved intermediates), aggregate them into per-facility, per-monitor and per-segment statistics for 2024, 2025
+   and January to August 2026, join every point to its census tract and neighborhood, and write a bundle of JSON
+   and GeoJSON files.
+2. `backend/pipeline/s07_reconcile.py` merges a second, independent analysis (in `data/reference/second_pipeline/`)
+   into that bundle: 95% intervals, matched-month eligibility, rush-hour windows and persistence labels are added
+   beside the existing fields, never in place of them.
+3. The bundle is copied into `frontend/public/data/`, so the app runs without the pipeline or the API.
+4. The frontend loads the bundle, builds the story text from the numbers in it (`frontend/src/content/story.js`),
+   and renders the map, the story panel, the timeline and the detail inspector. The file formats are described in
+   [docs/DATA_CONTRACT.md](docs/DATA_CONTRACT.md).
 
-All the processed data is already in the repo, so the map runs on its own. You only need **Node.js 22 or newer**
-(check with `node --version`; download from https://nodejs.org if missing).
+## Setup
 
-**Windows** (PowerShell or Command Prompt):
-
-```powershell
-git clone https://github.com/ancel1x/mhc-datathon-2026.git
-cd mhc-datathon-2026\frontend
-npm install
-npm run dev
-```
-
-**Mac** (Terminal): same commands, with forward slashes. If you don't have Node, install it first with
-`brew install node` (or from nodejs.org).
+You need Node.js 22 or newer. All processed data is already in the repo.
 
 ```bash
 git clone https://github.com/ancel1x/mhc-datathon-2026.git
@@ -48,79 +70,72 @@ npm install
 npm run dev
 ```
 
-Then open http://localhost:5173 in your browser. That's it. (`npm run build` then `npm run preview` serves the
-production build on http://localhost:4173.)
+Open http://localhost:5173. On Windows use backslashes in the `cd` path; everything else is the same.
 
-## Full setup: API and data pipeline (optional)
+`npm run build` makes the production build in `frontend/dist/`; `npm run preview` serves it on port 4173.
 
-Only needed if you want to change how the numbers are computed, or use the API's "compare any two date ranges"
-endpoints. Requires **Python 3.12 or newer** (`python --version` on Windows, `python3 --version` on Mac;
-Mac users can `brew install python@3.12`).
+### Optional: pipeline and API
 
-**Windows** (from the repo root):
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\setup.ps1     # once: creates .venv, installs Python + npm packages
-powershell -ExecutionPolicy Bypass -File .\dev.ps1       # starts the API (port 8000) and the app (port 5173)
-```
-
-**Mac** (from the repo root):
+Only needed to recompute the numbers or use the date-range endpoints. Requires Python 3.12 or newer.
 
 ```bash
-chmod +x setup.sh dev.sh   # first time only
-./setup.sh                 # once: creates .venv, installs Python + npm packages
-./dev.sh                   # starts the API (port 8000) and the app (port 5173); Ctrl+C stops both
+# Windows
+powershell -ExecutionPolicy Bypass -File .\setup.ps1     # creates .venv, installs Python and npm packages
+powershell -ExecutionPolicy Bypass -File .\dev.ps1       # starts the API (port 8000) and the app (port 5173)
+
+# Mac / Linux
+chmod +x setup.sh dev.sh
+./setup.sh
+./dev.sh
 ```
 
-To recompute the data from scratch: `python backend/pipeline/run_all.py` (Windows: `.venv\Scripts\python.exe`,
-Mac: `.venv/bin/python`). It downloads the small public inputs (about 30 MB), rebuilds `frontend/public/data/`
-and, as its last step (`s07_reconcile.py`), merges the second pipeline's intervals and eligibility fields from
-`data/reference/second_pipeline/`. To re-run only that merge: `python backend/pipeline/s07_reconcile.py`.
-The two large raw files (MTA zone entries, about 1 GB, and NYC DOT counts, about 275 MB) are **not** required:
-their compact intermediates are in `data/processed/`. If you do want to re-read them, download them from the links
-in the sources table into your Downloads folder, or point `RAW_CRZ_CSV` / `RAW_ATVC_CSV` at them.
+Rebuild the data with `python backend/pipeline/run_all.py` (use the `.venv` interpreter). It downloads about
+30 MB of public inputs and rewrites `frontend/public/data/`. The two large raw files (MTA zone entries, about
+1 GB, and NYC DOT counts, about 275 MB) are not required because their compact intermediates are in
+`data/processed/`; to re-read them, download them from the links below into your Downloads folder or point
+`RAW_CRZ_CSV` / `RAW_ATVC_CSV` at them. To re-run only the merge step: `python backend/pipeline/s07_reconcile.py`.
 
-Tests: `python -m pytest backend/tests -q`. Production build: `cd frontend && npm run build`.
+Tests: `python -m pytest backend/tests -q`.
 
-## What's in the repo
+## Repository layout
 
 ```
-frontend/                 React + Vite + MapLibre app (see frontend/README.md for the UI structure)
-frontend/public/data/     the processed data the app reads (JSON / GeoJSON, about 3 MB)
-backend/pipeline/         Python steps s00–s07 that turn the raw sources into that data
-backend/api/              FastAPI server: serves the data and two live comparison endpoints
-backend/tests/            pytest checks on helpers and on the generated data
-data/processed/           pipeline intermediates (small parquet files) and the data bundle
-data/reference/           tracked tables from partners' work: 2023 asthma rates by neighborhood, and the
-                          second (independent) analysis pipeline's map-ready outputs
-docs/                     findings write-up, data contract, screenshots
-DATA_RECONCILIATION.md    how the two analysis pipelines were compared and what the app finally shows
-PHASE1_COVERAGE_CHECK.md  audit of the app against the organizer's Phase 1 brief
-setup.ps1 / setup.sh      one-time setup (Windows / Mac)
-dev.ps1 / dev.sh          start API + app (Windows / Mac)
+frontend/                 React + Vite + MapLibre app (frontend/README.md describes the UI)
+frontend/public/data/     the processed data the app reads (about 3 MB)
+backend/pipeline/         Python steps s00 to s07
+backend/api/              FastAPI server
+backend/tests/            pytest checks
+data/processed/           pipeline intermediates and the data bundle
+data/reference/           tracked tables from partners: 2023 asthma and poverty by neighborhood, and the
+                          second analysis pipeline's outputs
+docs/                     findings, data contract, screenshots
+DATA_RECONCILIATION.md    how the two analyses were compared and what the app shows
+PHASE1_COVERAGE_CHECK.md  checklist against the datathon requirements
+setup.ps1 / setup.sh      one-time setup
+dev.ps1 / dev.sh          start API and app
 ```
 
-## How the numbers are made (short version)
+## How the numbers are made
 
-- **Frames.** Primary: Jan 5–Dec 31, 2024 vs 2025 (Year One). Secondary: Jan 5–Aug 31 of 2024 / 2025 / 2026,
-  used only to ask whether Year One patterns persisted; 2026 is never shown as a complete year.
-- **Traffic.** Average vehicles per day at each MTA bridge and tunnel (our pipeline), with the independent
-  analysis's 95% intervals, matched-day counts, AM / PM / other-hours windows and persistence labels attached.
-  A change is "supported" only when its interval stays on one side of zero; Hugh L. Carey is coverage-limited.
-  Entries into the zone by gate and vehicle class (no pre-toll baseline). NYC DOT street counters as sampled
-  matched locations, tiered by how comparable the before and after samples are; no citywide street estimate.
-- **Air.** Hourly PM2.5 from the city's street-level monitors, compared on eligible matched months. Two readings
-  per monitor: our control-site difference (against the Health Department's Van Wyck site, descriptive) and the
-  independent analysis's raw and weather-adjusted changes with intervals. The map class comes from the latter:
-  supported decrease / uncertain / supported increase / no eligible baseline.
-- **Who bears it.** Every point is joined to its census tract (New York State Disadvantaged Community
-  designation) and its neighborhood (child and adult asthma ER visits and poverty, 2023 / ACS 2019–23, the newest
-  published, since health data lag about two years).
+- **Frames.** The main comparison is January 5 to December 31, 2024 against the same window of 2025. January 5 to
+  August 31 of 2024, 2025 and 2026 is used only to check whether the 2025 patterns persisted; 2026 is never shown
+  as a complete year.
+- **Traffic.** Average vehicles per day at each MTA bridge and tunnel, with a 95% interval, matched-day counts and
+  AM / PM / other-hours windows from the second analysis. A change is called supported only when the whole interval
+  sits on one side of zero; the Hugh L. Carey Tunnel is flagged as coverage-limited. Entries into the zone by gate
+  and vehicle class have no pre-toll baseline. NYC DOT street counts are one-week samples, shown as matched
+  locations tiered by how comparable the before and after samples are, with no citywide estimate.
+- **Air.** Hourly PM2.5 from the street-level monitors, compared on months with enough data in both years. Each
+  monitor has a raw change, a weather-adjusted change with a 95% interval, and a difference against the Health
+  Department's control site on the Van Wyck Expressway. The map class comes from the weather-adjusted result:
+  supported decrease, uncertain, supported increase, or no eligible baseline.
+- **Neighborhoods.** Every point is joined to its census tract (state Disadvantaged Community designation) and its
+  neighborhood (child and adult asthma ER visits in 2023 and poverty from ACS 2019 to 2023, the newest published).
 
-Caveats we state up front: association is not cause; counts are crossing events, not tracked trips; most monitors
-have partial matched-month coverage; the zone-entry detectors have no "before"; DOT counts are one-week samples.
+Association is not cause. Counts are crossing events, not tracked trips. Most monitors have partial matched-month
+coverage. The zone-entry detectors have no "before". DOT counts are one-week samples.
 
-## Data sources (all official)
+## Data sources
 
 | Dataset | Publisher | Where |
 |---|---|---|
@@ -128,11 +143,11 @@ have partial matched-month coverage; the zone-entry detectors have no "before"; 
 | Bridges and Tunnels hourly crossings | MTA | NY State Open Data `ebfx-2m7v` |
 | Congestion Relief Zone boundary (geofence) | MTA | NY State Open Data `srxy-5nxn` |
 | Automated traffic volume counts | NYC DOT | NYC Open Data `7ym2-wayt` |
-| Real-time street-level PM2.5 (NYCCAS) | NYC DOHMH + Queens College | github.com/nychealth/nyccas-data |
+| Real-time street-level PM2.5 (NYCCAS) | NYC DOHMH and Queens College | github.com/nychealth/nyccas-data |
 | Annual neighborhood air quality (NYCCAS) | NYC DOHMH | NYC Open Data `c3uy-2p5r` |
-| Asthma ER visits (children and adults, 2023) and poverty (ACS 2019–23) by neighborhood | NYC DOHMH | Environment & Health Data Portal |
+| Asthma ER visits (children and adults, 2023) and poverty (ACS 2019 to 2023) by neighborhood | NYC DOHMH | Environment & Health Data Portal |
 | Disadvantaged Communities 2023 | NYS Climate Justice Working Group | NY State Open Data `2e6c-s6fp` |
 | Neighborhood and borough boundaries | NYC DOHMH | github.com/nycehs/NYC_geography |
 | Toll rates | MTA | mta.info |
 
-Basemap: © OpenMapTiles © OpenStreetMap contributors, tiles by OpenFreeMap.
+Basemap: OpenMapTiles and OpenStreetMap contributors, tiles by OpenFreeMap.
