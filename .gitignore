@@ -1,0 +1,24 @@
+# Inputs the pipeline downloads itself (backend/pipeline/s00_download_external.py); the 1 GB raw CSVs live in Downloads
+data/external/
+data/raw/
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Node
+node_modules/
+frontend/dist/
+.vite/
+
+# Editors and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+__MACOSX/
+*.log
+.env

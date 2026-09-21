@@ -1,0 +1,67 @@
+{
+ "effective": "2025-01-05",
+ "peak_hours": {
+  "weekday": "5:00 AM – 9:00 PM",
+  "weekend": "9:00 AM – 9:00 PM"
+ },
+ "overnight_discount": "75% off peak",
+ "ezpass_rates": [
+  {
+   "class": "Passenger & small commercial vehicles",
+   "peak": 9.0,
+   "overnight": 2.25,
+   "crossing_credit": 3.0
+  },
+  {
+   "class": "Motorcycles",
+   "peak": 4.5,
+   "overnight": 1.05,
+   "crossing_credit": 1.5
+  },
+  {
+   "class": "Small trucks & charter buses",
+   "peak": 14.4,
+   "overnight": 3.6,
+   "crossing_credit": 7.2
+  },
+  {
+   "class": "Large trucks & tour buses",
+   "peak": 21.6,
+   "overnight": 5.4,
+   "crossing_credit": 12.0
+  }
+ ],
+ "per_trip": [
+  {
+   "class": "Taxis, green cabs, black cars",
+   "fee": 0.75
+  },
+  {
+   "class": "High-volume for-hire vehicles (Uber/Lyft)",
+   "fee": 1.5
+  }
+ ],
+ "crossing_credit_tunnels": [
+  "Lincoln Tunnel",
+  "Holland Tunnel",
+  "Queens-Midtown Tunnel",
+  "Hugh L. Carey Tunnel"
+ ],
+ "excluded_roadways": [
+  "FDR Drive",
+  "West Side Highway / Route 9A",
+  "Battery Park Underpass",
+  "Hugh L. Carey Tunnel surface connection to West St"
+ ],
+ "scheduled_increases": [
+  {
+   "year": 2028,
+   "peak_car": 12.0
+  },
+  {
+   "year": 2031,
+   "peak_car": 15.0
+  }
+ ],
+ "source": "https://www.mta.info/fares-tolls/tolls/congestion-relief-zone/about"
+}

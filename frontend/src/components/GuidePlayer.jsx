@@ -1,0 +1,76 @@
+import { useEffect } from 'react';
+import { useMap } from 'react-map-gl/maplibre';
+import { CHAPTERS } from '../content/chapters.js';
+import { useAppState, useDispatch } from '../state/AppState.jsx';
+import { useReducedMotion } from '../hooks/useMediaQuery.js';
+
+const easeInOutCubic = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+const STEP_HOLD_MS = 2200; // how long a step shows its "before" year before tweening to its own
+
+/** Camera padding while the tour runs: the panels are hidden, only the timeline bar is on screen. */
+export function tourPadding() {
+  const css = (name, fallback) => {
+    try { const v = parseFloat(getComputedStyle(document.documentElement).getPropertyValue(name)); return Number.isFinite(v) ? v : fallback; } catch { return fallback; }
+  };
+  return { top: 72, bottom: css('--timeline-h', 64) + css('--inset', 16) + 48, left: 56, right: 56 };
+}
+
+/**
+ * Runs the guided tour: walks each step's beats on a timer (pause keeps the remaining time), applies a beat's
+ * year / metric so the map visibly changes, moves the camera for beats that ask for it, and hands over to
+ * Explore at the end. Space pauses, Escape leaves the tour.
+ * Outside the tour it also plays each step's own "before -> after" transition: a step with a `from` state
+ * opens on the earlier year and tweens to its own after a short hold.
+ */
+export default function GuidePlayer({ guide }) {
+  const { autoplay, activeChapter, exploreMode, intro } = useAppState();
+  const dispatch = useDispatch();
+  const { main } = useMap();
+  const reduced = useReducedMotion();
+  const { on, paused, step, beat, elapsed } = autoplay;
+
+  // ---- tour beats ----
+  useEffect(() => {
+    if (!on || paused) return undefined;
+    const beats = guide?.[step] ?? [];
+    const b = beats[beat];
+    if (!b) {
+      const t = window.setTimeout(() => dispatch(step >= CHAPTERS.length - 1 ? { type: 'AUTOPLAY_END' } : { type: 'AUTOPLAY_START', step: step + 1 }), 250);
+      return () => window.clearTimeout(t);
+    }
+    if (b.state && elapsed === 0) dispatch({ type: 'SET_STEP_STATE', ...b.state });
+    const map = main?.getMap?.();
+    if (b.camera && map && elapsed === 0) {
+      const opts = { center: b.camera.center, zoom: b.camera.zoom, padding: tourPadding() };
+      if (reduced) map.jumpTo(opts);
+      else map.easeTo({ ...opts, duration: 2400, easing: easeInOutCubic, essential: true });
+    }
+    const remaining = Math.max(0, (b.dwell ?? 6500) - elapsed);
+    const t = window.setTimeout(() => dispatch({ type: 'AUTOPLAY_BEAT', beat: beat + 1 }), remaining);
+    return () => window.clearTimeout(t);
+  }, [on, paused, step, beat, elapsed, guide, main, dispatch, reduced]);
+
+  useEffect(() => {
+    if (!on) return undefined;
+    const onKey = (e) => {
+      if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey) return;
+      const tag = e.target?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+      if (e.key === 'Escape') { e.preventDefault(); dispatch({ type: 'AUTOPLAY_STOP' }); }
+      else if (e.key === ' ') { e.preventDefault(); dispatch({ type: 'AUTOPLAY_TOGGLE_PAUSE' }); }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [on, dispatch]);
+
+  // ---- step transitions when paging by hand: show the "before" year, then tween to the step's own ----
+  useEffect(() => {
+    if (on || exploreMode || intro !== 'done') return undefined;
+    const ch = CHAPTERS[activeChapter];
+    if (!ch?.from) return undefined;
+    const t = window.setTimeout(() => dispatch({ type: 'SET_STEP_STATE', period: ch.period, metric: ch.metric }), reduced ? 0 : STEP_HOLD_MS);
+    return () => window.clearTimeout(t);
+  }, [on, exploreMode, intro, activeChapter, dispatch, reduced]);
+
+  return null;
+}
