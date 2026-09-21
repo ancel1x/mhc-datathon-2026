@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Layer, Source } from 'react-map-gl/maplibre';
 import { useData } from '../../lib/data.jsx';
 import { useAppState } from '../../state/AppState.jsx';
@@ -6,7 +7,7 @@ import { COLORS, violetExpression } from '../../lib/scales.js';
 export const POLYGON_LAYER_IDS = { dac: 'dac-fill', uhf42: 'uhf-fill' };
 
 /** DAC tracts and UHF42 asthma choropleths (mutually exclusive). Flat purple fills, no outlines. */
-export default function PolygonLayers() {
+function PolygonLayers() {
   const { geo, indexes } = useData();
   const { layerVisibility, dacMode } = useAppState();
   const dacOn = Boolean(layerVisibility.dac);
@@ -27,3 +28,5 @@ export default function PolygonLayers() {
     </>
   );
 }
+
+export default memo(PolygonLayers);

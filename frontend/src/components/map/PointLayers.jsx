@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import { Layer, Source } from 'react-map-gl/maplibre';
 import { useData } from '../../lib/data.jsx';
 import { useAppState } from '../../state/AppState.jsx';
@@ -113,7 +113,7 @@ const fade = { duration: 600 };
  * 5 px squares (matched only unless `dotAll`). Uncertain crossings and monitors without a baseline are rings.
  * Featured = full opacity, the rest 35 %. Text labels for bridges and monitors from zoom 10.4 to 11.
  */
-export default function PointLayers({ featured, imageReady = true, glyphs = true }) {
+function PointLayers({ featured, imageReady = true, glyphs = true }) {
   const maxzoom = glyphs ? GLYPH_SWITCH_ZOOM : 24;
   const { geo, indexes } = useData();
   const { period, metric, hour, layerVisibility, dotAll, theme } = useAppState();
@@ -221,3 +221,5 @@ export default function PointLayers({ featured, imageReady = true, glyphs = true
     </>
   );
 }
+
+export default memo(PointLayers);

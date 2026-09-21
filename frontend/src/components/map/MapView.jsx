@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AttributionControl, Map as MapGL } from 'react-map-gl/maplibre';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { AttributionControl, Map as MapGL, useMap } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { ATTRIBUTION, buildInkStyle } from '../../map/inkStyle.js';
 import { CHAPTERS, EXPLORE_CAMERA, INTRO_CAMERA } from '../../content/chapters.js';
@@ -62,8 +63,80 @@ function tipFor(f) {
   return null;
 }
 
-export default function MapView({ featured, guide }) {
+/** Pointer movement only updates this small overlay, never the map's React layer tree. */
+function MapTooltip({ layers, enabled, container }) {
+  const { current: mapRef } = useMap();
+  const { period, metric, hour, dacMode } = useAppState();
+  const element = useRef(null);
+  const position = useRef({ x: 0, y: 0 });
+  const [tip, setTip] = useState(null);
+
+  useEffect(() => {
+    const map = mapRef?.getMap?.();
+    if (!map || !enabled) { setTip(null); return undefined; }
+    let raf = 0;
+    let lastHover = -Infinity;
+    let point = null;
+    let previous = null;
+    const canvas = map.getCanvas();
+    const clear = () => {
+      cancelAnimationFrame(raf);
+      raf = 0;
+      previous = null;
+      setTip(null);
+      canvas.style.cursor = 'grab';
+    };
+    const update = () => {
+      raf = 0;
+      lastHover = performance.now();
+      if (map.isMoving()) { clear(); return; }
+      const visible = layers.filter((id) => map.getLayer(id));
+      const feats = visible.length ? map.queryRenderedFeatures(point, { layers: visible }) : [];
+      const f = feats.find((x) => x.properties?._layer) ?? feats.find((x) => x.properties?._of) ?? feats[0];
+      const key = f ? `${f.layer.id}:${f.properties?.id ?? f.properties?.geoid ?? f.properties?.uhf_code}` : null;
+      position.current = { x: point.x, y: point.y };
+      if (element.current) {
+        element.current.style.left = `${point.x}px`;
+        element.current.style.top = `${point.y}px`;
+      }
+      if (key !== previous) {
+        previous = key;
+        const next = f ? tipFor(f) : null;
+        setTip(next);
+        canvas.style.cursor = next ? 'pointer' : 'grab';
+      }
+    };
+    const move = (e) => {
+      point = e.point;
+      // Handle ordinary pointer events immediately. Coalesce only bursts from fast input devices.
+      if (performance.now() - lastHover >= 1000 / 60) {
+        cancelAnimationFrame(raf);
+        update();
+      } else if (!raf) raf = requestAnimationFrame(update);
+    };
+    map.on('mousemove', move);
+    map.on('movestart', clear);
+    canvas.addEventListener('mouseleave', clear);
+    return () => {
+      clear();
+      map.off('mousemove', move);
+      map.off('movestart', clear);
+      canvas.removeEventListener('mouseleave', clear);
+    };
+  }, [mapRef, layers, enabled, period, metric, hour, dacMode]);
+
+  return tip && enabled && container.current ? createPortal(
+    <div ref={element} className="map-tip panel" style={{ left: position.current.x, top: position.current.y }} role="tooltip">
+      <b>{tip.title ?? '—'}</b>
+      {tip.lines.map((line, i) => <div key={i}>{line}</div>)}
+    </div>,
+    container.current,
+  ) : null;
+}
+
+function MapView({ featured, guide }) {
   const mapRef = useRef(null);
+  const stageRef = useRef(null);
   const flownRef = useRef(null);
   const { geo } = useData();
   const { activeChapter, exploreMode, theme, layerVisibility, selectedFeature, intro, autoplay, period, controlsCollapsed } = useAppState();
@@ -71,9 +144,8 @@ export default function MapView({ featured, guide }) {
   const isPhone = usePhone();
   const reduced = useReducedMotion();
   const [loaded, setLoaded] = useState(false);
-  const [zoom, setZoom] = useState(10);
+  const [glyphZoom, setGlyphZoom] = useState(false);
   const [viewVersion, setViewVersion] = useState(0);
-  const [tip, setTip] = useState(null);
   const touring = autoplay.on;
 
   const style = useMemo(() => buildInkStyle(geo.boroughs, theme), [geo.boroughs, theme]);
@@ -119,22 +191,15 @@ export default function MapView({ featured, guide }) {
   }, [activeChapter, exploreMode, loaded, isPhone, reduced, intro, touring, controlsCollapsed, selectedFeature]);
 
   useEffect(() => {
-    dispatch({ type: 'SET_GLYPH_MODE', on: loaded && zoom >= GLYPH_ZOOM && !touring });
-  }, [zoom, loaded, dispatch, touring]);
+    dispatch({ type: 'SET_GLYPH_MODE', on: loaded && glyphZoom && !touring });
+  }, [glyphZoom, loaded, dispatch, touring]);
 
   const onLoad = useCallback((e) => {
     const map = e.target;
     ensureSquareImage(map);
     map.on('styleimagemissing', (ev) => { if (ev.id === SQUARE_IMAGE) ensureSquareImage(map); });
-    setZoom(map.getZoom());
+    setGlyphZoom(map.getZoom() >= GLYPH_ZOOM);
     setLoaded(true);
-  }, []);
-
-  const onMouseMove = useCallback((e) => {
-    const feats = e.features ?? [];
-    const f = feats.find((x) => x.properties?._layer) ?? feats.find((x) => x.properties?._of) ?? feats[0];
-    const t = f ? tipFor(f) : null;
-    setTip(t ? { ...t, x: e.point.x, y: e.point.y } : null);
   }, []);
 
   const onClick = useCallback((e) => {
@@ -149,7 +214,7 @@ export default function MapView({ featured, guide }) {
   const startCam = intro === 'done' ? CHAPTERS[activeChapter]?.camera ?? EXPLORE_CAMERA : INTRO_CAMERA;
 
   return (
-    <div className="map-stage">
+    <div className="map-stage" ref={stageRef}>
       <MapGL
         id="main"
         ref={mapRef}
@@ -165,13 +230,11 @@ export default function MapView({ featured, guide }) {
         pitchWithRotate={false}
         attributionControl={false}
         interactiveLayerIds={interactiveLayerIds}
-        cursor={tip ? 'pointer' : 'grab'}
+        cursor="grab"
         onLoad={onLoad}
         onStyleImageMissing={(e) => { if (e.id === SQUARE_IMAGE) ensureSquareImage(e.target); }}
-        onMove={(e) => setZoom(Math.round(e.viewState.zoom * 10) / 10)}
+        onZoom={(e) => setGlyphZoom(e.viewState.zoom >= GLYPH_ZOOM)}
         onMoveEnd={() => setViewVersion((v) => v + 1)}
-        onMouseMove={onMouseMove}
-        onMouseLeave={() => setTip(null)}
         onClick={onClick}
       >
         <AttributionControl customAttribution={ATTRIBUTION} position="bottom-right" compact={false} />
@@ -179,8 +242,9 @@ export default function MapView({ featured, guide }) {
         <ZoneLayer />
         <PointLayers featured={featured} imageReady={loaded} glyphs={!touring} />
         <FlowLayer featured={featured} />
-        {loaded && zoom >= GLYPH_ZOOM && !touring ? <GlyphLayer featured={featured} viewVersion={viewVersion} /> : null}
+        {loaded && glyphZoom && !touring ? <GlyphLayer featured={featured} viewVersion={viewVersion} /> : null}
         <GuideCallouts guide={guide} />
+        <MapTooltip layers={interactiveLayerIds} enabled={loaded && !touring} container={stageRef} />
       </MapGL>
       {intro === 'done' && YEAR[period] ? (
         <div key={period} className="yearstamp" aria-live="polite">
@@ -188,12 +252,8 @@ export default function MapView({ featured, guide }) {
           <span className="yearstamp__sub">{YEAR[period][1]}</span>
         </div>
       ) : null}
-      {tip && !touring ? (
-        <div className="map-tip panel" style={{ left: tip.x, top: tip.y }} role="tooltip">
-          <b>{tip.title ?? '—'}</b>
-          {tip.lines.map((l, i) => <div key={i}>{l}</div>)}
-        </div>
-      ) : null}
     </div>
   );
 }
+
+export default memo(MapView);

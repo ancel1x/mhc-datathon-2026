@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Marker } from 'react-map-gl/maplibre';
 import { useAppState, useDispatch } from '../../state/AppState.jsx';
 import { useData } from '../../lib/data.jsx';
@@ -20,7 +21,7 @@ function resolve(at, indexes) {
  * Each card carries its "2 / 4" counter and a Next button, so the reader can skip ahead instead of waiting
  * for the bar to run out.
  */
-export default function GuideCallouts({ guide }) {
+function GuideCallouts({ guide }) {
   const { autoplay } = useAppState();
   const { indexes } = useData();
   const dispatch = useDispatch();
@@ -70,3 +71,5 @@ export default function GuideCallouts({ guide }) {
     </>
   );
 }
+
+export default memo(GuideCallouts);

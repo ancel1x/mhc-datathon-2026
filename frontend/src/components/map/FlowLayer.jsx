@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { memo, useEffect, useMemo, useRef } from 'react';
 import { Layer, Source, useMap } from 'react-map-gl/maplibre';
 import { useData } from '../../lib/data.jsx';
 import { useAppState } from '../../state/AppState.jsx';
@@ -30,6 +30,7 @@ const lerp = (a, b, k) => a + (b - a) * k;
 
 /** Current visual state of a route, tweening from `from` to `to`. */
 function sample(r, now) {
+  if (now - r.t0 >= TWEEN_MS) return r.to;
   const k = smooth(Math.max(0, Math.min(1, (now - r.t0) / TWEEN_MS)));
   return {
     rgb: [lerp(r.from.rgb[0], r.to.rgb[0], k), lerp(r.from.rgb[1], r.to.rgb[1], k), lerp(r.from.rgb[2], r.to.rgb[2], k)],
@@ -158,13 +159,14 @@ function pointAt(pts, cum, d) {
  * changes, each route tweens to its new color and width so the reader sees the change happen.
  * An invisible wide MapLibre line under it gives hover and click.
  */
-export default function FlowLayer({ featured }) {
+function FlowLayer({ featured }) {
   const { current: mapRef } = useMap();
   const { geo, indexes } = useData();
   const { period, metric, hour, layerVisibility, theme } = useAppState();
   const reduced = useReducedMotion();
   const canvasRef = useRef(null);
   const routesRef = useRef(new Map());
+  const wakeRef = useRef(() => {});
   const on = Boolean(layerVisibility.flow);
   const plain = themeColors(theme).flow;
 
@@ -214,44 +216,59 @@ export default function FlowLayer({ featured }) {
       seen.add(t.key);
       const r = routes.get(t.key);
       if (!r) routes.set(t.key, { coords: t.coords, kind: t.of, seed: 1 + Math.floor(Math.random() * 1e6), from: { rgb: t.rgb, w: t.w, a: 0 }, to: { rgb: t.rgb, w: t.w, a: t.a }, t0: now, phase: Math.random(), gone: false });
-      else { r.from = sample(r, now); r.to = { rgb: t.rgb, w: t.w, a: t.a }; r.t0 = now; r.coords = t.coords; r.gone = false; }
+      else { r.from = sample(r, now); r.to = { rgb: t.rgb, w: t.w, a: t.a }; r.t0 = now; r.coords = t.coords; r.projected = null; r.gone = false; }
     }
     for (const [key, r] of routes) {
       if (!seen.has(key) && !r.gone) { r.from = sample(r, now); r.to = { ...r.to, a: 0 }; r.t0 = now; r.gone = true; }
     }
+    wakeRef.current();
   }, [targets]);
 
-  // The render loop: ~30 fps on the overlay canvas only. Under reduced motion: one static frame per map move.
+  // Project routes only when the camera/layout changes. Sleep when hidden, empty, or motion has settled.
   useEffect(() => {
     const map = mapRef?.getMap?.();
     const canvas = canvasRef.current;
     if (!map || !canvas) return undefined;
     const ctx = canvas.getContext('2d');
+    if (!ctx) return undefined;
     const container = map.getContainer();
     let raf = 0;
     let last = 0;
     let size = { w: 0, h: 0, dpr: 1 };
+    let geometryDirty = true;
+    let layoutDirty = true;
+    let ox = 0;
+    let oy = 0;
+
+    const wake = () => {
+      if (!raf && !document.hidden) raf = requestAnimationFrame(frame);
+    };
 
     const resize = () => {
-      const rect = canvas.getBoundingClientRect();
-      const dpr = Math.min(2, window.devicePixelRatio || 1);
-      size = { w: rect.width, h: rect.height, dpr };
-      canvas.width = Math.round(rect.width * dpr);
-      canvas.height = Math.round(rect.height * dpr);
+      layoutDirty = true;
+      geometryDirty = true;
+      wake();
     };
-    resize();
     const ro = new ResizeObserver(resize);
     ro.observe(canvas);
+    ro.observe(container);
 
     const draw = (now) => {
       const routes = routesRef.current;
+      if (layoutDirty) {
+        const rect = canvas.getBoundingClientRect();
+        const crect = container.getBoundingClientRect();
+        const dpr = Math.min(2, window.devicePixelRatio || 1);
+        size = { w: rect.width, h: rect.height, dpr };
+        if (canvas.width !== Math.round(rect.width * dpr)) canvas.width = Math.round(rect.width * dpr);
+        if (canvas.height !== Math.round(rect.height * dpr)) canvas.height = Math.round(rect.height * dpr);
+        ox = rect.left - crect.left;
+        oy = rect.top - crect.top;
+        layoutDirty = false;
+      }
       ctx.setTransform(size.dpr, 0, 0, size.dpr, 0, 0);
       ctx.clearRect(0, 0, size.w, size.h);
       if (!routes.size) return;
-      const crect = container.getBoundingClientRect();
-      const rect = canvas.getBoundingClientRect();
-      const ox = rect.left - crect.left;
-      const oy = rect.top - crect.top;
       const tSec = now / 1000;
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
@@ -259,12 +276,15 @@ export default function FlowLayer({ featured }) {
         const s = sample(r, now);
         if (r.gone && s.a <= 0.01 && now - r.t0 > TWEEN_MS) { routes.delete(key); continue; }
         if (s.a <= 0.005) continue;
-        const pts = r.coords.map(([lon, lat]) => { const p = map.project([lon, lat]); return [p.x - ox, p.y - oy]; });
-        if (pts.every(([x, y]) => x < -80 || y < -80 || x > size.w + 80 || y > size.h + 80)) continue;
-        const cum = [0];
-        for (let i = 1; i < pts.length; i += 1) cum.push(cum[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
-        const L = cum[cum.length - 1];
-        if (L < 4) continue;
+        if (geometryDirty || !r.projected) {
+          const pts = r.coords.map(([lon, lat]) => { const p = map.project([lon, lat]); return [p.x - ox, p.y - oy]; });
+          const cum = [0];
+          for (let i = 1; i < pts.length; i += 1) cum.push(cum[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
+          const visible = !pts.every(([x, y]) => x < -80 || y < -80 || x > size.w + 80 || y > size.h + 80);
+          r.projected = { pts, cum, L: cum[cum.length - 1], visible };
+        }
+        const { pts, cum, L, visible } = r.projected;
+        if (!visible || L < 4) continue;
         // the road: a faint solid line
         ctx.strokeStyle = rgba(s.rgb, 0.3 * s.a);
         ctx.lineWidth = Math.max(3, s.w * 1.7);
@@ -307,23 +327,41 @@ export default function FlowLayer({ featured }) {
         ctx.closePath();
         ctx.fill();
       }
+      geometryDirty = false;
     };
 
-    if (reduced) {
-      const still = () => draw(performance.now());
-      still();
-      map.on('move', still);
-      const t = window.setInterval(still, 250); // lets tweens settle without a rAF loop
-      return () => { map.off('move', still); window.clearInterval(t); ro.disconnect(); };
-    }
     const frame = (now) => {
-      raf = requestAnimationFrame(frame);
-      if (now - last < FPS_MS) return;
-      last = now;
-      draw(now);
+      raf = 0;
+      if (document.hidden) return;
+      if (geometryDirty || layoutDirty || now - last >= FPS_MS) {
+        // Carry the fractional frame time forward so a 60 Hz screen keeps a steady 30 fps.
+        last = now - ((now - last) % FPS_MS);
+        draw(now);
+      }
+      const routes = routesRef.current;
+      const tweening = reduced && [...routes.values()].some((r) => last - r.t0 <= TWEEN_MS);
+      if (routes.size && (!reduced || tweening)) wake();
     };
-    raf = requestAnimationFrame(frame);
-    return () => { cancelAnimationFrame(raf); ro.disconnect(); };
+    const moved = () => { geometryDirty = true; wake(); };
+    const visibility = () => {
+      if (document.hidden) { cancelAnimationFrame(raf); raf = 0; }
+      else resize();
+    };
+    wakeRef.current = wake;
+    map.on('move', moved);
+    map.on('resize', resize);
+    window.addEventListener('resize', resize);
+    document.addEventListener('visibilitychange', visibility);
+    wake();
+    return () => {
+      wakeRef.current = () => {};
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+      map.off('move', moved);
+      map.off('resize', resize);
+      window.removeEventListener('resize', resize);
+      document.removeEventListener('visibilitychange', visibility);
+    };
   }, [mapRef, reduced]);
 
   const hitData = useMemo(() => (targets.length ? {
@@ -340,3 +378,5 @@ export default function FlowLayer({ featured }) {
     </>
   );
 }
+
+export default memo(FlowLayer);
