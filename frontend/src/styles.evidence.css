@@ -1,0 +1,259 @@
+/* =========================================================
+   Evidence: interval bars, month chips, status badges, community card, main-level story tables.
+   Loaded after styles.css and styles.story.css; same tokens, same material.
+   ========================================================= */
+
+/* zero-centred 95% interval bars */
+.ivl {
+  display: grid;
+  gap: 6px;
+}
+.ivl__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(104px, auto);
+  grid-template-areas:
+    'label label'
+    'track val';
+  align-items: center;
+  column-gap: 10px;
+  row-gap: 2px;
+  padding: 4px 0;
+}
+.ivl__row + .ivl__row {
+  border-top: 1px solid var(--sep);
+}
+.ivl__label {
+  grid-area: label;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 8px;
+  font-size: 12.5px;
+  color: var(--text);
+  line-height: 1.25;
+  min-width: 0;
+}
+.ivl__sub {
+  font-size: 11px;
+  color: var(--text-3);
+}
+.ivl__track {
+  grid-area: track;
+  position: relative;
+  height: 14px;
+}
+.ivl__zero {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--text-3);
+}
+.ivl__bar {
+  position: absolute;
+  top: 5px;
+  height: 4px;
+  border-radius: 2px;
+  opacity: 0.95;
+}
+.ivl__bar--soft {
+  top: 6px;
+  height: 2px;
+  opacity: 0.7;
+}
+.ivl__bar[data-limited='true'] {
+  background-image: repeating-linear-gradient(90deg, transparent 0 3px, var(--panel) 3px 5px);
+}
+.ivl__dot {
+  position: absolute;
+  top: 3px;
+  width: 8px;
+  height: 8px;
+  margin-left: -4px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px var(--panel);
+}
+.ivl__val {
+  grid-area: val;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  min-width: 104px;
+  font-size: 12.5px;
+  font-weight: 500;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.ivl__ci {
+  font-size: 10.5px;
+  color: var(--text-3);
+  font-weight: 400;
+}
+.ivl__axis {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(104px, auto);
+  column-gap: 10px;
+  min-height: 14px;
+}
+.ivl__axis-track {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--text-3);
+}
+.ivl__axis-spacer {
+  min-width: 104px;
+}
+.ivl__empty {
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+/* matched-month chips */
+.chips {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--text-2);
+}
+.chips__label {
+  color: var(--text-3);
+  font-weight: 400;
+}
+.chips__row {
+  display: flex;
+  gap: 2px;
+}
+.chips__row i {
+  display: grid;
+  place-items: center;
+  width: 14px;
+  height: 16px;
+  border-radius: 3px;
+  font-style: normal;
+  font-size: 9px;
+  font-weight: 600;
+  background: var(--fill);
+  color: var(--text-3);
+}
+.chips__row i[data-on='true'] {
+  background: var(--text-2);
+  color: var(--bg);
+}
+
+/* status badges and result classes (the four interval-based classes) */
+.badge--increase {
+  color: var(--red);
+}
+.badge--decrease {
+  color: var(--green);
+}
+.badge--uncertain {
+  color: var(--text-2);
+}
+.badge--limited {
+  color: var(--text-2);
+  outline: 1px dashed var(--text-3);
+  outline-offset: -1px;
+}
+.badge--no_baseline,
+.badge--none {
+  color: var(--text-3);
+}
+.badge--reversed,
+.badge--strengthened,
+.badge--confirmed {
+  color: var(--text);
+}
+.cls-decrease {
+  color: var(--green);
+}
+.cls-increase {
+  color: var(--red);
+}
+.cls-uncertain {
+  color: var(--text-2);
+}
+.cls-no_baseline,
+.cls-limited {
+  color: var(--text-3);
+}
+.tbl td.cell--strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* coverage warning (Hugh L. Carey) */
+.warn {
+  font-size: 12px;
+  color: var(--text);
+  background: rgba(255, 69, 58, 0.1);
+  border: 1px solid rgba(255, 69, 58, 0.35);
+  border-radius: var(--r-inner);
+  padding: 8px 10px;
+  margin: 0 0 10px;
+  line-height: 1.45;
+}
+.detail__hint {
+  font-size: 11.5px;
+  color: var(--text-3);
+  margin-top: 8px;
+  line-height: 1.45;
+}
+.detail__hint + .detail__hint {
+  margin-top: 4px;
+}
+.detail__plain {
+  font-size: 12.5px;
+  color: var(--text);
+  line-height: 1.45;
+  margin-top: 10px;
+}
+.detail__plain strong {
+  font-weight: 600;
+}
+
+/* story card extras: a labelled badge above the title, compact main-level tables and lists */
+.chapter__badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-2);
+  background: var(--fill);
+  border-radius: 4px;
+  padding: 3px 8px;
+  margin-bottom: 10px;
+}
+.chapter__badge--warn {
+  color: var(--text);
+  background: rgba(255, 69, 58, 0.14);
+}
+.chapter .tbl--main {
+  margin-bottom: 18px;
+}
+.chapter .tbl--main tfoot td {
+  padding-top: 8px;
+}
+.chapter .klist--main {
+  margin-bottom: 18px;
+}
+.chapter__section-title--main {
+  margin-top: 4px;
+}
+
+/* community (neighborhood) card */
+.community__note {
+  font-size: 12px;
+  color: var(--text-2);
+  line-height: 1.45;
+  margin: 0 0 14px;
+}
+.community__note strong {
+  color: var(--text);
+}

@@ -16,8 +16,9 @@ npm run build && npm run preview  # production build
 node scripts/screenshot.mjs "http://localhost:4173/?chapter=3" out.png 18000 [width] [height]   # headless Chrome capture
 ```
 
-Deep links: `?chapter=1..9` starts on that step, `?chapter=explore` on the explore step, `?intro=0` skips the title card, `?feature=<layer>:<id>`
-opens a feature's detail (e.g. `bt_facility:whitestone`), `?controls=1` opens the controls sheet on phones,
+Deep links: `?chapter=1..11` starts on that step, `?chapter=explore` on the explore step, `?intro=0` skips the title card, `?play=N`
+starts the guided tour from step N, `?feature=<layer>:<id>` opens a feature's detail (e.g. `bt_facility:whitestone`,
+`aq_monitor:aq_36005NY11534`, `uhf42:107` for a neighborhood card), `?controls=1` opens the controls sheet on phones,
 `?theme=light|dark` forces a theme.
 
 ## Where the data comes from
@@ -38,11 +39,14 @@ Core files are loaded at startup (`src/lib/data.jsx`, thin progress line); the s
 
 Three surfaces on top of the map, all on a 16 px inset:
 
-- **Story panel** (left, 360 px): header (title + subtitle), one chapter at a time, footer with `Sources`, `‹ Back`,
-  `Step n of 9`, `Next ›`. Arrow keys page too. The last `Next` goes to Explore, which offers `Restart story`.
-  Each step is a strict template: title (≤ 5 words), one lede sentence with the headline number, up to two body
-  sentences, one row of three stat tiles, and a collapsed `Details` disclosure holding everything else (toll table,
-  lists, South Bronx table, sources). The caveats step shows its bullets directly.
+- **Story panel** (left, 392 px): header (title + subtitle + `Sources` / `Play the story`), one of eleven steps at a
+  time, footer with `‹ Back`, the step's date, `Next ›`. Arrow keys page too; the timeline bar under the map shows the
+  stops. The last `Next` goes to Explore, which offers `Start the story again`. Each step: optional badge (the
+  scenario step), title, one lede sentence, a short body or bullets, up to three stat rows (label, value, "so what"),
+  at most one compact main-level table or list (rush hours vs whole day, supported PM2.5 decreases, the South Bronx
+  burden table, DOT same-month pairs, persistence verdicts), then a collapsed `Details` disclosure (paragraphs,
+  full tables, zero-centred interval bars, toll table, sources). Copy lives in `content/story.js`, templated from
+  `summary.json` and its `reconciled` block.
 - **Control panel** (right, 264 px): `Period` (segmented), `Layers` (rows with label, plain-English hint, the layer's
   map symbol and a small switch), `Key` (discrete color swatches, only for visible layers), and an `Advanced` disclosure
   with `Metric` and `Hour of day`. The header holds the theme toggle and a chevron that collapses the panel to a
@@ -75,7 +79,9 @@ Tokens live at the top of `src/styles.css`; the map palette mirrors them in `src
   outline `rgba(255,255,255,.7)` 1.25 px (ink in the light theme). The traffic change scale
   (`scales.js#changeScale`) runs green → grey → red over ±25 % with soft stops at ±3 %; the Key shows it as five
   12 × 12 swatches labelled "less traffic · cleaner" / "more traffic · worse". PM2.5 classes reuse the same three
-  colors; "no data" is a hollow grey ring.
+  colors; "no eligible baseline" is a hollow grey ring, and a crossing whose 95% interval includes zero (or is
+  coverage-limited) is drawn as a ring with a neutral flow line. Interval bars (`charts/IntervalBar.jsx`) are
+  zero-centred: green below zero, red above, thin grey when the interval crosses zero.
 - **Map symbols** — one plain style: filled discs in the class color with a 1 px `rgba(11,13,16,.9)` separation
   stroke (PM2.5 monitors r = 5, bridges & tunnels r = 4–9 by volume), zone entries as 2 px rings, DOT count
   locations as 5 px squares (matched sites filled by change; single-count sites are outlines, hidden unless
@@ -95,7 +101,8 @@ predictably (`beforeId="anchor-lines"` for choropleths, `anchor-points` for the 
 
 Per-feature numbers come from `src/lib/metrics.js#featureMetrics(props, layer, period, hour, metric)`, which resolves
 the baseline/period pair for each layer (CRZ entry points only have 2026-YTD vs 2025-YTD, B&T use 2024 / 2024 YTD,
-monitors use the `comparisons` block) and returns nulls rather than throwing.
+monitors use the reconciled `evidence` block, falling back to `comparisons`) and returns nulls rather than throwing.
+`support` (crossings) and `classification` (monitors) carry the interval-based verdict that drives the ring / disc styling.
 
 ## Structure
 
@@ -106,13 +113,16 @@ src/
                             layers, dotAll, theme, controlsCollapsed, controlsOpen, glyphMode; URL deep links
   lib/                      api.js, data.jsx (DataProvider/useData), format.js (incl. shortName), scales.js, metrics.js
   map/inkStyle.js           basemap style
-  content/chapters.js       cameras, layer presets, featured ids, layer labels / hints / symbols
-  content/story.js          chapter copy templated with live numbers (lede / body / stats / details)
+  content/chapters.js       cameras, layer presets, featured ids, layer labels / hints / symbols (11 steps)
+  content/story.js          step copy templated with live numbers (lede / body / stats / table / details)
+  content/guide.js          guided-tour beats (callout text, camera, year the map switches to)
+  content/corridors.js      hand-drawn routes for the animated flow layer
   hooks/useMediaQuery.js    usePhone, useReducedMotion
   components/               Segmented (sliding thumb), CloseButton, Swatch (LayerSymbol)
   components/map/           MapView, ZoneLayer, PolygonLayers, PointLayers, GlyphLayer, ClockGlyph
   components/panels/        StoryPanel, SidePanel (controls), KeyLegend, DetailPanel (DetailContent), TollTable, SourcesSheet (SourcesList)
-  components/charts/        TimelineChart, HourProfileChart, BeforeAfterBars, StatTile
+  components/charts/        TimelineChart, HourProfileChart, BeforeAfterBars, StatTile, IntervalBar (interval bars,
+                            status badge, month chips)
 ```
 
 Theme: dark by default, light via `prefers-color-scheme`, `?theme=`, or the toggle in the control panel header

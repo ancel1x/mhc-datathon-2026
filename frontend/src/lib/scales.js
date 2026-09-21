@@ -25,7 +25,18 @@ export const COLORS = {
   dacFill: 'rgba(191,90,242,0.26)',
 };
 
+/**
+ * Result classes. The four the map uses come from the reconciled (interval-based) evidence:
+ * decrease / uncertain / increase / no_baseline. The four legacy keys (improved / unchanged / worsened /
+ * insufficient) are the existing pipeline's control-relative classes and map onto the same colors.
+ * `limited` = a crossing whose full-day estimate is coverage-limited (Hugh L. Carey).
+ */
 export const CLASS_COLORS = {
+  decrease: COLORS.improved,
+  uncertain: COLORS.unchanged,
+  increase: COLORS.worsened,
+  no_baseline: COLORS.insufficient,
+  limited: COLORS.unchanged,
   improved: COLORS.improved,
   unchanged: COLORS.unchanged,
   worsened: COLORS.worsened,
@@ -33,11 +44,19 @@ export const CLASS_COLORS = {
 };
 
 export const CLASS_LABELS = {
-  improved: 'improved',
-  unchanged: 'unchanged',
-  worsened: 'worsened',
+  decrease: 'supported decrease',
+  uncertain: 'uncertain',
+  increase: 'supported increase',
+  no_baseline: 'no eligible baseline',
+  limited: 'coverage-limited',
+  improved: 'beat the citywide trend',
+  unchanged: 'followed the trend',
+  worsened: 'rose beyond the trend',
   insufficient: 'no data',
 };
+
+/** Order for sorting result lists: strongest evidence first, missing baselines last. */
+export const CLASS_ORDER = { decrease: 0, increase: 1, uncertain: 2, limited: 3, no_baseline: 4 };
 
 /**
  * Diverging change scale in percent, clamped to ±25 %. Green = less traffic / cleaner, red = more / worse.
@@ -69,6 +88,14 @@ export function classColor(cls) {
   return CLASS_COLORS[cls] ?? COLORS.insufficient;
 }
 
+/** Color for an interval-backed estimate: green below zero, red above, grey when it includes zero. */
+export function statusColor(status) {
+  if (status === 'increase') return COLORS.worse;
+  if (status === 'decrease') return COLORS.better;
+  if (status === 'no_baseline' || status === 'none' || status == null) return COLORS.insufficient;
+  return COLORS.neutral;
+}
+
 /** MapLibre expression: five purple steps over a numeric property between min and max. */
 export function violetExpression(prop, min, max) {
   const lo = isNum(min) ? min : 0;
@@ -90,9 +117,14 @@ export function themeColors(theme) {
     : { bg: COLORS.bg, text: COLORS.text, outline: COLORS.outline, label: 'rgba(235,235,245,0.75)', halo: '#0b0d10', zone: 'rgba(255,255,255,0.7)', flow: 'rgba(235,235,245,0.8)' };
 }
 
-/** Color for a feature given the current metric. */
-export function metricColor({ change, classification }, metric) {
+/**
+ * Color for a feature given the current metric. Monitors color by their result class; crossings by the size of
+ * the change, but a change whose interval includes zero (or is coverage-limited) is drawn in neutral grey so the
+ * map never claims a direction the data do not support.
+ */
+export function metricColor({ change, classification, support }, metric) {
   if (metric === 'absolute') return COLORS.neutral;
   if (classification) return classColor(classification);
+  if (support === 'uncertain' || support === 'limited') return COLORS.neutral;
   return changeColor(change);
 }

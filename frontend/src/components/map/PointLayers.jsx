@@ -40,11 +40,22 @@ export function ensureSquareImage(map) {
   if (map && !map.hasImage(SQUARE_IMAGE)) map.addImage(SQUARE_IMAGE, squareSDF(), { sdf: true });
 }
 
+/**
+ * A crossing whose change is not statistically supported (95% interval includes zero) or is coverage-limited,
+ * and a monitor with no eligible baseline, are drawn as rings instead of filled discs.
+ */
+export function isHollow(layer, m, metric, period) {
+  if (metric !== 'change' || period === 'pre_2024') return false;
+  if (layer === 'aq_monitor') return (m.classification ?? 'no_baseline') === 'no_baseline';
+  if (layer === 'bt_facility') return m.support === 'uncertain' || m.support === 'limited' || m.support == null;
+  return false;
+}
+
 /** Text under a point: short name + change (traffic) or class (monitors); value when the metric is absolute. */
 export function pointLabel(layer, name, m, metric) {
   const short = shortName(name);
   if (metric === 'absolute') return `${short} ${layer === 'aq_monitor' ? (isNum(m.value) ? fmtNum(m.value, 1) : '—') : fmtCompact(m.value)}`;
-  if (layer === 'aq_monitor') return `${short} ${CLASS_LABELS[m.classification] ?? 'no data'}`;
+  if (layer === 'aq_monitor') return `${short} ${CLASS_LABELS[m.classification] ?? 'no eligible baseline'}`;
   if (!isNum(m.change) && isNum(m.value)) return `${short} ${fmtCompact(m.value)}`;
   return `${short} ${fmtPct(m.change)}`;
 }
@@ -59,9 +70,10 @@ function derive(fc, layer, { period, hour, metric, featuredSet, maxima }) {
     const featured = Boolean(featuredSet && featuredSet.has(p.id));
     const dim = featuredSet ? (featured ? 0 : 1) : 0;
     const matched = layer === 'dot_segment' && p.role === 'matched';
-    const hollow = layer === 'aq_monitor' && metric === 'change' && (m.classification ?? 'insufficient') === 'insufficient';
+    const hollow = isHollow(layer, m, metric, period);
     const r = layer === 'aq_monitor' ? AQ_R : Math.max(4, size(isNum(m.value) ? m.value : isNum(m.baseline) ? m.baseline : 0));
     const color = matched ? (metric === 'absolute' ? m.color : changeColor(p.pct_change)) : m.color;
+    const supportText = layer === 'bt_facility' && m.support ? ` · ${CLASS_LABELS[m.support] ?? m.support}` : '';
     features.push({
       type: 'Feature',
       geometry: f.geometry,
@@ -78,10 +90,10 @@ function derive(fc, layer, { period, hour, metric, featuredSet, maxima }) {
         _label: pointLabel(layer, p.name ?? p.id, m, metric),
         _valueText: layer === 'aq_monitor' ? (isNum(m.value) ? `${fmtNum(m.value, 2)} µg/m³` : '—') : fmtCompact(m.value),
         _baseText: layer === 'aq_monitor' ? (isNum(m.baseline) ? `${fmtNum(m.baseline, 2)} µg/m³` : '—') : fmtCompact(m.baseline),
-        _changeText: layer === 'aq_monitor' && metric === 'change' ? `${fmtPct(m.change)} · ${CLASS_LABELS[m.classification] ?? 'no data'}` : fmtPct(m.change),
+        _changeText: layer === 'aq_monitor' && metric === 'change' ? `${fmtPct(m.change)} · ${CLASS_LABELS[m.classification] ?? 'no eligible baseline'}` : `${fmtPct(m.change)}${metric === 'change' ? supportText : ''}`,
         _baseLabel: m.baselineLabel,
         _curLabel: m.currentLabel,
-        _class: m.classification ?? '',
+        _class: m.classification ?? m.support ?? '',
         _matched: matched ? 1 : 0,
       },
     });
@@ -92,13 +104,14 @@ function derive(fc, layer, { period, hour, metric, featuredSet, maxima }) {
 const dimCase = (on, off) => ['case', ['==', ['get', '_dim'], 1], on, off];
 const radiusExpr = (extra = 0) => ['interpolate', ['linear'], ['zoom'], 9, ['*', ['+', ['get', '_r'], extra], 0.8], 11, ['+', ['get', '_r'], extra]];
 const FEATURED = ['==', ['get', '_featured'], 1];
+const HOLLOW = ['==', ['get', '_hollow'], 1];
 const fade = { duration: 600 };
 
 /**
- * Point layers below the glyph zoom. One plain style: filled discs in the class color with a 1 px dark
+ * Point layers below the glyph zoom. One plain style: filled discs in the result color with a 1 px dark
  * separation stroke (monitors r = 5, bridges r = 4–9 by volume), zone entries as 2 px rings, DOT counts as
- * 5 px squares (matched only unless `dotAll`). Featured = full opacity, the rest 35 %.
- * Text labels for bridges and monitors from zoom 10.4 to 11.
+ * 5 px squares (matched only unless `dotAll`). Uncertain crossings and monitors without a baseline are rings.
+ * Featured = full opacity, the rest 35 %. Text labels for bridges and monitors from zoom 10.4 to 11.
  */
 export default function PointLayers({ featured, imageReady = true, glyphs = true }) {
   const maxzoom = glyphs ? GLYPH_SWITCH_ZOOM : 24;
@@ -141,10 +154,10 @@ export default function PointLayers({ featured, imageReady = true, glyphs = true
 
   const disc = (on) => ({
     'circle-radius': radiusExpr(0),
-    'circle-color': ['case', ['==', ['get', '_hollow'], 1], TRANSPARENT, ['get', '_color']],
+    'circle-color': ['case', HOLLOW, TRANSPARENT, ['get', '_color']],
     'circle-opacity': on ? dimCase(DIM, 1) : 0,
-    'circle-stroke-color': ['case', ['==', ['get', '_hollow'], 1], COLORS.insufficient, outline],
-    'circle-stroke-width': ['case', ['==', ['get', '_hollow'], 1], 1.5, 1],
+    'circle-stroke-color': ['case', HOLLOW, ['get', '_color'], outline],
+    'circle-stroke-width': ['case', HOLLOW, 1.75, 1],
     'circle-stroke-opacity': on ? dimCase(DIM, 1) : 0,
     'circle-opacity-transition': fade,
     'circle-stroke-opacity-transition': fade,
@@ -170,13 +183,13 @@ export default function PointLayers({ featured, imageReady = true, glyphs = true
         />
       </Source>
 
-      {/* Bridges & tunnels: filled disc, r 4–9 by volume */}
+      {/* Bridges & tunnels: filled disc, r 4–9 by volume; ring = change not supported / coverage-limited */}
       <Source id="pts-bt_facility" type="geojson" data={data.bt_facility}>
         <Layer id={POINT_LAYER_IDS.bt_facility} type="circle" maxzoom={maxzoom} beforeId="labels-highways" paint={disc(btOn)} />
         <Layer id="lbl-bt_facility" type="symbol" minzoom={LABEL_ZOOM} maxzoom={maxzoom} layout={labelLayout(btOn)} paint={labelPaint} />
       </Source>
 
-      {/* PM2.5 monitors: filled disc r 5 in the class color; "no data" = hollow grey ring */}
+      {/* PM2.5 monitors: filled disc r 5 in the result color; "no eligible baseline" = hollow grey ring */}
       <Source id="pts-aq_monitor" type="geojson" data={data.aq_monitor}>
         <Layer id={POINT_LAYER_IDS.aq_monitor} type="circle" maxzoom={maxzoom} beforeId="labels-highways" paint={disc(aqOn)} />
         <Layer id="lbl-aq_monitor" type="symbol" minzoom={LABEL_ZOOM} maxzoom={maxzoom} layout={labelLayout(aqOn)} paint={labelPaint} />

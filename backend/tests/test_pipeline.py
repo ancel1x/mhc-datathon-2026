@@ -79,3 +79,31 @@ def test_dot_matched_have_both_sides():
     for m in _load("dot_matched.json"):
         assert m["pre_months"] and m["post_months"]
         assert m["pre_adv"] and m["post_adv"]
+
+
+@needs_bundle
+def test_reconciled_evidence_is_joined_and_consistent():
+    """Second-pipeline evidence (step 07) sits beside the existing fields, joined by facility name and site id."""
+    s = _load("summary.json")
+    rc = s["reconciled"]
+    assert rc["traffic_counts"]["increase"] + rc["traffic_counts"]["uncertain"] + rc["traffic_counts"]["limited"] + rc["traffic_counts"]["decrease"] == 10
+    assert sum(rc["air_counts"].values()) >= 15
+    bt = _load("bt_facilities.geojson")
+    for f in bt["features"]:
+        ev = f["properties"]["evidence"]
+        assert ev and ev["full_year"]["status"] in ("increase", "decrease", "uncertain", "limited")
+        fy = ev["full_year"]
+        assert fy["ci_low"] <= fy["pct"] <= fy["ci_high"]
+        # the existing plain-mean change and the matched-day change agree except at the coverage-limited tunnel
+        if fy["status"] != "limited":
+            assert abs(f["properties"]["change"]["pct_2025_vs_2024"] - fy["pct"]) < 0.5, f["properties"]["name"]
+    aq = _load("aq_monitors.geojson")
+    classes = {f["properties"]["evidence_class"] for f in aq["features"]}
+    assert classes <= {"decrease", "uncertain", "increase", "no_baseline"}
+    for f in aq["features"]:
+        ev = f["properties"]["evidence"]
+        if ev and ev["full_year"]["class"] != "no_baseline":
+            fy = ev["full_year"]
+            assert fy["months"] and fy["ci_low"] <= fy["delta_raw"] <= fy["ci_high"]
+        elif ev:
+            assert ev["full_year"]["delta_raw"] is None   # missing stays missing, never zero
