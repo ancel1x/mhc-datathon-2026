@@ -1,0 +1,9 @@
+pandas>=3.0
+pyarrow>=21
+duckdb>=1.4
+shapely>=2.1
+pyproj>=3.7
+requests>=2.32
+fastapi>=0.115
+uvicorn[standard]>=0.34
+pytest>=8

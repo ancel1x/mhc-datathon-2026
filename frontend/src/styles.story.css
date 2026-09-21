@@ -1,0 +1,470 @@
+/* =========================================================
+   Intro title card, timeline bar, guided tour, flow canvas.
+   Loaded after styles.css; same tokens, same material.
+   ========================================================= */
+
+:root {
+  --timeline-h: 64px;
+}
+
+/* ---------- story header: title, then subtitle with two quiet actions on the same line ---------- */
+.story__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 2px;
+}
+.story__meta .panel__sub {
+  margin-top: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.story__actions {
+  flex: none;
+  display: flex;
+  gap: 10px;
+}
+.story__action {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  color: var(--text-2);
+  white-space: nowrap;
+  transition: color var(--dur) ease;
+}
+.story__action:hover,
+.story__action[aria-pressed='true'] {
+  color: var(--text);
+}
+
+/* ---------- intro title card ---------- */
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: var(--bg);
+  cursor: default;
+  transition: opacity 1000ms ease;
+}
+.intro[data-phase='out'] {
+  opacity: 0;
+  pointer-events: none;
+}
+.intro__bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 2px;
+  background: var(--text);
+  transition: width 240ms ease;
+}
+.intro__inner {
+  max-width: 760px;
+  text-align: center;
+  animation: intro-in 900ms ease both;
+}
+.intro__kicker {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-3);
+  margin-bottom: 18px;
+}
+.intro__title {
+  font-size: clamp(30px, 4.6vw, 52px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.08;
+  color: var(--text);
+  text-wrap: balance;
+}
+.intro__sub {
+  font-size: clamp(15px, 1.4vw, 18px);
+  line-height: 1.5;
+  color: var(--text-2);
+  max-width: 560px;
+  margin: 18px auto 0;
+  text-wrap: pretty;
+}
+.intro__status {
+  margin-top: 36px;
+  font-size: 12px;
+  color: var(--text-3);
+  min-height: 18px;
+}
+@keyframes intro-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* the panels wait behind the intro and fade in as it leaves; no movement, only opacity */
+.story,
+.side,
+.side-btn,
+.timeline {
+  transition: opacity 900ms ease;
+}
+.app[data-intro='show'] :is(.story, .side, .side-btn, .timeline) {
+  opacity: 0;
+}
+
+/* ---------- flow canvas: only over the free part of the map, never under the frosted panels ---------- */
+.flow-canvas {
+  position: absolute;
+  top: 0;
+  bottom: calc(var(--timeline-h) + var(--inset));
+  left: calc(var(--story-w) + var(--inset) * 2);
+  right: calc(var(--side-w) + var(--inset) * 2);
+  z-index: 2;
+  pointer-events: none;
+  overflow: hidden;
+}
+.flow-canvas canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.app[data-autoplay='true'] .flow-canvas {
+  left: 0;
+  right: 0;
+}
+
+/* ---------- timeline bar under the map ---------- */
+.timeline {
+  position: fixed;
+  left: calc(var(--story-w) + var(--inset) * 2);
+  right: calc(var(--side-w) + var(--inset) * 2);
+  bottom: var(--inset);
+  height: var(--timeline-h);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 12px 0 10px;
+}
+.tl__play {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 12px 0 10px;
+  border-radius: var(--r-inner);
+  background: var(--fill);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+  transition: background var(--dur) ease;
+}
+.tl__play:hover {
+  background: var(--fill-hover);
+}
+.tl__play--on {
+  background: transparent;
+  color: var(--text-2);
+}
+.tl__play--on:hover {
+  color: var(--text);
+}
+.tl__grid {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: grid;
+  grid-template-rows: 14px 18px 16px;
+  row-gap: 2px;
+}
+.tl__exit {
+  flex: none;
+}
+.tl__eras,
+.tl__track,
+.tl__titles {
+  display: grid;
+  grid-template-columns: repeat(var(--n, 9), minmax(0, 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tl__track {
+  position: relative;
+  align-items: center;
+}
+.tl__line,
+.tl__fill {
+  position: absolute;
+  top: 50%;
+  left: calc(50% / var(--n, 9));
+  height: 1px;
+  background: var(--sep);
+  pointer-events: none;
+}
+.tl__line,
+.tl__fill {
+  right: calc(50% / var(--n, 9));
+}
+.tl__fill {
+  background: var(--text-2);
+  transform-origin: left center;
+  transform: scaleX(0);
+  transition: transform 600ms ease;
+  will-change: transform;
+}
+.tl__fill--live {
+  transition: none;
+  background: var(--text);
+}
+.tl__track li {
+  display: grid;
+  place-items: center;
+}
+.tl__stop {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-inner);
+}
+.tl__stop i {
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--switch-off);
+  transition: width var(--dur) ease, height var(--dur) ease, background var(--dur) ease;
+}
+.tl__stop[data-past='true'] i {
+  background: var(--text-2);
+}
+.tl__stop[aria-current='step'] i {
+  width: 10px;
+  height: 10px;
+  background: var(--text);
+}
+.tl__stop:hover i {
+  background: var(--text);
+}
+.tl__era {
+  font-size: 10.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-3);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tl__title {
+  font-size: 12px;
+  color: var(--text-3);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 2px;
+  transition: color var(--dur) ease;
+}
+.tl__title[data-current='true'] {
+  color: var(--text);
+  font-weight: 500;
+}
+
+/* map attribution sits above the timeline bar */
+.maplibregl-ctrl-bottom-right {
+  bottom: calc(var(--inset) + var(--timeline-h) + 6px);
+}
+
+/* ---------- guided tour: panels step aside, callouts on the map ---------- */
+.app[data-autoplay='true'] :is(.story, .side, .side-btn) {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 600ms ease, visibility 0s linear 600ms;
+}
+.app[data-autoplay='false'] :is(.story, .side, .side-btn) {
+  transition: opacity 600ms ease;
+}
+.callout {
+  width: max-content;
+  max-width: 290px;
+  padding: 10px 12px 8px;
+  border-radius: 10px;
+  color: var(--text);
+  font-size: 13.5px;
+  line-height: 1.45;
+  animation: intro-in 450ms ease both;
+}
+.callout {
+  position: relative;
+  overflow: hidden;
+}
+.callout p {
+  margin: 0;
+}
+.callout__progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--text);
+  opacity: 0.55;
+  transform-origin: left center;
+  transform: scaleX(0);
+  animation-name: callout-progress;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+@keyframes callout-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+.callout .num,
+.callout__count {
+  font-variant-numeric: tabular-nums;
+}
+.callout__count {
+  display: block;
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--text-3);
+}
+.callout--screen {
+  position: absolute;
+  top: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 8;
+  max-width: 460px;
+  text-align: center;
+  pointer-events: none;
+}
+.callout__ring {
+  display: block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid var(--text);
+  background: rgba(0, 0, 0, 0.25);
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.35);
+  animation: intro-in 450ms ease both;
+}
+
+/* ---------- reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .intro,
+  .intro__inner,
+  .story,
+  .side,
+  .side-btn,
+  .timeline,
+  .tl__fill,
+  .callout,
+  .callout__ring {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* ---------- phones: the bar shrinks to play / pause + dots; the story footer carries Back / Next ---------- */
+@media (max-width: 720px) {
+  .timeline {
+    left: var(--inset);
+    right: var(--inset);
+    bottom: auto;
+    top: var(--inset);
+    height: 44px;
+    padding: 0 8px;
+    gap: 8px;
+    width: auto;
+    max-width: calc(100vw - 130px);
+  }
+  .tl__grid {
+    grid-template-rows: 18px;
+  }
+  .tl__eras,
+  .tl__titles {
+    display: none;
+  }
+  .tl__play-label {
+    display: none;
+  }
+  .tl__play {
+    padding: 0 8px;
+  }
+  .flow-canvas {
+    left: 0;
+    right: 0;
+    bottom: 55%;
+  }
+  .app[data-autoplay='true'] .flow-canvas {
+    bottom: 0;
+  }
+  .maplibregl-ctrl-bottom-right {
+    bottom: calc(55% + 6px);
+  }
+  .callout {
+    max-width: min(290px, calc(100vw - 48px));
+  }
+  .callout--screen {
+    top: 72px;
+  }
+  .intro__status {
+    margin-top: 28px;
+  }
+}
+
+/* ---------- year stamp: which year the map shows, top-right of the free map area ---------- */
+.yearstamp {
+  position: absolute;
+  top: 20px;
+  right: calc(var(--side-w) + var(--inset) * 2 + 10px);
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  pointer-events: none;
+  animation: intro-in 700ms ease both;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.7);
+}
+.yearstamp__year {
+  font-size: 32px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--text);
+}
+.yearstamp__sub {
+  font-size: 12px;
+  color: var(--text-2);
+  margin-top: 4px;
+}
+.app[data-autoplay='true'] .yearstamp {
+  right: 28px;
+  top: 24px;
+}
+@media (max-width: 720px) {
+  .yearstamp {
+    top: 68px;
+    right: 12px;
+  }
+  .yearstamp__year {
+    font-size: 24px;
+  }
+}

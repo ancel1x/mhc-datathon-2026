@@ -1,0 +1,82 @@
+[
+ {
+  "name": "MTA Congestion Relief Zone Vehicle Entries: Beginning 2025",
+  "publisher": "MTA",
+  "portal": "NY State Open Data",
+  "dataset_id": "t6yz-b64h",
+  "url": "https://data.ny.gov/Transportation/MTA-Congestion-Relief-Zone-Vehicle-Entries-Beginni/t6yz-b64h",
+  "used_for": "Entries into the zone by crossing, vehicle class and 10-minute interval (Jan 5 2025 onward)"
+ },
+ {
+  "name": "Automated Traffic Volume Counts",
+  "publisher": "NYC DOT",
+  "portal": "NYC Open Data",
+  "dataset_id": "7ym2-wayt",
+  "url": "https://data.cityofnewyork.us/Transportation/Automated-Traffic-Volume-Counts/7ym2-wayt",
+  "used_for": "15-minute street and bridge counts; matched before/after locations"
+ },
+ {
+  "name": "MTA Bridges and Tunnels Hourly Crossings: Beginning 2019",
+  "publisher": "MTA Bridges & Tunnels",
+  "portal": "NY State Open Data",
+  "dataset_id": "ebfx-2m7v",
+  "url": "https://data.ny.gov/Transportation/MTA-Bridges-and-Tunnels-Hourly-Crossings-Beginning/ebfx-2m7v",
+  "used_for": "Hourly crossings at the nine tolled MTA bridges and tunnels, 2023–2026"
+ },
+ {
+  "name": "MTA Central Business District Geofence",
+  "publisher": "MTA",
+  "portal": "NY State Open Data",
+  "dataset_id": "srxy-5nxn",
+  "url": "https://data.ny.gov/Transportation/MTA-Central-Business-District-Geofence-Beginning-J/srxy-5nxn",
+  "used_for": "Official zone boundary polygon"
+ },
+ {
+  "name": "NYCCAS Real-Time PM2.5 (hourly street-level monitors)",
+  "publisher": "NYC Dept. of Health & Mental Hygiene + Queens College",
+  "portal": "NYC DOHMH open archive (github.com/nychealth/nyccas-data)",
+  "dataset_id": "nyccas-data",
+  "url": "https://github.com/nychealth/nyccas-data",
+  "used_for": "Hourly PM2.5 at ~16 monitors inside and outside the zone, 2023–2026"
+ },
+ {
+  "name": "Air Quality (NYCCAS annual neighborhood indicators)",
+  "publisher": "NYC DOHMH",
+  "portal": "NYC Open Data",
+  "dataset_id": "c3uy-2p5r",
+  "url": "https://data.cityofnewyork.us/Environment/Air-Quality/c3uy-2p5r",
+  "used_for": "Annual PM2.5 by neighborhood 2009–2024; asthma ED visits attributable to PM2.5"
+ },
+ {
+  "name": "Asthma emergency department visits (children 5–17, 2023) and poverty (ACS 2019–23) by neighborhood",
+  "publisher": "NYC DOHMH",
+  "portal": "NYC Environment & Health Data Portal",
+  "dataset_id": "asthma / poverty indicators (UHF42)",
+  "url": "https://a816-dohbesp.nyc.gov/IndicatorPublic/data-explorer/asthma/",
+  "used_for": "Neighborhood asthma burden before the toll; 2023 is the newest year published (health data lag ~2 years)"
+ },
+ {
+  "name": "Final Disadvantaged Communities (DAC) 2023",
+  "publisher": "NYS Climate Justice Working Group / NYSERDA",
+  "portal": "NY State Open Data",
+  "dataset_id": "2e6c-s6fp",
+  "url": "https://data.ny.gov/Energy-Environment/Final-Disadvantaged-Communities-DAC-2023/2e6c-s6fp",
+  "used_for": "Census-tract environmental-justice designation and burden percentiles"
+ },
+ {
+  "name": "NYC geography (UHF42, boroughs)",
+  "publisher": "NYC DOHMH Environmental Health",
+  "portal": "github.com/nycehs/NYC_geography",
+  "dataset_id": "NYC_geography",
+  "url": "https://github.com/nycehs/NYC_geography",
+  "used_for": "Neighborhood and borough boundaries"
+ },
+ {
+  "name": "Congestion Relief Zone toll rates",
+  "publisher": "MTA",
+  "portal": "mta.info",
+  "dataset_id": "-",
+  "url": "https://www.mta.info/fares-tolls/tolls/congestion-relief-zone/about",
+  "used_for": "Toll structure, peak/overnight schedule, crossing credits"
+ }
+]
