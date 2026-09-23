@@ -42,3 +42,19 @@ export function entryStub(id, gate) {
   const from = ENTRY_FROM[id];
   return from && Array.isArray(gate) ? [from, gate] : null;
 }
+
+// Hand-drawn routes linking outer-borough AQ monitors (well outside the zone) to the CRZ gate their
+// traffic would realistically funnel through, following the highway corridor between them. Used to draw
+// the same animated flow lines as CROSSING_ROUTES so a reader can visually trace how a distant reading
+// connects back to the congestion zone.
+export const AQ_LINK_ROUTES = {
+  aq_36081NY08198: [[-73.8863, 40.7057], [-73.912, 40.708], [-73.94, 40.711], [-73.968, 40.713], [-73.985, 40.7175]], // Glendale -> BQE -> Williamsburg Bridge
+  aq_36081NY09285: [[-73.8216, 40.7371], [-73.87, 40.7425], [-73.92, 40.745], [-73.9505, 40.745], [-73.9715, 40.7455]], // Queens College -> LIE -> Queens Midtown Tunnel
+  aq_36081NY07615: [[-73.8091, 40.6902], [-73.83, 40.716], [-73.86, 40.735], [-73.92, 40.744], [-73.9505, 40.745], [-73.9715, 40.7455]], // Van Wyck -> Van Wyck Expwy/LIE -> Queens Midtown Tunnel
+  aq_36005NY11534: [[-73.9225, 40.8065], [-73.921, 40.789], [-73.916, 40.775], [-73.921, 40.758], [-73.966, 40.7628]], // Mott Haven -> RFK/FDR -> 60th St (east)
+  aq_36005NY11790: [[-73.8857, 40.8191], [-73.905, 40.8085], [-73.921, 40.789], [-73.916, 40.775], [-73.9592, 40.7592]], // Hunts Point -> Bruckner/FDR -> 60th St (FDR)
+  aq_36061NY12380: [[-73.933, 40.8465], [-73.94, 40.833], [-73.95, 40.8], [-73.97, 40.783], [-73.9855, 40.771]], // Hamilton Bridge -> Henry Hudson -> 60th St (west)
+  aq_36005NY12387: [[-73.9061, 40.8452], [-73.92, 40.81], [-73.921, 40.789], [-73.916, 40.775], [-73.966, 40.7628]], // Cross Bronx Expwy -> RFK/FDR -> 60th St (east)
+  aq_36085NY04805: [[-74.1459, 40.6279], [-74.09, 40.5985], [-74.0447, 40.6066], [-74.022, 40.62], [-74.012, 40.66], [-74.0138, 40.7028]], // Port Richmond -> Verrazzano/BQE -> Hugh Carey Tunnel
+  aq_36085NY03820: [[-74.1512, 40.6092], [-74.1, 40.6], [-74.0447, 40.6066], [-74.022, 40.62], [-74.012, 40.66], [-74.0138, 40.7028]], // SI Expwy -> Verrazzano/BQE -> Hugh Carey Tunnel
+};

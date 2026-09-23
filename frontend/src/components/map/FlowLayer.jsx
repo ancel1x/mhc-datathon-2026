@@ -6,10 +6,11 @@ import { useReducedMotion } from '../../hooks/useMediaQuery.js';
 import { featureMetrics } from '../../lib/metrics.js';
 import { sqrtSize, themeColors } from '../../lib/scales.js';
 import { fmtCompact, fmtPct, isNum } from '../../lib/format.js';
-import { CROSSING_ROUTES, entryStub } from '../../content/corridors.js';
+import { CROSSING_ROUTES, entryStub, AQ_LINK_ROUTES } from '../../content/corridors.js';
 
 export const FLOW_LAYER_IDS = { hit: 'flow-hit' };
 
+const AQ_LINK_WIDTH = 2; // fixed width for AQ-monitor link routes: these have no traffic-volume figure to scale by
 const SPEED = 44; // px per second: clearly moving, still calm
 const TWEEN_MS = 1100; // how long a route takes to change color / width when the year changes
 const FPS_MS = 1000 / 30;
@@ -204,8 +205,15 @@ function FlowLayer({ featured }) {
         if (stub) push(stub, p, 'crz_entry', featureMetrics(p, 'crz_entry', period, hour, metric), width);
       }
     }
+    if (layerVisibility.aq_monitor) {
+      for (const f of geo.aq_monitor?.features ?? []) {
+        const p = f.properties ?? {};
+        const route = AQ_LINK_ROUTES[p.id];
+        if (route) push(route, p, 'aq_monitor', featureMetrics(p, 'aq_monitor', period, hour, metric), () => AQ_LINK_WIDTH);
+      }
+    }
     return out;
-  }, [on, geo, indexes, period, hour, metric, layerVisibility.bt_facility, layerVisibility.crz_entry, featured, plain]);
+  }, [on, geo, indexes, period, hour, metric, layerVisibility.bt_facility, layerVisibility.crz_entry, layerVisibility.aq_monitor, featured, plain]);
 
   // Retarget the routes; routes that disappeared fade out and are dropped once invisible.
   useEffect(() => {
