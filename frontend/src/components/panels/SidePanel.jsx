@@ -56,12 +56,12 @@ function Section({ title, children }) {
   );
 }
 
-function Switch({ on }) {
-  return <span className="switch" data-on={on ? 'true' : 'false'} aria-hidden="true"><i /></span>;
+function Switch({ on, accent = 'blue' }) {
+  return <span className="switch" data-on={on ? 'true' : 'false'} data-accent={accent} aria-hidden="true"><i /></span>;
 }
 
 /** Layer row: label + hint on the panel's text line, then a small switch. */
-function LayerRow({ label, hint, on, onClick, sub = false }) {
+function LayerRow({ label, hint, on, onClick, sub = false, accent = 'blue' }) {
   return (
     <li>
       <button type="button" className={sub ? 'row row--sub' : 'row'} role="switch" aria-checked={on} onClick={onClick}>
@@ -69,7 +69,7 @@ function LayerRow({ label, hint, on, onClick, sub = false }) {
           <span className="row__label">{label}</span>
           <span className="row__hint">{hint}</span>
         </span>
-        <Switch on={on} />
+        <Switch on={on} accent={accent} />
       </button>
     </li>
   );
@@ -108,10 +108,11 @@ function ControlsContent({ onCollapse, onClose, hasFeatured }) {
         <ul className="rows">
           {LAYER_KEYS.flatMap((k) => {
             const on = Boolean(layerVisibility[k]);
-            const rows = [<LayerRow key={k} kind={LAYER_SYMBOL[k].kind} label={LAYER_LABELS[k]} hint={LAYER_HINTS[k]} on={on} onClick={() => dispatch({ type: 'TOGGLE_LAYER', layer: k })} />];
+            const accent = k === 'dac' || k === 'uhf42' ? 'purple' : 'blue';
+            const rows = [<LayerRow key={k} kind={LAYER_SYMBOL[k].kind} label={LAYER_LABELS[k]} hint={LAYER_HINTS[k]} on={on} accent={accent} onClick={() => dispatch({ type: 'TOGGLE_LAYER', layer: k })} />];
             // sub-options only appear while their parent layer is on, to keep the list short
             if (k === 'dot_segment' && on) rows.push(<LayerRow key="dot-all" sub label="All DOT sites" hint="Also spots counted only once" on={dotAll} onClick={() => dispatch({ type: 'TOGGLE_DOT_ALL' })} />);
-            if (k === 'dac' && on) rows.push(<LayerRow key="dac-pct" sub label="Shade by burden score" hint="A 0–100 score instead of yes / no" on={dacMode === 'percentile'} onClick={() => dispatch({ type: 'SET_DAC_MODE', mode: dacMode === 'percentile' ? 'designated' : 'percentile' })} />);
+            if (k === 'dac' && on) rows.push(<LayerRow key="dac-pct" sub accent="purple" label="Shade by burden score" hint="0 = lower burden · 100 = higher burden" on={dacMode === 'percentile'} onClick={() => dispatch({ type: 'SET_DAC_MODE', mode: dacMode === 'percentile' ? 'designated' : 'percentile' })} />);
             return rows;
           })}
         </ul>

@@ -82,8 +82,9 @@ export default function KeyLegend({ hasFeatured = false }) {
       ) : null}
       {purplePct ? (
         <div className="key__block">
-          <div className="key__label">Combined burden score (pollution, poverty, health)</div>
-          <Steps colors={PURPLE_STEPS} from="lowest" to="highest" />
+          <div className="key__label">Combined burden score · 0–100</div>
+          <Steps colors={PURPLE_STEPS} from="0 · lower burden" to="100 · higher burden" />
+          <div className="key__note">Higher scores indicate greater combined environmental, health, and socioeconomic burden. The statewide percentile ranks each tract relative to other New York State tracts.</div>
         </div>
       ) : null}
       {v.uhf42 ? (
@@ -96,7 +97,7 @@ export default function KeyLegend({ hasFeatured = false }) {
       {hasFeatured && points ? <div className="key__note">Bright = the ones this step is about; the rest are faded.</div> : null}
       {glyphMode && points ? (
         <div className="key__note">
-          <LayerSymbol kind="ring-grey" size={12} /> before the toll (2024{v.crz_entry ? '; Jan–Aug 2025 for entry points' : ''}) &nbsp; <LayerSymbol kind="ring-color" color="var(--text)" size={12} /> {PERIOD_LABELS[period] ?? period} — each point is a 24-hour clock, midnight at the top.
+          <LayerSymbol kind="ring-grey" size={12} /> before the toll (2024{v.crz_entry ? '; Jan–Aug 2025 for entry points' : ''}) &nbsp; <LayerSymbol kind="ring-color" color="var(--blue)" size={12} /> {PERIOD_LABELS[period] ?? period} — each point is a 24-hour clock, midnight at the top.
         </div>
       ) : null}
     </div>

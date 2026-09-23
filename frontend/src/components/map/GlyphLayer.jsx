@@ -6,18 +6,18 @@ import { useData } from '../../lib/data.jsx';
 import { useAppState, useDispatch } from '../../state/AppState.jsx';
 import { featureMetrics, GLYPH_LAYERS, LAYER_META } from '../../lib/metrics.js';
 import { CLASS_LABELS } from '../../lib/scales.js';
-import { fmtCompact, fmtNum, fmtPct, isNum, shortName } from '../../lib/format.js';
+import { fmtCompact, fmtNum, fmtPct, fmtTrafficK, isNum, shortName } from '../../lib/format.js';
 
 const SIZES = { crz_entry: 64, bt_facility: 70, aq_monitor: 58 };
 const SHAPES = { crz_entry: 'entry', bt_facility: 'bridge', aq_monitor: 'monitor' };
 
-const fmtVal = (layer, v) => (layer === 'aq_monitor' ? (isNum(v) ? `${fmtNum(v, 2)} µg/m³` : '—') : fmtCompact(v));
+const fmtVal = (layer, v) => (layer === 'aq_monitor' ? (isNum(v) ? `${fmtNum(v, 2)} µg/m³` : 'No data available for this period') : layer === 'bt_facility' || layer === 'crz_entry' ? fmtTrafficK(v) : fmtCompact(v));
 
 /** Caption text under the ring: change for traffic, class for monitors, value when the metric is absolute. */
 function captionFor(layer, m, metric) {
-  if (metric === 'absolute') return layer === 'aq_monitor' ? (isNum(m.value) ? `${fmtNum(m.value, 1)} µg/m³` : '—') : fmtCompact(m.value);
-  if (layer === 'aq_monitor') return CLASS_LABELS[m.classification] ?? 'no eligible baseline';
-  if (!isNum(m.change) && isNum(m.value)) return fmtCompact(m.value);
+  if (metric === 'absolute') return layer === 'aq_monitor' ? (isNum(m.value) ? `${fmtNum(m.value, 1)} µg/m³` : 'No data available for this period') : layer === 'bt_facility' || layer === 'crz_entry' ? fmtTrafficK(m.value) : fmtCompact(m.value);
+  if (layer === 'aq_monitor') return CLASS_LABELS[m.classification] ?? 'no data';
+  if (!isNum(m.change) && isNum(m.value)) return layer === 'bt_facility' || layer === 'crz_entry' ? fmtTrafficK(m.value) : fmtCompact(m.value);
   return fmtPct(m.change);
 }
 
@@ -58,6 +58,8 @@ function GlyphLayer({ featured, viewVersion }) {
     const isHovered = hovered === it.key;
     const caption = captionFor(it.layer, it.m, metric);
     const support = it.layer === 'bt_facility' && metric === 'change' && it.m.support ? CLASS_LABELS[it.m.support] ?? it.m.support : null;
+    const showBaseline = period !== 'pre_2024' && isNum(it.m.baseline);
+    const showChange = period !== 'pre_2024' && isNum(it.m.change);
     return (
       <Marker
         key={it.key}
@@ -73,14 +75,14 @@ function GlyphLayer({ featured, viewVersion }) {
           data-selected={isSelected ? 'true' : 'false'}
           tabIndex={0}
           role="button"
-          aria-label={`${it.name}: ${LAYER_META[it.layer].label}. ${it.m.baselineLabel} ${fmtVal(it.layer, it.m.baseline)}, ${it.m.currentLabel} ${fmtVal(it.layer, it.m.value)}, change ${fmtPct(it.m.change)}${support ? `, ${support}` : ''}.`}
+          aria-label={`${it.name}: ${LAYER_META[it.layer].label}. ${showBaseline ? `${it.m.baselineLabel} ${fmtVal(it.layer, it.m.baseline)}, ` : ''}${it.m.currentLabel} ${fmtVal(it.layer, it.m.value)}${showChange ? `, change ${fmtPct(it.m.change)}${support ? `, ${support}` : ''}` : ''}.`}
           onMouseEnter={() => setHovered(it.key)}
           onMouseLeave={() => setHovered(null)}
           onFocus={() => setHovered(it.key)}
           onBlur={() => setHovered(null)}
           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); select(it); } }}
         >
-          <ClockGlyph baseline={it.m.baselineHourly} current={it.m.currentHourly} max={it.max} color={it.m.color} size={SIZES[it.layer] ?? 64} hour={hour} dimmed={it.dimmed} selected={isSelected} title={it.name} shape={SHAPES[it.layer]} hollow={it.hollow} />
+          <ClockGlyph baseline={period === 'pre_2024' ? null : it.m.baselineHourly} current={it.m.currentHourly} max={it.max} color={it.m.color} size={SIZES[it.layer] ?? 64} hour={hour} dimmed={it.dimmed} selected={isSelected} title={it.name} shape={SHAPES[it.layer]} hollow={it.hollow} />
           <div className="glyph__cap" aria-hidden="true">
             <span className="glyph__cap-name">{shortName(it.name)}</span>
             <span className="glyph__cap-val num" style={{ color: it.m.color }}>{caption}</span>
@@ -88,9 +90,9 @@ function GlyphLayer({ featured, viewVersion }) {
           {isHovered ? (
             <div className="glyph__tip panel" role="tooltip">
               <b>{it.name}</b>
-              <div className="row"><span>{it.m.baselineLabel}</span><span className="num">{fmtVal(it.layer, it.m.baseline)}</span></div>
+              {showBaseline ? <div className="row"><span>{it.m.baselineLabel}</span><span className="num">{fmtVal(it.layer, it.m.baseline)}</span></div> : null}
               <div className="row"><span>{it.m.currentLabel}</span><span className="num">{fmtVal(it.layer, it.m.value)}</span></div>
-              <div className="row"><span>change</span><span className="num" style={{ color: it.m.color }}>{fmtPct(it.m.change)}{support ? ` · ${support}` : ''}</span></div>
+              {showChange ? <div className="row"><span>change</span><span className="num" style={{ color: it.m.color }}>{fmtPct(it.m.change)}{support ? ` · ${support}` : ''}</span></div> : null}
             </div>
           ) : null}
         </div>

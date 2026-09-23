@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAppState } from '../../state/AppState.jsx';
 import { useData, useLazyJson } from '../../lib/data.jsx';
 import { COMMUNITY_META, dotTier, featureMetrics, LAYER_META, metaLine } from '../../lib/metrics.js';
-import { fmtCompact, fmtDelta, fmtInt, fmtMonth, fmtMonthList, fmtNum, fmtPct, fmtShare, isNum, shortName } from '../../lib/format.js';
+import { fmtCompact, fmtDelta, fmtInt, fmtMonth, fmtMonthList, fmtNum, fmtPct, fmtShare, fmtTrafficK, isNum, shortName } from '../../lib/format.js';
 import { CLASS_LABELS } from '../../lib/scales.js';
 import { plainAir, plainPct, plainRate, plainRush } from '../../lib/plain.js';
 import { StatRow } from '../charts/StatTile.jsx';
@@ -17,6 +17,8 @@ const SERIES_FILE = { aq_monitor: 'aq_series', bt_facility: 'bt_series', crz_ent
 const PERS_TEXT = { reversed: 'Reversed in 2026', strengthened: 'Strengthened in 2026', confirmed: 'Confirmed in 2026', weakened: 'Weakened in 2026', inconclusive: 'Inconclusive so far' };
 const STRONG = new Set(['reversed', 'strengthened', 'confirmed']);
 const daysInMonth = (ym) => { const [y, m] = ym.split('-').map(Number); return new Date(Date.UTC(y, m, 0)).getUTCDate(); };
+const DOT_DIRECTIONS = { NB: 'Northbound', SB: 'Southbound', EB: 'Eastbound', WB: 'Westbound' };
+const fmtDot = (v) => (isNum(v) ? (Math.abs(v) >= 1000 ? `${fmtNum(v / 1000, 1)}k` : fmtNum(v, 0)) : '—');
 
 function buildTimeline(layer, p, series) {
   if (!p || !series) return [];
@@ -235,79 +237,138 @@ export default function DetailContent({ layer, feature, onClose }) {
     return () => { window.removeEventListener('keydown', onKey); clearTimeout(t); };
   }, [onClose, p]);
 
+  useEffect(() => {
+    if (layer === 'dot_segment' && period === 'pre_2024' && p?.role !== 'matched' && p?.last_month >= '2025-01') onClose?.();
+  }, [layer, period, p, onClose]);
+
   const isCommunity = layer === 'uhf42';
   const { data: series, loading: seriesLoading } = useLazyJson(layer && !isCommunity ? SERIES_FILE[layer] : null, Boolean(p) && !isCommunity);
   const m = useMemo(() => (p && !isCommunity ? featureMetrics(p, layer, period, null, metric) : null), [p, layer, period, metric, isCommunity]);
-  const timeline = useMemo(() => buildTimeline(layer, p, series), [layer, p, series]);
+  const timeline = useMemo(() => {
+    if (isCommunity) return [];
+    const all = buildTimeline(layer, p, series);
+    if (layer === 'crz_entry' && period === 'pre_2024') return all.filter((r) => r.x >= '2025-01');
+    if (period === 'pre_2024') return all.filter((r) => r.x.startsWith('2024-'));
+    if (period === 'post_2025') return all.filter((r) => r.x >= '2024-01' && r.x < '2026-01');
+    return all.filter((r) => r.x >= (p?.name === 'Hunts Point' ? '2025-01' : '2024-01'));
+  }, [layer, p, series, period, isCommunity]);
   if (!p) return null;
   if (isCommunity) return <CommunityDetail p={p} onClose={onClose} closeRef={closeRef} />;
   if (!m) return null;
-
   const matched = layer === 'dot_segment' ? matchedFor(p, series) : null;
   const meta = LAYER_META[layer];
   const isAQ = layer === 'aq_monitor';
   const isBT = layer === 'bt_facility';
   const unit = isAQ ? 'µg/m³' : '';
   const digits = isAQ ? 2 : 0;
-  const fmtVal = (v) => (isAQ ? fmtNum(v, 2) : fmtCompact(v));
-  const e = m.evidence;
+  const fmtVal = (v) => (isAQ ? fmtNum(v, 2) : layer === 'dot_segment' ? fmtDot(v) : layer === 'bt_facility' || layer === 'crz_entry' ? fmtTrafficK(v) : fmtCompact(v));
+  const isBaseline = period === 'pre_2024';
+  const isEntryBefore = layer === 'crz_entry' && isBaseline;
+  const isBridgeBefore = layer === 'bt_facility' && isBaseline;
+  const isDotLater = layer === 'dot_segment' && !isBaseline;
+  const isDotMatched = layer === 'dot_segment' && p.role === 'matched';
+  const isDotSingle = layer === 'dot_segment' && !isDotMatched;
+  const baselineExists = isNum(m.baseline);
+  const currentExists = isNum(m.value);
+  const tiles = isEntryBefore ? [] : isDotSingle
+    ? (currentExists ? [{ label: 'Observed traffic', value: fmtVal(m.value), sub: meta?.unit }] : [])
+    : isBaseline
+    ? (currentExists ? [{ label: isBridgeBefore ? '2024, before the toll' : '2024 baseline', value: fmtVal(m.value), sub: isAQ ? 'µg/m³' : meta?.unit }] : [])
+    : isAQ
+    ? [
+        ...(baselineExists ? [{ label: m.baselineLabel || 'before', value: fmtVal(m.baseline), sub: 'mean µg/m³' }] : []),
+        ...(currentExists ? [{ label: m.currentLabel || 'after', value: fmtVal(m.value), sub: 'mean µg/m³' }] : []),
+      ]
+    : [
+        ...(baselineExists ? [{ label: isDotLater ? '2024 baseline' : m.baselineLabel || 'before', value: fmtVal(m.baseline), sub: isAQ ? 'mean µg/m³' : meta?.unit }] : []),
+        ...(currentExists ? [{ label: isDotLater ? '2025 follow-up' : m.currentLabel || 'after', value: fmtVal(m.value), sub: isAQ ? 'mean µg/m³' : meta?.unit }] : []),
+        ...(isNum(m.change) ? [{ label: isDotLater ? 'Change from 2024' : 'Change', value: fmtPct(m.change), sub: isAQ ? (isNum(m.comparison?.delta_adj_control) ? `${fmtDelta(m.comparison.delta_adj_control, 'µg/m³', 2)} adj.` : '') : 'vs baseline', tone: isAQ && Math.abs(m.change) < 0.05 ? 0 : m.change }] : []),
+      ];
 
-  let tiles;
-  if (isAQ) {
-    const cls = m.classification ?? 'no_baseline';
-    const delta = isNum(e?.delta_raw) ? e.delta_raw : isNum(m.value) && isNum(m.baseline) ? m.value - m.baseline : null;
-    tiles = [
-      { label: m.baselineLabel || 'before', value: fmtVal(m.baseline), sub: period === 'pre_2024' ? 'µg/m³ of fine soot, mean' : 'µg/m³ of fine soot, matched-month mean' },
-      { label: m.currentLabel || 'after', value: fmtVal(m.value), sub: period === 'pre_2024' ? 'µg/m³ of fine soot, mean' : 'µg/m³ of fine soot, matched-month mean' },
-      { label: 'Raw change', value: fmtDelta(delta, '', 2), sub: `µg/m³ · ${cls === 'no_baseline' ? 'nothing to compare with' : `${plainAir(delta, m.baseline)} · ${CLASS_LABELS[cls] ?? cls}`}`, tone: cls === 'increase' ? 1 : cls === 'decrease' ? -1 : 0 },
-    ];
-  } else if (isBT) {
-    const s = m.support;
-    tiles = [
-      { label: m.baselineLabel || 'before', value: fmtVal(m.baseline), sub: meta?.unit },
-      { label: m.currentLabel || 'after', value: fmtVal(m.value), sub: meta?.unit },
-      { label: 'Change', value: fmtPct(m.change), sub: plainPct(m.change, { status: s, base: period === 'post_2026_ytd' ? 'Jan–Aug 2024' : '2024' }), tone: s === 'increase' ? 1 : s === 'decrease' ? -1 : 0 },
-    ];
-  } else {
-    tiles = [
-      { label: m.baselineLabel || 'before', value: fmtVal(m.baseline), sub: meta?.unit },
-      { label: m.currentLabel || 'after', value: fmtVal(m.value), sub: meta?.unit },
-      { label: 'Change', value: fmtPct(m.change), sub: 'vs baseline', tone: m.change },
-    ];
-  }
-
-  const baseH = layer === 'dot_segment' ? matched?.hourly_weekday_pre : dayType === 'weekday' ? m.baselineHourly : m.baselineWeekend;
-  const curH = layer === 'dot_segment' ? matched?.hourly_weekday_post : dayType === 'weekday' ? m.currentHourly : m.currentWeekend;
+  const comparisonH = isBaseline ? null : layer === 'dot_segment' ? matched?.hourly_weekday_pre : dayType === 'weekday' ? m.baselineHourly : m.baselineWeekend;
+  const curH = layer === 'dot_segment' ? (isBaseline ? matched?.hourly_weekday_pre : matched?.hourly_weekday_post) : dayType === 'weekday' ? m.currentHourly : m.currentWeekend;
+  const baseH = Array.isArray(comparisonH) && Array.isArray(curH) && comparisonH.every((v, i) => v === curH[i]) ? null : comparisonH;
+  const hourlyUnit = isAQ ? 'µg/m³' : 'vehicles/hour';
+  const monthlyUnit = isAQ ? 'µg/m³' : 'vehicles/day';
+  const hasHourly = (values) => Array.isArray(values) && values.some(isNum);
+  const showMonthly = layer !== 'dot_segment' && timeline.some((r) => isNum(r.y));
+  const showHourly = hasHourly(baseH) || hasHourly(curH);
+  const neutralCurrent = !isBaseline && (!isNum(m.change) || isAQ);
+  const chartColor = neutralCurrent ? 'var(--blue)' : m.color;
+  const baselineYear = Number((m.baselineLabel ?? '').match(/\b(20\d{2})\b/)?.[1]) || null;
+  const currentYear = period === 'post_2026_ytd' ? 2026 : period === 'post_2025' ? 2025 : 2024;
+  const aqPeriod = isAQ ? p.periods?.[period] : null;
 
   let breakdown = null;
   if (layer === 'crz_entry') {
     const mix = p.periods?.[period === 'pre_2024' ? 'ytd_2025' : period]?.class_mix ?? p.periods?.post_2025?.class_mix;
-    breakdown = <ClassMixBar mix={mix} />;
-  } else if (isBT && p.by_direction) {
+    if (Object.values(mix ?? {}).some((v) => isNum(v) && v > 0)) breakdown = <ClassMixBar mix={mix} />;
+  } else if (layer === 'bt_facility' && isBridgeBefore && p.by_direction) {
+    const rows = Object.entries(p.by_direction).filter(([, d]) => isNum(d?.avg_daily_2024)).map(([dir, d]) => ({ label: dir, after: d.avg_daily_2024 }));
+    if (rows.length) breakdown = <BeforeAfterBars rows={rows} beforeLabel="2024" afterLabel="2024" color={m.color} showBefore={false} valueFormatter={fmtTrafficK} />;
+  } else if (layer === 'bt_facility' && p.by_direction) {
     const rows = Object.entries(p.by_direction).map(([dir, d]) => ({ label: dir, before: d?.avg_daily_2024 ?? null, after: d?.avg_daily_2025 ?? null }));
-    breakdown = <BeforeAfterBars rows={rows} beforeLabel="2024" afterLabel="2025" color={m.color} />;
+    breakdown = <BeforeAfterBars rows={rows} beforeLabel="2024" afterLabel="2025" color={m.color} valueFormatter={fmtTrafficK} />;
   } else if (layer === 'dot_segment' && matched?.by_direction) {
-    const rows = Object.entries(matched.by_direction).map(([dir, d]) => ({ label: dir, before: d?.pre_adv ?? null, after: d?.post_adv ?? null }));
-    breakdown = <BeforeAfterBars rows={rows} beforeLabel="before" afterLabel="after" color={m.color} />;
+    const rows = Object.entries(matched.by_direction).map(([dir, d]) => ({ label: DOT_DIRECTIONS[dir] ?? dir, before: isBaseline ? null : d?.pre_adv ?? null, after: isBaseline ? d?.pre_adv ?? null : d?.post_adv ?? null }));
+    if (rows.some((r) => isNum(r.before) || isNum(r.after))) breakdown = <BeforeAfterBars rows={rows} beforeLabel="2024 baseline" afterLabel={isBaseline ? '2024 baseline' : '2025 follow-up'} color={m.color} showBefore={!isBaseline} valueFormatter={fmtDot} />;
+  } else if (isAQ && !isBaseline && m.comparison) {
+    const c = m.comparison;
+    const hasAdjusted = isNum(c.delta_adj_control);
+    const hasResult = ['improved', 'unchanged', 'worsened'].includes(c.classification);
+    const technicalRows = [
+      isNum(c.delta_raw) ? ['Observed change at this monitor', fmtDelta(c.delta_raw, unit, 2)] : null,
+      hasAdjusted ? ['Compared with Van Wyck control', fmtDelta(c.delta_adj_control, unit, 2)] : null,
+      isNum(c.delta_adj_reference) ? ['Compared with Queens College reference', fmtDelta(c.delta_adj_reference, unit, 2)] : null,
+      isNum(c.ci_low) && isNum(c.ci_high) ? ['95% uncertainty range', `${fmtNum(c.ci_low, 2)} to ${fmtNum(c.ci_high, 2)}`] : null,
+      c.months_used?.length ? ['Months used', fmtMonthList(c.months_used)] : null,
+      isNum(aqPeriod?.coverage_pct) ? ['Coverage', `${fmtNum(aqPeriod.coverage_pct, 0)}%`] : null,
+      isNum(aqPeriod?.smoke_days_excluded) ? ['Smoke days excluded', fmtInt(aqPeriod.smoke_days_excluded)] : null,
+      p.role && p.role !== 'site' ? ['Monitor role', p.role] : null,
+    ].filter(Boolean);
+    if (hasAdjusted || hasResult) {
+      breakdown = (
+        <>
+          <table className="tbl"><tbody>
+            {hasAdjusted ? <tr><td>Difference from the citywide trend</td><td>{fmtDelta(c.delta_adj_control, unit, 2)}</td></tr> : null}
+            {hasResult ? <tr><td>Result</td><td className={`cls-${c.classification}`}>{c.classification[0].toUpperCase() + c.classification.slice(1)}</td></tr> : null}
+          </tbody></table>
+          {hasAdjusted ? <p className="detail__note">Negative values mean the monitor improved more than the citywide trend.</p> : null}
+          {technicalRows.length ? <details className="disclosure"><summary className="text-btn disclosure__summary">Details / Methodology <svg className="chev" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="M2 4.5l4 4 4-4" /></svg></summary><div className="disclosure__body"><table className="tbl tbl--method"><tbody>{technicalRows.map(([label, value]) => <tr key={label}><td>{label}</td><td>{value}</td></tr>)}</tbody></table></div></details> : null}
+        </>
+      );
+    }
   }
 
   let note = null;
   if (isAQ) {
     const per = p.periods?.[period];
-    note = `Period coverage ${isNum(per?.coverage_pct) ? `${fmtNum(per.coverage_pct, 0)}%` : '—'} of days; ${fmtInt(per?.smoke_days_excluded)} regional smoke days excluded from the monthly series${p.role && p.role !== 'site' ? ` · Health Department ${p.role} site` : ''}${p.geometry_note ? ` · ${p.geometry_note}` : ''}${p.evidence?.limitation ? ` · ${p.evidence.limitation}` : ''}.`;
+    const bits = [
+      isBaseline ? '2024 baseline' : null,
+      isNum(per?.coverage_pct) ? `coverage ${fmtNum(per.coverage_pct, 0)}%` : null,
+      isNum(per?.smoke_days_excluded) ? `${fmtInt(per.smoke_days_excluded)} regional smoke days excluded` : null,
+      p.role && p.role !== 'site' ? `Health Department ${p.role} site` : null,
+      p.geometry_note || null,
+      p.evidence?.limitation || null,
+    ].filter(Boolean);
+    note = bits.length ? `${bits.join('; ')}.` : null;
   } else if (layer === 'crz_entry') {
     const per = p.periods?.[period === 'pre_2024' ? 'ytd_2025' : period];
-    note = `${fmtInt(per?.days)} days in period; ${fmtShare(per?.excluded_share)} of entries on excluded roadways; peak share ${fmtShare(per?.peak_share)}. ${m.note ?? ''}`;
-  } else if (isBT) {
+    note = isEntryBefore ? null : `${fmtInt(per?.days)} days in period; ${fmtShare(per?.excluded_share)} of entries on excluded roadways; peak share ${fmtShare(per?.peak_share)}. ${m.note ?? ''}`;
+  } else if (layer === 'bt_facility') {
     const per = p.periods?.[period];
     note = `${fmtInt(per?.days)} days in period; truck share ${fmtShare(per?.truck_share, 1)}; peak share ${fmtShare(per?.peak_share)}${p.role ? ` · ${p.role}` : ''}${p.evidence?.limitation ? ` · ${p.evidence.limitation}` : ''}`;
   } else if (layer === 'dot_segment') {
     const tier = dotTier(p);
-    note = p.role === 'matched'
-      ? `Sampled matched location (${tier?.label ?? 'matched'}): counted ${(p.pre_months ?? []).map((x) => fmtMonth(x, { short: true })).join(', ') || '—'} and ${(p.post_months ?? []).map((x) => fmtMonth(x, { short: true })).join(', ') || '—'}. One-week samples, not continuous counts; describes this spot only, not the city.`
+    const pre = (p.pre_months ?? []).map((x) => fmtMonth(x, { short: true })).join(', ');
+    const post = (p.post_months ?? []).map((x) => fmtMonth(x, { short: true })).join(', ');
+    note = isDotMatched
+      ? isBaseline
+        ? `Counted ${pre}; spot count, not continuous; ${tier?.label ?? 'matched location'}.`
+        : `Counted ${pre} and ${post} (${tier?.label ?? (p.comparison_kind === 'same_month' ? 'same calendar month' : 'different months')}); spot counts, not continuous; describes this spot only, not the city.`
       : p.role === 'unpaired'
-        ? `counted before and after the toll (${(p.months ?? []).map((x) => fmtMonth(x, { short: true })).join(', ') || '—'}) but never in the same direction, so no before/after comparison is possible`
-        : `${p.role === 'post_only' ? 'counted only after' : 'counted only before'} the toll (${(p.months ?? []).map((x) => fmtMonth(x, { short: true })).join(', ') || '—'}); no before/after comparison possible`;
+        ? `Counted ${fmtMonth(p.last_month)}. This location has no matched before/after observation, so no comparison is available.`
+        : `Counted ${fmtMonth(p.last_month)}. This location has one usable observation period, so no before/after comparison is available.`;
   }
 
   return (
@@ -321,43 +382,54 @@ export default function DetailContent({ layer, feature, onClose }) {
       </header>
       <div className="side__body">
       <div className="detail__meta">{metaLine(p) || ' '}</div>
+      {isEntryBefore ? <p className="detail__meta">Entry-point counts begin Jan. 5, 2025, so there is no comparable point-level 2024 entry count.</p> : null}
       <StatRow items={tiles} panel />
 
       {isBT && period !== 'pre_2024' ? <TrafficEvidence p={p} period={period} /> : null}
-      {isAQ && period !== 'pre_2024' ? <AirEvidence p={p} period={period} /> : null}
-
-      {layer !== 'dot_segment' ? (
+      {isAQ && breakdown ? (
         <section className="side__section">
-          <div className="detail__section-head"><h3 className="side__section-title">Monthly {isAQ ? 'mean PM2.5' : layer === 'crz_entry' ? 'entries per day' : 'vehicles per day'}</h3>{seriesLoading ? <span className="caption">loading</span> : null}</div>
-          <TimelineChart data={timeline} color={m.color} unit={unit} digits={digits} label={isAQ ? 'mean' : 'per day'} id={`tl-${layer}`} />
-          <p className="detail__hint">Observed monthly values; the dashed line marks Jan 5, 2025, when the toll began.</p>
+          <h3 className="side__section-title">Comparison with the citywide trend</h3>
+          {breakdown}
+        </section>
+      ) : null}
+      {isAQ && period !== 'pre_2024' ? (
+        <details className="disclosure">
+          <summary className="text-btn disclosure__summary">Additional interval evidence <svg className="chev" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="M2 4.5l4 4 4-4" /></svg></summary>
+          <div className="disclosure__body"><AirEvidence p={p} period={period} /></div>
+        </details>
+      ) : null}
+
+      {showMonthly ? (
+        <section className="side__section">
+          <div className="detail__section-head"><h3 className="side__section-title detail__chart-title">{isAQ ? 'Monthly PM2.5' : layer === 'crz_entry' && period !== 'post_2026_ytd' ? 'Monthly entries per day' : 'Monthly traffic'} ({monthlyUnit})</h3>{isEntryBefore ? <span className="caption">begins Jan. 2025</span> : seriesLoading ? <span className="caption">loading</span> : null}</div>
+          <TimelineChart data={timeline} color={chartColor} unit={monthlyUnit} digits={digits} label={isAQ ? 'PM2.5' : 'traffic'} marker={isBaseline ? null : '2025-01'} id={`tl-${layer}`} baselineYear={isAQ && !isBaseline ? baselineYear : null} currentYear={isAQ && !isBaseline ? currentYear : null} baselineLabel={m.baselineLabel} currentLabel={m.currentLabel} />
         </section>
       ) : null}
 
-      <section className="side__section">
+      {showHourly ? <section className="side__section">
         <div className="detail__section-head">
-          <h3 className="side__section-title">Hour of day</h3>
-          {layer !== 'dot_segment' ? <div className="detail__seg"><Segmented size="sm" label="Day type" value={dayType} onChange={setDayType} options={[{ value: 'weekday', label: 'Weekday' }, { value: 'weekend', label: 'Weekend' }]} /></div> : null}
+          <h3 className="side__section-title detail__chart-title">{isAQ ? 'PM2.5 by hour' : 'Traffic by hour'} ({hourlyUnit})</h3>
+          {layer !== 'dot_segment' ? <div className="detail__seg"><Segmented size="sm" label="Compare weekday or weekend hourly patterns" value={dayType} onChange={setDayType} options={[{ value: 'weekday', label: 'Weekday' }, { value: 'weekend', label: 'Weekend' }]} /></div> : null}
         </div>
-        <HourProfileChart baseline={baseH} current={curH} baselineLabel={m.baselineLabel} currentLabel={m.currentLabel} color={m.color} unit={unit} digits={digits} hour={hour} peak={dayType === 'weekend' && layer !== 'dot_segment' ? [9, 21] : [5, 21]} />
-      </section>
+        <HourProfileChart baseline={baseH} current={curH} baselineLabel={m.baselineLabel} currentLabel={isBaseline ? '2024' : m.currentLabel} color={chartColor} unit={hourlyUnit} digits={digits} hour={hour} peak={dayType === 'weekend' && layer !== 'dot_segment' ? [9, 21] : [5, 21]} />
+      </section> : null}
 
-      {breakdown ? (
+      {breakdown && !isAQ ? (
         <section className="side__section">
-          <h3 className="side__section-title">{layer === 'crz_entry' ? 'Vehicle class mix' : 'By direction'}</h3>
+          <div className="detail__section-head"><h3 className="side__section-title">{layer === 'crz_entry' ? 'Vehicle class mix' : layer === 'bt_facility' || layer === 'dot_segment' ? 'Traffic by direction (vehicles/day)' : 'Comparison'}</h3>{isEntryBefore ? <span className="caption">2025 observed entries</span> : null}</div>
           {breakdown}
         </section>
       ) : null}
 
       {note ? <p className="detail__note">{note}</p> : null}
 
-      <table className="sr-only">
+      {timeline.some((r) => isNum(r.y)) || hasHourly(curH) ? <table className="sr-only">
         <caption>Chart data for {p.name ?? p.id}</caption>
         <tbody>
-          {timeline.map((r) => <tr key={r.x}><th scope="row">{fmtMonth(r.x)}</th><td>{fmtVal(r.y)}</td></tr>)}
-          {Array.isArray(curH) ? curH.map((v, h) => <tr key={`h${h}`}><th scope="row">{h}:00</th><td>{fmtVal(baseH?.[h])}</td><td>{fmtVal(v)}</td></tr>) : null}
+          {timeline.filter((r) => isNum(r.y)).map((r) => <tr key={r.x}><th scope="row">{fmtMonth(r.x)}</th><td>{fmtVal(r.y)}</td></tr>)}
+          {Array.isArray(curH) ? curH.map((v, h) => <tr key={`h${h}`}><th scope="row">{h}:00</th>{Array.isArray(baseH) ? <td>{fmtVal(baseH[h])}</td> : null}<td>{fmtVal(v)}</td></tr>) : null}
         </tbody>
-      </table>
+      </table> : null}
       </div>
     </div>
   );

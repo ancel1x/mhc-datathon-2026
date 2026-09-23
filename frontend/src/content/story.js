@@ -13,7 +13,11 @@ const argmax = (arr) => (Array.isArray(arr) && arr.length ? arr.reduce((bi, v, i
 const joinNames = (list) => (list.length <= 1 ? list.join('') : `${list.slice(0, -1).join(', ')} and ${list[list.length - 1]}`);
 const SUPPORTED = new Set(['increase', 'decrease']);
 const cell = (text, cls = null, strong = false) => ({ text, cls, strong });
-const pctCell = (v, status) => cell(fmtPct(v), status ?? 'uncertain', SUPPORTED.has(status));
+const pctCell = (v, status) => cell(
+  fmtPct(v),
+  isNum(v) ? (v > 0 ? 'increase' : v < 0 ? 'decrease' : 'unchanged') : 'insufficient',
+  SUPPORTED.has(status),
+);
 const ci = (lo, hi, digits = 1, unit = '') => (isNum(lo) && isNum(hi) ? `${fmtSigned(lo, digits)} to ${fmtSigned(hi, digits)}${unit}` : 'no interval');
 const rangeText = (arr, digits = 0) => (arr.length ? `${fmtNum(Math.min(...arr), digits)}–${fmtNum(Math.max(...arr), digits)}` : DASH);
 const ivlRow = (label, v, sub) => (v ? { label, sub, est: v.pct, lo: v.ci_low, hi: v.ci_high, status: v.status } : null);
@@ -119,8 +123,8 @@ export function buildStory({ summary, tolls, sources, geo }) {
     },
     // 2 · Inside the zone -------------------------------------------------------------------
     {
-      kicker: '2025 · year one · the priced core',
-      title: 'Inside the zone: what was measured',
+      kicker: '2025 · year one',
+      title: 'About 502,000 vehicles entered the zone each weekday',
       lede: `In year one about ${n(fmtCompact(crz.avg_weekday_entries_2025))} vehicles still entered the zone on a typical weekday, ${n(fmtShareText(crz.peak_share_2025))} of them in the tolled daytime hours.`,
       body: 'Nobody counted these gates before the toll, so this dataset shows the level, the daily rhythm and the vehicle mix, not a before/after change. The mixed daily picture the brief asks about starts here: the busiest hour is still the morning rush.',
       stats: [
@@ -139,7 +143,7 @@ export function buildStory({ summary, tolls, sources, geo }) {
     // 3 · Crossings ------------------------------------------------------------------------
     {
       kicker: '2025 vs 2024 · Jan 5–Dec 31',
-      title: 'Crossings: where volume changed',
+      title: 'Traffic went around, not away',
       lede: `Outside the priced core, crossing volumes changed unevenly: ${n(fmtInt(tUp.length))} supported increases, ${n(fmtInt(tUnc.length))} changes too small to separate from zero, ${n(fmtInt(tLim.length))} coverage-limited tunnel.`,
       body: 'Each crossing is compared with itself in 2024 and carries a 95% interval: the range of doubt around the estimate. A change counts as supported only when that whole range sits above or below zero. Red = more vehicles than 2024, supported; grey ring = no clear change. Counts are crossing events, not tracked vehicles, so this cannot say whether the same trips moved from the tunnels to the bridges.',
       stats: [
@@ -151,7 +155,7 @@ export function buildStory({ summary, tolls, sources, geo }) {
         title: 'Rush hours vs the whole day, 2025 vs 2024',
         head: ['Crossing', 'Whole day', 'AM rush', 'PM rush'],
         rows: rushRows.map((r) => ({ cells: [shortName(r.name), pctCell(r.pct_existing, r.status), pctCell(r.peak?.am?.pct, r.peak?.am?.status), pctCell(r.peak?.pm?.pct, r.peak?.pm?.status)] })),
-        foot: `AM = weekdays 7–10 AM, PM = 4–7 PM. +4.7% means about 5 more vehicles for every 100 that crossed in 2024. Bold green/red = supported (the range of doubt stays on one side of zero); grey = no clear change. Hugh L. Carey is coverage-limited and not listed.`,
+        foot: `AM = weekdays 7–10 AM, PM = 4–7 PM. +4.7% means about 5 more vehicles for every 100 that crossed in 2024. Green = decreased traffic; red = increased traffic; bold = supported (the range of doubt stays on one side of zero); grey = no change. Hugh L. Carey is coverage-limited and not listed.`,
       },
       details: {
         paragraphs: [
@@ -192,7 +196,7 @@ export function buildStory({ summary, tolls, sources, geo }) {
     // 5 · Air --------------------------------------------------------------------------------
     {
       kicker: '2025 vs 2024 · matched months',
-      title: 'Air: where PM2.5 changed',
+      title: 'Air quality improved at two monitors near the congestion zone, but not in the South Bronx',
       lede: `${n(fmtInt(aDec.length))} monitors show a supported decrease in fine-particle pollution once weather is accounted for, ${n(fmtInt(aUnc.length))} are uncertain, ${n(fmtInt(aInc.length))} show a supported increase, and ${n(fmtInt(aNo.length))} have no eligible 2024 baseline.`,
       body: `Two numbers per monitor: the raw change in fine soot, and a weather-adjusted change that removes what wind and temperature would explain. Each comes with a 95% interval, the range of doubt; a result is "supported" only when that range stays on one side of zero. Only ${joinNames((rc.air_full_coverage_ids ?? []).map((id) => aById(id).name).filter(Boolean)) || 'one monitor'} has all 12 matched months; every other estimate is a partial-year window.`,
       stats: [
@@ -247,7 +251,7 @@ export function buildStory({ summary, tolls, sources, geo }) {
     // 7 · Burden -----------------------------------------------------------------------------
     {
       kicker: '2025 · overlap with vulnerable communities',
-      title: 'Who was already carrying the most',
+      title: 'Traffic and air-quality burdens were concentrated in already disadvantaged communities',
       lede: 'The clearest air improvements landed in and beside the priced core, in neighborhoods with lower pre-existing asthma burden; the highest-burden monitored neighborhoods saw no statistically clear change either way.',
       body: `Purple areas are state-designated Disadvantaged Communities. ${upInDac.length ? `The ${upInDac.length === 1 ? 'one supported traffic increase' : `${fmtInt(upInDac.length)} supported traffic increases`} inside them ${upInDac.length === 1 ? 'is' : 'are'} ${joinNames(upInDac.map((r) => `the ${shortName(r.name)} (${r.uhf42_name})`))}.` : 'No supported traffic increase falls inside them.'} Historical vulnerability is not the same as new harm caused by the toll: this step shows where the patterns overlap, not what caused them.`,
       stats: [
@@ -266,9 +270,10 @@ export function buildStory({ summary, tolls, sources, geo }) {
     // 8 · 2026 -------------------------------------------------------------------------------
     {
       kicker: 'Jan 5–Aug 31 · 2024 vs 2025 vs 2026',
-      title: '2026 so far: did year one persist?',
+      title: 'Traffic declined further in 2026',
       lede: `Some year-one patterns persisted, ${pers.filter((h) => h.label === 'reversed').length === 1 ? 'one reversed' : `${fmtInt(pers.filter((h) => h.label === 'reversed').length)} reversed`}, and most are still inconclusive after eight months of 2026.`,
       body: `Only January–August is compared, against the same months of 2024, so nothing here is a full-year result. ${persText(pers, tById, aById)} The ${fmtInt(tUp.length)} supported increases of year one (${joinNames(tUp.map((r) => shortName(r.name)))}) are no longer distinguishable from 2024.`,
+      notice: '2026 is incomplete, so comparisons use matched available periods: zone entries compare the available 2026 period with the same 2025 period; MTA bridge and tunnel traffic compares January–August 2026 with January–August 2024.',
       stats: pers.slice(0, 3).map((h) => ({
         label: `${shortName(h.name)}${h.kind === 'air' ? ' PM2.5' : ''}: ${h.label}`,
         value: h.kind === 'air' ? `${fmtSigned(h.y2025, 2)} → ${fmtSigned(h.y2026, 2)}` : `${fmtPct(h.y2025)} → ${fmtPct(h.y2026)}`,
@@ -303,7 +308,7 @@ export function buildStory({ summary, tolls, sources, geo }) {
       kicker: 'What if · one corridor, reasoned from the data',
       badge: 'Data-grounded scenario reasoning · not a forecast',
       badgeTone: 'warn',
-      title: 'If the Major Deegan came down',
+      title: 'What if the Deegan or BQE were removed?',
       lede: 'The brief asks what would happen if a highway like the Major Deegan or the BQE were removed or repurposed. These data cannot model it, so this step reasons through one corridor, the Deegan, from what was observed.',
       bullets: [
         `**Traffic burden today.** DOT counted ${n(fmtCompact(deegan?.latest_adv))} vehicles a day on one roadway of the Deegan at High Bridge (${(deegan?.months ?? []).map(monthShort).join('–') || 'after the toll'}, post-toll only, no "before"). The crossings that feed it: ${shortName(rfkBronx.name ?? 'RFK Bronx')} ${n(fmtCompact(rfkBronx.avg_daily_2025))} a day (${fmtPct(rfkBronx.pct_existing)}, ${CLASS_WORD[rfkBronx.status] ?? DASH}), Henry Hudson ${n(fmtCompact(hh.avg_daily_2025))} (morning rush ${fmtPct(hh.peak?.am?.pct)}, ${CLASS_WORD[hh.peak?.am?.status] ?? DASH}).`,

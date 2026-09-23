@@ -3,7 +3,7 @@ import { fmtCompact, fmtPct, fmtShare, isNum } from '../../lib/format.js';
 import { ChartTip, tick } from './chartTheme.jsx';
 
 /** Grouped before/after bars, one row per category (direction, class...). */
-export default function BeforeAfterBars({ rows = [], beforeLabel = 'before', afterLabel = 'after', color = 'var(--text)' }) {
+export default function BeforeAfterBars({ rows = [], beforeLabel = 'before', afterLabel = 'after', color = 'var(--text)', showBefore = true, valueFormatter = fmtCompact }) {
   const data = rows.filter((r) => r && (isNum(r.before) || isNum(r.after)));
   if (!data.length) return <div className="chart chart--short"><div className="chart__empty">No before/after breakdown</div></div>;
   const height = Math.max(70, data.length * 34 + 16);
@@ -14,14 +14,14 @@ export default function BeforeAfterBars({ rows = [], beforeLabel = 'before', aft
           <BarChart data={data} layout="vertical" margin={{ top: 0, right: 12, bottom: 0, left: 0 }} barGap={2} barCategoryGap={10}>
             <XAxis type="number" hide domain={[0, 'auto']} />
             <YAxis type="category" dataKey="label" width={104} tick={{ ...tick, fontFamily: 'inherit', fontSize: 11 }} axisLine={false} tickLine={false} />
-            <Tooltip cursor={{ fill: 'var(--text)', fillOpacity: 0.04 }} content={<ChartTip rows={(p, label) => [...p.map((s) => ({ name: s.dataKey === 'before' ? beforeLabel : afterLabel, value: fmtCompact(s.value), color: s.fill })), { name: 'change', value: fmtPct(pct(p)) }]} />} />
-            <Bar dataKey="before" fill="var(--neutral)" fillOpacity={0.55} barSize={8} isAnimationActive={false} radius={1} />
+            <Tooltip cursor={{ fill: 'var(--text)', fillOpacity: 0.04 }} content={<ChartTip rows={(p, label) => [...p.map((s) => ({ name: s.dataKey === 'before' ? beforeLabel : afterLabel, value: valueFormatter(s.value), color: s.fill })), ...(showBefore ? [{ name: 'change', value: fmtPct(pct(p)) }] : [])]} />} />
+            {showBefore ? <Bar dataKey="before" fill="var(--neutral)" fillOpacity={0.55} barSize={8} isAnimationActive={false} radius={1} /> : null}
             <Bar dataKey="after" fill={color} barSize={8} isAnimationActive={false} radius={1} />
           </BarChart>
         </ResponsiveContainer>
       </div>
       <div className="chart-key" aria-hidden="true">
-        <span style={{ '--k': 'var(--neutral)' }}>{beforeLabel}</span>
+        {showBefore ? <span style={{ '--k': 'var(--neutral)' }}>{beforeLabel}</span> : null}
         <span style={{ '--k': color }}>{afterLabel}</span>
       </div>
     </div>

@@ -4,7 +4,7 @@ import { useData } from '../../lib/data.jsx';
 import { useAppState } from '../../state/AppState.jsx';
 import { featureMetrics, POINT_LAYERS } from '../../lib/metrics.js';
 import { changeColor, CLASS_LABELS, COLORS, sqrtSize, themeColors } from '../../lib/scales.js';
-import { fmtCompact, fmtNum, fmtPct, isNum, shortName } from '../../lib/format.js';
+import { fmtCompact, fmtMonth, fmtNum, fmtPct, fmtTrafficK, isNum, shortName } from '../../lib/format.js';
 
 export const SQUARE_IMAGE = 'dot-square';
 export const POINT_LAYER_IDS = { aq_monitor: 'pt-aq_monitor', crz_entry: 'pt-crz_entry', bt_facility: 'pt-bt_facility', dot_segment: 'pt-dot_segment' };
@@ -15,6 +15,8 @@ const FONT = ['Noto Sans Regular'];
 const EMPTY = { type: 'FeatureCollection', features: [] };
 export const DIM = 0.35;
 const AQ_R = 5;
+const fmtDot = (v) => (isNum(v) ? (Math.abs(v) >= 1000 ? `${fmtNum(v / 1000, 1)}k` : fmtNum(v, 0)) : '—');
+const fmtTraffic = (layer, v) => (layer === 'bt_facility' || layer === 'crz_entry' ? fmtTrafficK(v) : fmtCompact(v));
 
 /** Signed-distance-field 5 px square, recolored per feature by the symbol layer. */
 export function squareSDF(size = 20, half = 2.5, corner = 0.8) {
@@ -54,9 +56,9 @@ export function isHollow(layer, m, metric, period) {
 /** Text under a point: short name + change (traffic) or class (monitors); value when the metric is absolute. */
 export function pointLabel(layer, name, m, metric) {
   const short = shortName(name);
-  if (metric === 'absolute') return `${short} ${layer === 'aq_monitor' ? (isNum(m.value) ? fmtNum(m.value, 1) : '—') : fmtCompact(m.value)}`;
-  if (layer === 'aq_monitor') return `${short} ${CLASS_LABELS[m.classification] ?? 'no eligible baseline'}`;
-  if (!isNum(m.change) && isNum(m.value)) return `${short} ${fmtCompact(m.value)}`;
+  if (metric === 'absolute') return `${short} ${layer === 'aq_monitor' ? (isNum(m.value) ? fmtNum(m.value, 1) : 'No data available for this period') : fmtTraffic(layer, m.value)}`;
+  if (layer === 'aq_monitor') return `${short} ${CLASS_LABELS[m.classification] ?? 'no data'}`;
+  if (!isNum(m.change) && isNum(m.value)) return `${short} ${fmtTraffic(layer, m.value)}`;
   return `${short} ${fmtPct(m.change)}`;
 }
 
@@ -66,6 +68,7 @@ function derive(fc, layer, { period, hour, metric, featuredSet, maxima }) {
   const features = [];
   for (const f of fc?.features ?? []) {
     const p = f.properties ?? {};
+    if (layer === 'dot_segment' && period === 'pre_2024' && p.role !== 'matched' && p.last_month >= '2025-01') continue;
     const m = featureMetrics(p, layer, period, hour, metric);
     const featured = Boolean(featuredSet && featuredSet.has(p.id));
     const dim = featuredSet ? (featured ? 0 : 1) : 0;
@@ -87,14 +90,16 @@ function derive(fc, layer, { period, hour, metric, featuredSet, maxima }) {
         _dim: dim,
         _featured: featured ? 1 : 0,
         _hollow: hollow ? 1 : 0,
-        _label: pointLabel(layer, p.name ?? p.id, m, metric),
-        _valueText: layer === 'aq_monitor' ? (isNum(m.value) ? `${fmtNum(m.value, 2)} µg/m³` : '—') : fmtCompact(m.value),
-        _baseText: layer === 'aq_monitor' ? (isNum(m.baseline) ? `${fmtNum(m.baseline, 2)} µg/m³` : '—') : fmtCompact(m.baseline),
-        _changeText: layer === 'aq_monitor' && metric === 'change' ? `${fmtPct(m.change)} · ${CLASS_LABELS[m.classification] ?? 'no eligible baseline'}` : `${fmtPct(m.change)}${metric === 'change' ? supportText : ''}`,
+        _label: layer === 'dot_segment' ? `${shortName(p.name ?? p.id)} ${fmtDot(m.value)}` : pointLabel(layer, p.name ?? p.id, m, metric),
+        _valueText: layer === 'aq_monitor' ? (isNum(m.value) ? `${fmtNum(m.value, 2)} µg/m³` : 'No data available for this period') : layer === 'dot_segment' ? fmtDot(m.value) : fmtTraffic(layer, m.value),
+        _baseText: layer === 'aq_monitor' ? (isNum(m.baseline) ? `${fmtNum(m.baseline, 2)} µg/m³` : 'No data available for this period') : layer === 'dot_segment' ? fmtDot(m.baseline) : fmtTraffic(layer, m.baseline),
+        _changeText: layer === 'aq_monitor' && metric === 'change' ? `${isNum(m.change) ? fmtPct(m.change) : 'No data available for this period'} · ${CLASS_LABELS[m.classification] ?? 'no data'}` : `${fmtPct(m.change)}${metric === 'change' ? supportText : ''}`,
         _baseLabel: m.baselineLabel,
         _curLabel: m.currentLabel,
         _class: m.classification ?? m.support ?? '',
         _matched: matched ? 1 : 0,
+        _dotRole: layer === 'dot_segment' ? p.role : '',
+        _observationMonth: layer === 'dot_segment' && p.role !== 'matched' ? fmtMonth(p.last_month) : '',
       },
     });
   }
