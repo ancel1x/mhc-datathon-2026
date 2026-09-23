@@ -37,7 +37,7 @@ function ChoroplethToggle() {
   return (
     <div className="chapter__control">
       <span className="chapter__control-label">Purple layer shows</span>
-      <Segmented label="Purple layer" value={mode} onChange={set} options={[{ value: 'dac', label: 'Designated areas' }, { value: 'pct', label: 'Burden score' }, { value: 'uhf42', label: 'Asthma visits' }]} />
+      <Segmented tone="purple" label="Purple layer" value={mode} onChange={set} options={[{ value: 'dac', label: 'Designated areas' }, { value: 'pct', label: 'Burden score' }, { value: 'uhf42', label: 'Asthma visits' }]} />
     </div>
   );
 }
@@ -67,10 +67,17 @@ function KList({ list, main = false }) {
 /** Compact table. Cells are strings or { text, cls } objects; rows may carry `cls` for the whole row. */
 function Table({ table, main = false }) {
   if (!table?.rows?.length) return null;
+  const foot = table.foot ?? table.note;
+  const titleClass = main
+    ? 'chapter__section-title chapter__section-title--main'
+    : table.className
+      ? 'chapter__section-title chapter__section-title--units'
+      : 'chapter__section-title';
+  const tableClass = [main ? 'tbl--main' : '', table.className ?? ''].filter(Boolean).join(' ');
   return (
     <>
-      {table.title ? <div className={main ? 'chapter__section-title chapter__section-title--main' : 'chapter__section-title'}>{table.title}</div> : null}
-      <table className={main ? 'tbl tbl--main' : 'tbl'}>
+      {table.title ? <div className={titleClass}>{table.title}</div> : null}
+      <table className={`tbl${tableClass ? ` ${tableClass}` : ''}`}>
         <thead><tr>{table.head.map((h) => <th key={h} scope="col">{h}</th>)}</tr></thead>
         <tbody>
           {table.rows.map((r, i) => (
@@ -82,7 +89,7 @@ function Table({ table, main = false }) {
             </tr>
           ))}
         </tbody>
-        {table.foot ? <tfoot><tr><td colSpan={table.head.length}>{table.foot}</td></tr></tfoot> : null}
+        {foot ? <tfoot><tr><td colSpan={table.head.length}>{foot}</td></tr></tfoot> : null}
       </table>
     </>
   );
@@ -131,6 +138,7 @@ function ChapterView({ c, step, tolls, sources, onRestart }) {
       {c.lede ? <p className="chapter__lede"><Rich text={c.lede} /></p> : null}
       {c.body ? <p className="chapter__body"><Rich text={c.body} /></p> : null}
       {c.bullets?.length ? <ul className="chapter__bullets">{c.bullets.map((b, i) => <li key={i}><Rich text={b} /></li>)}</ul> : null}
+      {c.notice ? <p className="chapter__notice"><Rich text={c.notice} /></p> : null}
       {c.stats?.length ? <StatRow items={c.stats.slice(0, 3)} /> : null}
       <Table table={c.table} main />
       <KList list={c.list} main />

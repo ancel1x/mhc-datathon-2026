@@ -87,9 +87,9 @@ export function featureMetrics(props, layer, period, hour = null, metric = 'chan
     m.value = p.periods?.[period]?.avg_daily ?? null;
     m.baseline = p.periods?.[baseKey]?.avg_daily ?? null;
     m.change = period === 'pre_2024' ? null : p.change?.[BT_CHANGE[period]] ?? pctOf(m.value, m.baseline);
-    m.baselineHourly = hourly(p, 'pre_2024');
+    m.baselineHourly = hourly(p, baseKey);
     m.currentHourly = hourly(p, period);
-    m.baselineWeekend = hourly(p, 'pre_2024', true);
+    m.baselineWeekend = hourly(p, baseKey, true);
     m.currentWeekend = hourly(p, period, true);
     const e = period === 'pre_2024' ? null : btEvidence(p, period);
     m.evidence = e;
@@ -97,7 +97,9 @@ export function featureMetrics(props, layer, period, hour = null, metric = 'chan
     m.ci = e && isNum(e.lo) && isNum(e.hi) ? [e.lo, e.hi] : null;
   } else if (layer === 'aq_monitor') {
     const key = AQ_COMPARISON[period];
-    const c = key ? p.comparisons?.[key] ?? null : null;
+    const use2025Baseline = period === 'post_2026_ytd' && !isNum(p.periods?.ytd_2024?.mean);
+    const comparisonKey = use2025Baseline ? 'post_2026ytd_vs_ytd_2025' : key;
+    const c = comparisonKey ? p.comparisons?.[comparisonKey] ?? null : null;
     const e = period === 'pre_2024' ? null : aqEvidence(p, period);
     // In "change" mode the before / after figures are the matched-month means the verdict was computed from
     // (the reconciled ones when they exist, so they agree with the interval shown), and "amount only" shows the
@@ -105,26 +107,28 @@ export function featureMetrics(props, layer, period, hour = null, metric = 'chan
     const wantMatched = metric !== 'absolute' && period !== 'pre_2024';
     const useEv = wantMatched && e && isNum(e.pre_mean) && isNum(e.post_mean);
     const useOld = !useEv && wantMatched && isNum(c?.pre_mean) && isNum(c?.post_mean);
-    const baseKey = period === 'post_2026_ytd' ? 'ytd_2024' : 'pre_2024';
+    const baseKey = period === 'post_2026_ytd' ? (use2025Baseline ? 'ytd_2025' : 'ytd_2024') : 'pre_2024';
     m.comparison = c;
     m.evidence = e;
-    m.baselineLabel = period === 'post_2026_ytd' ? 'Jan–Aug 2024' : '2024, before the toll';
+    m.baselineLabel = period === 'post_2026_ytd' ? (use2025Baseline ? 'Jan–Aug 2025' : 'Jan–Aug 2024') : '2024, before the toll';
     m.value = useEv ? e.post_mean : useOld ? c.post_mean : p.periods?.[period]?.mean ?? c?.post_mean ?? null;
     m.baseline = period === 'pre_2024' ? null : useEv ? e.pre_mean : useOld ? c.pre_mean : p.periods?.[baseKey]?.mean ?? c?.pre_mean ?? null;
     m.change = period === 'pre_2024' ? null : useEv ? e.pct_raw ?? pctOf(m.value, m.baseline) : useOld ? c.pct_raw ?? pctOf(m.value, m.baseline) : pctOf(m.value, m.baseline);
     m.classification = period === 'pre_2024' ? null : e?.class ?? LEGACY_CLASS[c?.classification ?? p.classification] ?? 'no_baseline';
     m.support = m.classification;
     m.ci = e && isNum(e.adj_ci_low) && isNum(e.adj_ci_high) ? [e.adj_ci_low, e.adj_ci_high] : e && isNum(e.ci_low) && isNum(e.ci_high) ? [e.ci_low, e.ci_high] : null;
-    m.baselineHourly = hourly(p, 'pre_2024') ?? hourly(p, 'ytd_2025');
+    m.baselineHourly = hourly(p, baseKey);
     m.currentHourly = hourly(p, period);
-    m.baselineWeekend = hourly(p, 'pre_2024', true) ?? hourly(p, 'ytd_2025', true);
+    m.baselineWeekend = hourly(p, baseKey, true);
     m.currentWeekend = hourly(p, period, true);
   } else if (layer === 'dot_segment') {
-    m.baselineLabel = 'before';
-    m.currentLabel = 'after';
-    m.value = p.post_adv ?? p.latest_adv ?? null;
-    m.baseline = p.pre_adv ?? null;
-    m.change = p.role === 'matched' ? p.pct_change ?? pctOf(m.value, m.baseline) : null;
+    const matched = p.role === 'matched';
+    const baseline = period === 'pre_2024';
+    m.baselineLabel = '2024 baseline';
+    m.currentLabel = matched ? (baseline ? '2024 baseline' : '2025 follow-up') : 'Observed traffic';
+    m.value = matched ? (baseline ? p.pre_adv ?? null : p.post_adv ?? null) : p.latest_adv ?? null;
+    m.baseline = matched && !baseline ? p.pre_adv ?? null : null;
+    m.change = matched && !baseline ? p.pct_change ?? pctOf(m.value, m.baseline) : null;
   }
 
   if (isNum(hour) && hour >= 0 && hour < 24 && layer !== 'dot_segment') {
@@ -163,8 +167,8 @@ export function metaLine(props) {
   if (props?.boro) bits.push(props.boro);
   if (props?.uhf42_name) bits.push(props.uhf42_name);
   if (props?.crz_status) bits.push(props.crz_status === 'inside' ? 'inside the zone' : props.crz_status === 'boundary' ? 'on the zone boundary' : 'outside the zone');
-  if (props?.dac_designated === true) bits.push('Disadvantaged Community tract');
-  else if (props?.dac_designated === false) bits.push('not a designated tract');
+  if (props?.dac_designated === true) bits.push('Inside a disadvantaged community area');
+  else if (props?.dac_designated === false) bits.push('Outside a disadvantaged community area');
   if (props?.approx) bits.push('approx. location');
   return bits.join(' · ');
 }

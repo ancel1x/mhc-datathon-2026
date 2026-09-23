@@ -31,22 +31,49 @@ function cssPx(name, fallback) {
   }
 }
 
-function tipFor(f) {
+function tipFor(f, dacMode = 'designated') {
   const p = f?.properties ?? {};
   if (p._layer) {
-    return { title: p.name, lines: [`${p._baseLabel}: ${p._baseText}`, `${p._curLabel}: ${p._valueText}`, `change: ${p._changeText}`] };
+    if (p._layer === 'dot_segment') {
+      if (p._dotRole !== 'matched') return { title: p.name, lines: [`${p._valueText} vehicles/day`, `Counted ${p._observationMonth}`, p._dotRole === 'unpaired' ? 'No matched before/after comparison' : 'Single observation — no before/after comparison'] };
+      return { title: p.name, lines: [
+        ...(p._baseText && p._baseText !== '—' ? [`${p._baseLabel}: ${p._baseText}`] : []),
+        ...(p._valueText && p._valueText !== '—' ? [`${p._curLabel}: ${p._valueText}`] : []),
+        ...(p._changeText && p._changeText !== '—' ? [`Change from 2024: ${p._changeText}`] : []),
+      ] };
+    }
+    return { title: p.name, lines: [
+      ...(p._baseText && !p._baseText.includes('No data') ? [`${p._baseLabel}: ${p._baseText}`] : []),
+      ...(p._valueText && !p._valueText.includes('No data') ? [`${p._curLabel}: ${p._valueText}`] : []),
+      ...(p._changeText && !p._changeText.includes('No data') && p._changeText !== '—' ? [`change: ${p._changeText}`] : []),
+    ] };
   }
   if (p._of) {
     return { title: p.name, lines: [p._text, 'click for the full timeline'] };
   }
   if (f.layer?.id === POLYGON_LAYER_IDS.dac) {
     // The DAC fields are NY State percentile RANKS (0–1), never shares: 0.99 = the 99th percentile statewide.
+    const combinedRank = Number.isFinite(Number(p.combined_pct)) ? Number(p.combined_pct) : null;
+    const explicitScore = Number.isFinite(Number(p.combined_score)) ? Number(p.combined_score) : null;
+    const score = explicitScore ?? (combinedRank == null ? null : Math.round(combinedRank * 100));
+    const designation = p.dac ? 'Disadvantaged Community (NY State, 2023)' : 'Not a designated Disadvantaged Community';
+    const burdenLines = score != null
+      ? [
+          `Combined burden score: ${Math.round(score)} / 100`,
+          'Higher score = greater combined burden',
+          designation,
+          ...(combinedRank == null ? [] : [`Statewide percentile: ${fmtPercentile(combinedRank)} percentile`]),
+        ]
+      : [
+          designation,
+          ...(combinedRank == null ? [] : [`Combined burden: ${fmtPercentile(combinedRank)} percentile statewide`]),
+        ];
     return {
       title: `Census tract ${p.geoid ?? ''}`,
       lines: [
-        p.dac ? 'Disadvantaged Community (NY State, 2023)' : 'Not a designated Disadvantaged Community',
-        `Combined burden score: ${fmtPercentile(p.combined_pct)} percentile in NY State`,
-        `Asthma ER visits: ${fmtPercentile(p.asthma_pct)} · traffic volume: ${fmtPercentile(p.traffic_pct)} (statewide percentile ranks, not rates)`,
+        ...burdenLines,
+        ...(Number.isFinite(Number(p.asthma_pct)) ? [`Asthma ER visits: ${fmtPercentile(Number(p.asthma_pct))} percentile statewide`] : []),
+        ...(Number.isFinite(Number(p.traffic_pct)) ? [`Traffic volume: ${fmtPercentile(Number(p.traffic_pct))} percentile statewide`] : []),
       ],
     };
   }
@@ -54,9 +81,11 @@ function tipFor(f) {
     return {
       title: p.name,
       lines: [
-        `Child asthma ER visits: ${fmtInt(p.asthma_ed_children)} per 10,000 ages 5–17 · adults ${fmtInt(p.asthma_ed_adults)} per 10,000 (${p.health_period ?? '2023'}, newest published)`,
-        `Below the poverty line: ${fmtNum(p.poverty_pct, 1)}% (ACS 2019–23) · PM2.5 in 2024: ${fmtNum(p.pm25_2024)} µg/m³`,
-        'pre-existing context, not an effect of the toll · click for detail',
+        `Child asthma ER visits: ${fmtInt(p.asthma_ed_children)} per 10,000 children ages 5–17`,
+        '2023 — latest available',
+        '2023 is the latest available year and predates congestion pricing.',
+        'This shows pre-existing health burden, not an effect of the toll.',
+        `PM2.5 in 2024: ${fmtNum(p.pm25_2024)} µg/m³ (${fmtNum(p.pm25_2009)} in 2009)`,
       ],
     };
   }
@@ -101,7 +130,7 @@ function MapTooltip({ layers, enabled, container }) {
       }
       if (key !== previous) {
         previous = key;
-        const next = f ? tipFor(f) : null;
+        const next = f ? tipFor(f, dacMode) : null;
         setTip(next);
         canvas.style.cursor = next ? 'pointer' : 'grab';
       }

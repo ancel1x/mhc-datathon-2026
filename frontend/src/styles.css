@@ -20,7 +20,10 @@
   --sep: rgba(255, 255, 255, 0.08);
   --thumb: rgba(255, 255, 255, 0.12);
   --switch-off: rgba(255, 255, 255, 0.18);
-  --focus: rgba(245, 245, 247, 0.5);
+  --blue: #2f6fdb;
+  --blue-hover: #3d7be5;
+  --blue-soft: rgba(47, 111, 219, 0.2);
+  --focus: rgba(47, 111, 219, 0.82);
   --glyph-base: rgba(235, 235, 245, 0.35);
   --cap-bg: rgba(16, 16, 18, 0.84);
 
@@ -62,7 +65,7 @@
     --sep: rgba(0, 0, 0, 0.08);
     --thumb: rgba(255, 255, 255, 0.92);
     --switch-off: rgba(0, 0, 0, 0.16);
-    --focus: rgba(29, 29, 31, 0.5);
+    --focus: rgba(47, 111, 219, 0.82);
     --glyph-base: rgba(29, 29, 31, 0.35);
     --cap-bg: rgba(246, 246, 248, 0.86);
     color-scheme: light;
@@ -82,7 +85,7 @@
   --sep: rgba(0, 0, 0, 0.08);
   --thumb: rgba(255, 255, 255, 0.92);
   --switch-off: rgba(0, 0, 0, 0.16);
-  --focus: rgba(29, 29, 31, 0.5);
+  --focus: rgba(47, 111, 219, 0.82);
   --glyph-base: rgba(29, 29, 31, 0.35);
   --cap-bg: rgba(246, 246, 248, 0.86);
   color-scheme: light;
@@ -122,7 +125,7 @@ p {
   margin: 0;
 }
 a {
-  color: inherit;
+  color: var(--blue);
 }
 button {
   font: inherit;
@@ -176,6 +179,17 @@ button {
 .cls-insufficient {
   color: var(--text-3);
 }
+.cls-increase {
+  color: var(--red);
+}
+.cls-decrease {
+  color: var(--green);
+}
+.cls-uncertain,
+.cls-limited,
+.cls-no_baseline {
+  color: var(--text-2);
+}
 .badge {
   font-size: 10px;
   font-weight: 600;
@@ -226,7 +240,8 @@ button {
   transition: background var(--dur) ease, color var(--dur) ease;
 }
 .text-btn:hover {
-  background: var(--fill);
+  background: var(--blue-soft);
+  color: var(--blue-hover);
 }
 .text-btn:disabled {
   color: var(--text-3);
@@ -234,7 +249,8 @@ button {
   cursor: default;
 }
 .text-btn[aria-pressed='true'] {
-  background: var(--fill);
+  background: var(--blue-soft);
+  color: var(--blue-hover);
 }
 .text-btn--quiet {
   color: var(--text-2);
@@ -255,10 +271,11 @@ button {
   transition: background var(--dur) ease;
 }
 .btn--fill {
-  background: var(--fill);
+  background: var(--blue);
+  color: #fff;
 }
 .btn:hover {
-  background: var(--fill-hover);
+  background: var(--blue-hover);
 }
 .icon-btn {
   width: 28px;
@@ -270,8 +287,8 @@ button {
   transition: background var(--dur) ease, color var(--dur) ease;
 }
 .icon-btn:hover {
-  background: var(--fill);
-  color: var(--text);
+  background: var(--blue-soft);
+  color: var(--blue-hover);
 }
 .close-btn {
   width: 24px;
@@ -302,8 +319,8 @@ button {
   background: var(--fill);
 }
 .chip[aria-pressed='true'] {
-  background: var(--fill-sel);
-  color: var(--text);
+  background: var(--blue);
+  color: #fff;
 }
 .chev {
   flex: none;
@@ -326,7 +343,8 @@ button {
   width: calc((100% - 4px) / var(--n, 2));
   transform: translateX(calc(var(--i, 0) * 100%));
   border-radius: 6px;
-  background: var(--thumb);
+  background: var(--blue);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.24);
   pointer-events: none;
 }
 .seg__btn {
@@ -347,6 +365,9 @@ button {
 .seg__btn:hover,
 .seg__btn[aria-pressed='true'] {
   color: var(--text);
+}
+.seg[data-tone='purple'] .seg__thumb {
+  background: var(--purple);
 }
 .seg--sm .seg__btn {
   height: 22px;
@@ -379,14 +400,14 @@ button {
   height: 14px;
   margin-top: -5px;
   border-radius: 50%;
-  background: #fff;
+  background: var(--blue);
 }
 .slider::-moz-range-thumb {
   width: 14px;
   height: 14px;
   border: 0;
   border-radius: 50%;
-  background: #fff;
+  background: var(--blue);
 }
 
 /* macOS-size switch: 26 x 16, 12 px knob */
@@ -409,7 +430,10 @@ button {
   background: #fff;
 }
 .switch[data-on='true'] {
-  background: var(--green);
+  background: var(--blue);
+}
+.switch[data-on='true'][data-accent='purple'] {
+  background: var(--purple);
 }
 .switch[data-on='true'] i {
   transform: translateX(10px);
@@ -429,7 +453,7 @@ button {
   top: 0;
   left: 0;
   height: 2px;
-  background: var(--text);
+  background: var(--blue);
   transition: width 240ms ease;
 }
 .loading__title {
@@ -541,6 +565,9 @@ button {
   line-height: 1.2;
   margin: 0 0 14px;
 }
+.chapter[aria-labelledby='chapter-title'] > .chapter__title {
+  color: var(--blue);
+}
 .chapter__lede {
   font-size: 16px;
   font-weight: 500;
@@ -553,6 +580,14 @@ button {
   line-height: 1.6;
   color: var(--text-2);
   margin: 0 0 20px;
+}
+.chapter__notice {
+  margin: -4px 0 14px;
+  padding: 9px 10px;
+  border-left: 2px solid var(--grey);
+  color: var(--text-2);
+  font-size: 12.5px;
+  line-height: 1.45;
 }
 .chapter strong {
   color: var(--text);
@@ -590,6 +625,10 @@ button {
 }
 .chapter__section-title {
   margin-top: 16px;
+}
+.chapter__section-title--units,
+.detail__chart-title {
+  text-transform: none;
 }
 .chapter__control {
   display: flex;
@@ -712,6 +751,12 @@ button {
   font-weight: 500;
   color: var(--text);
 }
+.klist .num.tone-worse {
+  color: var(--red);
+}
+.klist .num.tone-better {
+  color: var(--green);
+}
 .klist .sub {
   color: var(--text-3);
   font-weight: 400;
@@ -744,10 +789,52 @@ button {
 .tbl td {
   font-variant-numeric: tabular-nums;
 }
+.tbl td.cls-increase,
+.klist .num.cls-increase {
+  color: var(--red);
+}
+.tbl td.cls-decrease,
+.klist .num.cls-decrease {
+  color: var(--green);
+}
+.tbl td.cls-uncertain,
+.tbl td.cls-limited,
+.tbl td.cls-no_baseline,
+.klist .num.cls-uncertain,
+.klist .num.cls-limited,
+.klist .num.cls-no_baseline {
+  color: var(--text-2);
+}
 .tbl tfoot td {
   color: var(--text-3);
   font-size: 11px;
   white-space: normal;
+}
+.tbl--method {
+  table-layout: fixed;
+}
+.tbl--method td {
+  vertical-align: top;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.tbl--method td:first-child {
+  width: 58%;
+  padding-right: 8px;
+}
+.tbl--method td:last-child {
+  width: 42%;
+}
+.tbl--air {
+  font-size: 11px;
+}
+.tbl--air th,
+.tbl--air td {
+  padding-left: 5px;
+}
+.tbl--air th {
+  white-space: normal;
+  line-height: 1.2;
 }
 .tolltable__note {
   color: var(--text-3);
@@ -769,7 +856,7 @@ button {
 }
 .sources-list a {
   text-decoration: none;
-  color: var(--text);
+  color: var(--blue-hover);
 }
 .sources-list a:hover {
   text-decoration: underline;
@@ -884,6 +971,9 @@ button {
 }
 .row:hover {
   background: var(--fill);
+}
+.row:hover .row__label {
+  color: var(--blue-hover);
 }
 .rows li + li .row {
   border-top: 1px solid var(--sep);

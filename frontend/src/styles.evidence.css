@@ -186,6 +186,12 @@
   color: var(--text);
   font-weight: 600;
 }
+.tbl td.cell--strong.cls-increase {
+  color: var(--red);
+}
+.tbl td.cell--strong.cls-decrease {
+  color: var(--green);
+}
 
 /* coverage warning (Hugh L. Carey) */
 .warn {

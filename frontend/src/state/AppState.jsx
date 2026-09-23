@@ -72,7 +72,7 @@ export const initialState = {
   sourcesOpen: false,
   controlsOpen: fromUrl.controlsOpen, // phone: controls sheet open
   controlsCollapsed: Boolean(fromUrl.controlsCollapsed), // desktop: control panel collapsed to a pill (?controls=collapsed)
-  dacMode: 'designated', // 'designated' | 'percentile'
+  dacMode: 'percentile', // 'designated' | 'percentile'; burden score is the primary presentation
   glyphMode: false, // map zoom >= 11 (clock glyphs on)
 };
 

@@ -36,7 +36,7 @@
 }
 .story__action:hover,
 .story__action[aria-pressed='true'] {
-  color: var(--text);
+  color: var(--blue-hover);
 }
 
 /* ---------- intro title card ---------- */
@@ -60,7 +60,7 @@
   top: 0;
   left: 0;
   height: 2px;
-  background: var(--text);
+  background: var(--blue);
   transition: width 240ms ease;
 }
 .intro__inner {
@@ -160,22 +160,23 @@
   height: 32px;
   padding: 0 12px 0 10px;
   border-radius: var(--r-inner);
-  background: var(--fill);
+  background: var(--blue);
   font-size: 13px;
   font-weight: 500;
-  color: var(--text);
+  color: #fff;
   white-space: nowrap;
   transition: background var(--dur) ease;
 }
 .tl__play:hover {
-  background: var(--fill-hover);
+  background: var(--blue-hover);
 }
 .tl__play--on {
-  background: transparent;
-  color: var(--text-2);
+  background: var(--blue-soft);
+  color: var(--blue-hover);
 }
 .tl__play--on:hover {
-  color: var(--text);
+  background: rgba(47, 111, 219, 0.28);
+  color: var(--blue-hover);
 }
 .tl__grid {
   flex: 1 1 auto;
@@ -214,7 +215,7 @@
   right: calc(50% / var(--n, 9));
 }
 .tl__fill {
-  background: var(--text-2);
+  background: var(--text-3);
   transform-origin: left center;
   transform: scaleX(0);
   transition: transform 600ms ease;
@@ -222,7 +223,7 @@
 }
 .tl__fill--live {
   transition: none;
-  background: var(--text);
+  background: var(--blue);
 }
 .tl__track li {
   display: grid;
@@ -251,10 +252,11 @@
 .tl__stop[aria-current='step'] i {
   width: 10px;
   height: 10px;
-  background: var(--text);
+  background: var(--blue);
+  box-shadow: 0 0 0 3px var(--blue-soft);
 }
 .tl__stop:hover i {
-  background: var(--text);
+  background: var(--blue-hover);
 }
 .tl__era {
   font-size: 10.5px;
@@ -278,7 +280,7 @@
   transition: color var(--dur) ease;
 }
 .tl__title[data-current='true'] {
-  color: var(--text);
+  color: var(--blue-hover);
   font-weight: 500;
 }
 
@@ -319,7 +321,7 @@
   right: 0;
   bottom: 0;
   height: 2px;
-  background: var(--text);
+  background: var(--blue);
   opacity: 0.55;
   transform-origin: left center;
   transform: scaleX(0);
@@ -360,7 +362,7 @@
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  border: 2px solid var(--text);
+  border: 2px solid var(--blue);
   background: rgba(0, 0, 0, 0.25);
   box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.35);
   animation: intro-in 450ms ease both;
@@ -448,11 +450,12 @@
   font-weight: 600;
   letter-spacing: -0.02em;
   line-height: 1;
-  color: var(--text);
+  color: var(--blue);
 }
 .yearstamp__sub {
   font-size: 12px;
-  color: var(--text-2);
+  color: var(--blue);
+  opacity: 0.68;
   margin-top: 4px;
 }
 .app[data-autoplay='true'] .yearstamp {

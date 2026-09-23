@@ -25,6 +25,12 @@ export function fmtCompact(v) {
   return fmtInt(v);
 }
 
+/** Traffic comparison value with enough precision to reconcile a displayed percent change. */
+export function fmtTrafficK(v) {
+  if (!isNum(v)) return DASH;
+  return Math.abs(v) >= 1e3 ? `${fmtNum(v / 1e3, 1)}k` : fmtInt(v);
+}
+
 /** Signed number with a true minus sign. Zero renders as "0". */
 export function fmtSigned(v, digits = 1) {
   if (!isNum(v)) return DASH;
