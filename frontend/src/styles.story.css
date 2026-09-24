@@ -394,8 +394,10 @@
   background: var(--blue);
   box-shadow: 0 0 0 3px var(--blue-soft);
 }
-.tl__stop:hover i {
+.tl__stop:hover i,
+.tl__stop[data-hot='true'] i {
   background: var(--blue-hover);
+  box-shadow: 0 0 0 3px var(--blue-soft);
 }
 .tl__era {
   font-size: 10.5px;
@@ -446,7 +448,8 @@
   }
 }
 .tl__title:hover,
-.tl__title:focus-visible {
+.tl__title:focus-visible,
+.tl__title[data-hot='true'] {
   color: var(--blue-hover);
   background: var(--blue-soft);
 }

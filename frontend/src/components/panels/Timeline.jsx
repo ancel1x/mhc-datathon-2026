@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { CHAPTERS } from '../../content/chapters.js';
 import { useAppState, useDispatch } from '../../state/AppState.jsx';
 
@@ -38,6 +38,9 @@ export default function Timeline({ guide }) {
   const { activeChapter, exploreMode, autoplay } = useAppState();
   const dispatch = useDispatch();
   const fillRef = useRef(null);
+  // The dot and the title of a stop are separate rows; hovering or focusing either highlights both.
+  const [hot, setHot] = useState(null);
+  const hover = (i) => ({ onMouseEnter: () => setHot(i), onMouseLeave: () => setHot(null), onFocus: () => setHot(i), onBlur: () => setHot(null) });
   const cur = exploreMode ? N - 1 : Math.min(activeChapter, N - 1);
 
   // Live fill during the tour: written straight to the DOM each frame, no React re-render.
@@ -107,7 +110,9 @@ export default function Timeline({ guide }) {
                 data-past={i < cur ? 'true' : 'false'}
                 aria-label={`${s.era}: ${s.title}`}
                 title={s.title}
+                data-hot={hot === i ? 'true' : 'false'}
                 onClick={() => go(i)}
+                {...hover(i)}
               >
                 <i />
               </button>
@@ -116,7 +121,7 @@ export default function Timeline({ guide }) {
         </ol>
         <div className="tl__titles">
           {STOPS.map((s, i) => (
-            <button key={i} type="button" className="tl__title" data-current={i === cur ? 'true' : 'false'} aria-current={i === cur ? 'step' : undefined} title={s.title} onClick={() => go(i)}>
+            <button key={i} type="button" className="tl__title" data-current={i === cur ? 'true' : 'false'} aria-current={i === cur ? 'step' : undefined} title={s.title} data-hot={hot === i ? 'true' : 'false'} onClick={() => go(i)} {...hover(i)}>
               {s.display}
             </button>
           ))}
