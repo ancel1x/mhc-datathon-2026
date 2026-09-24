@@ -172,13 +172,13 @@ neighborhoods) stays in Explore.
 
 | | |
 |---|---|
-| ![Intro title card](screenshots/00-intro.png) | ![2024 · Before the toll](screenshots/01-before.png) |
-| ![January 2025 · The toll begins](screenshots/02-toll-begins.png) | ![2025 · Inside the zone](screenshots/03-inside.png) |
-| ![2025 · Crossings](screenshots/04-crossings.png) | ![2025 · Street level](screenshots/05-streets.png) |
-| ![2025 · Air](screenshots/06-air.png) | ![2025 · The South Bronx](screenshots/07-bronx.png) |
-| ![2025 · Who was already carrying the most](screenshots/08-burden.png) | ![2026 so far](screenshots/09-year-two.png) |
-| ![If the Major Deegan came down](screenshots/10-what-if.png) | ![What this can't say](screenshots/11-caveats.png) |
-| ![Explore, crossing inspector](screenshots/12-explore-crossing.png) | ![Guided tour with callouts](screenshots/13-guided-tour.png) |
+| ![Intro title card](screenshots/00-intro.webp) | ![2024 · Before the toll](screenshots/01-before.webp) |
+| ![January 2025 · The toll begins](screenshots/02-toll-begins.webp) | ![2025 · Inside the zone](screenshots/03-inside.webp) |
+| ![2025 · Crossings](screenshots/04-crossings.webp) | ![2025 · Street level](screenshots/05-streets.webp) |
+| ![2025 · Air](screenshots/06-air.webp) | ![2025 · The South Bronx](screenshots/07-bronx.webp) |
+| ![2025 · Who was already carrying the most](screenshots/08-burden.webp) | ![2026 so far](screenshots/09-year-two.webp) |
+| ![If the Major Deegan came down](screenshots/10-what-if.webp) | ![What this can't say](screenshots/11-caveats.webp) |
+| ![Explore, crossing inspector](screenshots/12-explore-crossing.webp) | ![Guided tour with callouts](screenshots/13-guided-tour.webp) |
 
 The app opens on a title card that fades into the map, then pages along a timeline (Back / Next, arrow keys, or the
 stops in the bar under the map). **Play the story** runs the guided tour (Space pauses, Esc exits). Deep links:

@@ -8,7 +8,7 @@ So I made an interactive map of NYC for the MHC Datathon 2026. It walks through 
 and then you can poke around the data yourself. Everything on it comes from public data from the MTA, NYC DOT,
 the NYC Health Department and New York State.
 
-![The crossings chapter](docs/screenshots/04-crossings.png)
+![The crossings chapter](docs/screenshots/04-crossings.webp)
 
 ## 🚀 Running it
 
