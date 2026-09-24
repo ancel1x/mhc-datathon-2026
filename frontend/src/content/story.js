@@ -406,7 +406,7 @@ export function buildChapterCards({ summary, geo }) {
         rows: selected.map((row) => ({
           label: row.name,
           value: `${fmtNum(row.pre_mean, 2)} → ${fmtNum(row.post_mean, 2)} µg/m³`,
-          sub: `${fmtSigned(row.delta_raw, 2)} raw change · ${row.class === 'decrease' ? 'supported decrease' : 'weather-adjusted result uncertain'}`,
+          sub: `${fmtSigned(row.delta_raw, 2)} raw change · ${row.class === 'decrease' ? 'supported PM2.5 decrease' : 'weather-adjusted PM2.5 change uncertain'}`,
           tone: row.delta_raw,
         })),
       },
@@ -489,7 +489,7 @@ export const EXPLORE_CARD = {
 };
 
 // ---- small helpers -------------------------------------------------------------------------
-const CLASS_WORD = { increase: 'supported increase', decrease: 'supported decrease', uncertain: 'uncertain', limited: 'coverage-limited', no_baseline: 'no eligible baseline' };
+const CLASS_WORD = { increase: 'supported traffic increase', decrease: 'supported traffic decrease', uncertain: 'traffic change uncertain', limited: 'traffic data coverage-limited', no_baseline: 'no 2024 traffic baseline' };
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 function monthShort(ym) {
   if (!ym || typeof ym !== 'string') return '';

@@ -55,6 +55,24 @@ export const CLASS_LABELS = {
   insufficient: 'no data',
 };
 
+/**
+ * A result label that names what changed: "supported PM2.5 decrease" for a monitor, "supported traffic increase"
+ * for a crossing. Falls back to the bare class label for anything else.
+ */
+const MEASURE = { aq_monitor: 'PM2.5', bt_facility: 'traffic', crz_entry: 'traffic', dot_segment: 'traffic' };
+export function resultLabel(layer, cls) {
+  const what = MEASURE[layer];
+  if (!what) return CLASS_LABELS[cls] ?? cls;
+  switch (cls) {
+    case 'decrease': return `supported ${what} decrease`;
+    case 'increase': return `supported ${what} increase`;
+    case 'uncertain': return `${what} change uncertain`;
+    case 'no_baseline': return `no 2024 ${what} baseline`;
+    case 'limited': return `${what} data coverage-limited`;
+    default: return CLASS_LABELS[cls] ?? cls;
+  }
+}
+
 /** Order for sorting result lists: strongest evidence first, missing baselines last. */
 export const CLASS_ORDER = { decrease: 0, increase: 1, uncertain: 2, limited: 3, no_baseline: 4 };
 

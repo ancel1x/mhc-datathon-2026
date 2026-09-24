@@ -20,9 +20,12 @@ export function intervalStatus(lo, hi, status = null) {
   return 'uncertain';
 }
 
-export function StatusBadge({ status, text }) {
+/** `what` names the measure ("traffic", "PM2.5") so the badge reads "Supported PM2.5 decrease". */
+export function StatusBadge({ status, text, what = null }) {
   const st = status ?? 'none';
-  return <span className={`badge badge--${st}`}>{text ?? STATUS_TEXT[st] ?? st}</span>;
+  const named = what && { increase: `Supported ${what} increase`, decrease: `Supported ${what} decrease`, uncertain: `${what} change uncertain`, no_baseline: `No 2024 ${what} baseline`, limited: `${what} coverage-limited` }[st];
+  const label = text ?? named ?? STATUS_TEXT[st] ?? st;
+  return <span className={`badge badge--${st}`}>{label.charAt(0).toUpperCase() + label.slice(1)}</span>;
 }
 
 /**

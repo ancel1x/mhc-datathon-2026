@@ -64,7 +64,7 @@ function Switch({ on, accent = 'blue' }) {
 function LayerRow({ label, hint, on, onClick, sub = false, accent = 'blue' }) {
   return (
     <li>
-      <button type="button" className={sub ? 'row row--sub' : 'row'} role="switch" aria-checked={on} onClick={onClick}>
+      <button type="button" className={sub ? 'row row--sub' : 'row'} role="switch" aria-checked={on} onClick={onClick} title={hint ? `${label}: ${hint}` : label}>
         <span className="row__text">
           <span className="row__label">{label}</span>
           <span className="row__hint">{hint}</span>

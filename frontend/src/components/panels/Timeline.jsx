@@ -3,14 +3,14 @@ import { CHAPTERS } from '../../content/chapters.js';
 import { useAppState, useDispatch } from '../../state/AppState.jsx';
 
 const DISPLAY_LABELS = [
-  <>1. BEFORE<br />THE TOLL</>,
-  <>2. THE<br />HEADLINE</>,
-  <>3. WHERE DID<br />TRAFFIC GO?</>,
-  <>4. FOLLOW<br />THE AIR</>,
-  <>5. WHO BEARS<br />THE BURDEN?</>,
-  <>6. ASTHMA<br />ALLEY</>,
-  <>7. ONE YEAR<br />LATER</>,
-  <>8. WHAT COULD NYC<br />BECOME?</>,
+  <>1. Before<br />the toll</>,
+  <>2. The<br />headline</>,
+  <>3. Where did<br />traffic go?</>,
+  <>4. Follow<br />the air</>,
+  <>5. Who bears<br />the burden?</>,
+  <>6. Asthma<br />Alley</>,
+  <>7. One year<br />later</>,
+  <>8. What could<br />NYC become?</>,
 ];
 const STOPS = CHAPTERS.map((c, index) => ({ era: c.era, short: c.short, title: c.title, display: DISPLAY_LABELS[index] ?? c.short }));
 const N = STOPS.length;
@@ -19,7 +19,7 @@ const GROUPS = [
   { label: 'THE SHIFT', start: 1, count: 3 },
   { label: 'LOCAL IMPACT', start: 4, count: 2 },
   { label: 'WHAT LASTED', start: 6, count: 1 },
-  { label: 'WHAT NEXT', start: 7, count: 1 },
+  { label: 'WHAT’S NEXT', start: 7, count: 1 },
 ];
 const fillScale = (p) => `scaleX(${(Math.max(0, Math.min(N - 1, p)) / (N - 1)).toFixed(4)})`;
 

@@ -306,6 +306,52 @@
   pointer-events: none;
 }
 
+/* the story card never scrolls sideways: long stat values wrap onto a second line, and any long word or
+   table cell breaks inside the card instead of pushing past its edge */
+.story__body {
+  overflow-x: hidden;
+}
+.story .chapter {
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+/* compact lists: name and value on one line, the explanatory note on its own line underneath */
+.story .klist li {
+  grid-template-columns: minmax(10ch, 1fr) auto;
+  row-gap: 2px;
+}
+.story .klist li > .sub {
+  grid-column: 1 / -1;
+}
+.story .stat {
+  grid-template-columns: minmax(0, 1fr) fit-content(58%);
+}
+.story .stat__value {
+  white-space: normal;
+  max-width: 100%;
+  text-wrap: balance;
+}
+.story .tbl {
+  table-layout: auto;
+}
+.story .tbl td,
+.story .tbl th {
+  white-space: normal;
+}
+
+/* layer rows: a description cut off with "…" expands to its full text on hover or keyboard focus */
+.row {
+  height: auto;
+  min-height: 52px;
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+.row:hover .row__hint,
+.row:focus-visible .row__hint {
+  white-space: normal;
+  overflow: visible;
+}
+
 /* collapsing the map controls: the panel slides out to the right, the pill fades in, and the year stamp,
    flow canvas and timeline take the freed space */
 .side {
