@@ -301,8 +301,12 @@ function FlowLayer({ featured }) {
         for (let i = 1; i < pts.length; i += 1) ctx.lineTo(pts[i][0], pts[i][1]);
         ctx.stroke();
         // the traffic: little cars driving from the first coordinate to the last
-        const carLen = 7.5 + s.w * 1.7;
-        const spacing = carLen * 2.3;
+        // Busier routes carry more cars, not just a thicker road: the gap between cars shrinks with volume
+        // (widths run 1.5–5 px). Density follows the target width, not the tweening one, so cars do not
+        // jitter while a route changes color; the count updates once per change.
+        const busy = Math.max(0, Math.min(1, (r.to.w - 1.5) / 3.5));
+        const carLen = 8 + s.w * 0.9;
+        const spacing = carLen * (6 - 4.6 * Math.sqrt(busy));
         const travelled = reduced ? r.phase * spacing : tSec * SPEED + r.phase * spacing;
         const offset = travelled % spacing;
         const cycle = Math.floor(travelled / spacing); // a car keeps its paint as it moves down the route
