@@ -460,7 +460,6 @@ export function buildChapterCards({ summary, geo }) {
     {
       kicker: 'FROM EVIDENCE TO INTERVENTION', title: 'Chapter 8 — What Could NYC Become?',
       lede: 'Seven chapters of traffic, air-quality, environmental-justice, and health evidence point toward a more specific question: where could changing the physical city address a burden revealed by the data?',
-      badge: 'SCENARIO · DESIGN HYPOTHESIS',
       stats: [
         { value: 'Major Deegan Expressway', label: 'Selected intervention location · High Bridge, South Bronx' },
         { value: `${fmtInt(deegan.latest_adv)} vehicles/day`, label: 'Northbound · Oct–Nov 2025 snapshot · no matched pre-toll count' },
