@@ -11,7 +11,7 @@ import { fmtInt, fmtNum, fmtPercentile } from '../../lib/format.js';
 import { tourPadding } from '../GuidePlayer.jsx';
 import ZoneLayer from './ZoneLayer.jsx';
 import PolygonLayers, { POLYGON_LAYER_IDS } from './PolygonLayers.jsx';
-import PointLayers, { DIAMOND_IMAGE, ensureDiamondImage, ensureSquareImage, POINT_LAYER_IDS, SQUARE_IMAGE } from './PointLayers.jsx';
+import PointLayers, { DIAMOND_IMAGE, ensureDiamondImage, POINT_LAYER_IDS } from './PointLayers.jsx';
 import FlowLayer, { FLOW_LAYER_IDS } from './FlowLayer.jsx';
 import GlyphLayer from './GlyphLayer.jsx';
 import GuideCallouts from './GuideCallouts.jsx';
@@ -34,14 +34,6 @@ function cssPx(name, fallback) {
 function tipFor(f, dacMode = 'designated') {
   const p = f?.properties ?? {};
   if (p._layer) {
-    if (p._layer === 'dot_segment') {
-      if (p._dotRole !== 'matched') return { title: p.name, lines: [`${p._valueText} vehicles/day`, `Counted ${p._observationMonth}`, p._dotRole === 'unpaired' ? 'No matched before/after comparison' : 'Single observation — no before/after comparison'] };
-      return { title: p.name, lines: [
-        ...(p._baseText && p._baseText !== '—' ? [`${p._baseLabel}: ${p._baseText}`] : []),
-        ...(p._valueText && p._valueText !== '—' ? [`${p._curLabel}: ${p._valueText}`] : []),
-        ...(p._changeText && p._changeText !== '—' ? [`Change from 2024: ${p._changeText}`] : []),
-      ] };
-    }
     return { title: p.name, lines: [
       ...(p._baseText && !p._baseText.includes('No data') ? [`${p._baseLabel}: ${p._baseText}`] : []),
       ...(p._valueText && !p._valueText.includes('No data') ? [`${p._curLabel}: ${p._valueText}`] : []),
@@ -225,11 +217,9 @@ function MapView({ featured, guide }) {
 
   const onLoad = useCallback((e) => {
     const map = e.target;
-    ensureSquareImage(map);
     ensureDiamondImage(map);
     map.on('styleimagemissing', (ev) => {
-      if (ev.id === SQUARE_IMAGE) ensureSquareImage(map);
-      else if (ev.id === DIAMOND_IMAGE) ensureDiamondImage(map);
+      if (ev.id === DIAMOND_IMAGE) ensureDiamondImage(map);
     });
     setGlyphZoom(map.getZoom() >= GLYPH_ZOOM);
     setLoaded(true);
@@ -266,8 +256,7 @@ function MapView({ featured, guide }) {
         cursor="grab"
         onLoad={onLoad}
         onStyleImageMissing={(e) => {
-          if (e.id === SQUARE_IMAGE) ensureSquareImage(e.target);
-          else if (e.id === DIAMOND_IMAGE) ensureDiamondImage(e.target);
+          if (e.id === DIAMOND_IMAGE) ensureDiamondImage(e.target);
         }}
         onZoom={(e) => setGlyphZoom(e.viewState.zoom >= GLYPH_ZOOM)}
         onMoveEnd={() => setViewVersion((v) => v + 1)}

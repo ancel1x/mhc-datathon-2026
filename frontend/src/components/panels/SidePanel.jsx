@@ -80,7 +80,7 @@ function LayerRow({ label, hint, on, onClick, sub = false, accent = 'blue' }) {
  * "Color by" and "Hour of day" live under Advanced. Every control is always live.
  */
 function ControlsContent({ onCollapse, onClose, hasFeatured }) {
-  const { period, metric, hour, layerVisibility, dotAll, dacMode, exploreMode } = useAppState();
+  const { period, metric, hour, layerVisibility, dacMode, exploreMode } = useAppState();
   const dispatch = useDispatch();
   const [view, setView] = useState('layers');
   return (
@@ -119,7 +119,6 @@ function ControlsContent({ onCollapse, onClose, hasFeatured }) {
             const accent = k === 'dac' || k === 'uhf42' ? 'purple' : 'blue';
             const rows = [<LayerRow key={k} kind={LAYER_SYMBOL[k].kind} label={LAYER_LABELS[k]} hint={LAYER_HINTS[k]} on={on} accent={accent} onClick={() => dispatch({ type: 'TOGGLE_LAYER', layer: k })} />];
             // sub-options only appear while their parent layer is on, to keep the list short
-            if (k === 'dot_segment' && on) rows.push(<LayerRow key="dot-all" sub label="All DOT sites" hint="Also spots counted only once" on={dotAll} onClick={() => dispatch({ type: 'TOGGLE_DOT_ALL' })} />);
             if (k === 'dac' && on) rows.push(<LayerRow key="dac-pct" sub accent="purple" label="Shade by burden score" hint="0 = lower burden · 100 = higher burden" on={dacMode === 'percentile'} onClick={() => dispatch({ type: 'SET_DAC_MODE', mode: dacMode === 'percentile' ? 'designated' : 'percentile' })} />);
             return rows;
           })}

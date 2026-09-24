@@ -27,7 +27,7 @@ export default function KeyLegend({ hasFeatured = false }) {
   const { layerVisibility: v, period, metric, hour, dacMode, glyphMode } = useAppState();
   const { indexes, geo } = useData();
   const asthmaPeriod = geo?.uhf42?.features?.[0]?.properties?.health_period ?? null;
-  const traffic = v.crz_entry || v.bt_facility || v.dot_segment;
+  const traffic = v.crz_entry || v.bt_facility;
   const points = traffic || v.aq_monitor;
   const isChange = metric === 'change' && period !== 'pre_2024';
   const purplePct = v.dac && dacMode === 'percentile';
@@ -37,7 +37,6 @@ export default function KeyLegend({ hasFeatured = false }) {
   const compareNote = [
     v.bt_facility || v.aq_monitor ? `${v.bt_facility ? 'Crossings' : ''}${v.bt_facility && v.aq_monitor ? ' and ' : ''}${v.aq_monitor ? 'monitors' : ''} compare ${frame}.` : null,
     v.crz_entry ? (period === 'post_2026_ytd' ? 'Entry points compare Jan–Aug 2026 with Jan–Aug 2025; nobody counted them before the toll.' : 'Entry points were first counted the day the toll began, so 2025 has nothing earlier to compare with: they stay grey.') : null,
-    v.dot_segment ? 'Street counters compare one sampled week before the toll with one after; filled squares only.' : null,
   ].filter(Boolean).join(' ');
 
   if (!points && !v.dac && !v.uhf42 && !v.flow) return <p className="key__empty">Turn on a layer to see what its colors mean.</p>;
@@ -50,7 +49,6 @@ export default function KeyLegend({ hasFeatured = false }) {
           <div className="key__classes">
             {v.crz_entry ? <span className="key__class"><LayerSymbol kind="entry" />diamond = zone entry</span> : null}
             {v.bt_facility ? <span className="key__class"><LayerSymbol kind="disc" />disc = bridge or tunnel</span> : null}
-            {v.dot_segment ? <span className="key__class"><LayerSymbol kind="square" />square = street counter</span> : null}
             {v.aq_monitor ? <span className="key__class"><LayerSymbol kind="disc" />disc = air monitor</span> : null}
           </div>
           {v.crz_entry || v.bt_facility ? <div className="key__note">Larger zone-entry diamonds and bridge/tunnel discs represent more vehicles.</div> : null}

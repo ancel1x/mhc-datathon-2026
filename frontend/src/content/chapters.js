@@ -3,16 +3,15 @@
 // "featured" (everything else is faded). The Timeline bar groups steps by `era`.
 //
 // Every step answers one part of the Phase 1 brief: the three required layers (NYCCAS PM2.5 before/after,
-// MTA + DOT traffic, the zone + toll) and the four questions (headline vs daily/peak picture; eliminated vs
+// MTA traffic, the zone + toll) and the four questions (headline vs daily/peak picture; eliminated vs
 // shifted and who lives there; the South Bronx monitor by monitor; a highway-removal scenario).
-export const LAYER_KEYS = ['zone', 'crz_entry', 'bt_facility', 'flow', 'dot_segment', 'aq_monitor', 'dac', 'uhf42'];
+export const LAYER_KEYS = ['zone', 'crz_entry', 'bt_facility', 'flow', 'aq_monitor', 'dac', 'uhf42'];
 
 export const LAYER_LABELS = {
   zone: 'Toll zone',
   crz_entry: 'Entry points',
   bt_facility: 'Bridges & tunnels',
   flow: 'Traffic flow',
-  dot_segment: 'Street counters',
   aq_monitor: 'Air monitors',
   dac: 'Disadvantaged communities',
   uhf42: 'Child asthma ER visits',
@@ -24,7 +23,6 @@ export const LAYER_HINTS = {
   crz_entry: 'Diamonds · where vehicles enter the zone',
   bt_facility: 'Discs · nine MTA facilities, ten routes shown',
   flow: 'Moving lines · which way traffic goes',
-  dot_segment: 'Squares · one-week NYC DOT counts',
   aq_monitor: 'Dots · PM2.5, weather-adjusted verdict',
   dac: 'Purple fill · state-designated areas',
   uhf42: 'Purple shading · ER visits per 10,000 children, 2023',
@@ -36,7 +34,6 @@ export const LAYER_SYMBOL = {
   crz_entry: { kind: 'entry' },
   bt_facility: { kind: 'disc' },
   flow: { kind: 'line' },
-  dot_segment: { kind: 'square' },
   aq_monitor: { kind: 'disc' },
   dac: { kind: 'fill' },
   uhf42: { kind: 'ramp' },
@@ -112,13 +109,11 @@ export const CHAPTERS = [
     short: '6. ASTHMA ALLEY',
     title: 'Chapter 6 — Asthma Alley',
     camera: { center: [-73.91, 40.82], zoom: 11.05 },
-    layers: layers(['bt_facility', 'dot_segment', 'aq_monitor', 'dac']),
-    dotAll: true,
+    layers: layers(['bt_facility', 'aq_monitor', 'dac']),
     period: 'post_2025',
     metric: 'change',
     featured: () => ({
       bt_facility: new Set(['rfk_bronx']),
-      dot_segment: new Set(['dot_139020']),
       aq_monitor: new Set(['aq_36005NY11534', 'aq_36005NY12387']),
     }),
   },
@@ -144,13 +139,11 @@ export const CHAPTERS = [
     short: '8. WHAT COULD NYC BECOME?',
     title: 'Chapter 8 — What Could NYC Become?',
     camera: { center: [-73.928, 40.8425], zoom: 11.35 },
-    layers: layers(['bt_facility', 'flow', 'dot_segment', 'aq_monitor', 'dac']),
-    dotAll: true,
+    layers: layers(['bt_facility', 'flow', 'aq_monitor', 'dac']),
     period: 'post_2026_ytd',
     metric: 'change',
     featured: () => ({
       bt_facility: new Set(['rfk_bronx']),
-      dot_segment: new Set(['dot_139020']),
       aq_monitor: new Set(['aq_36005NY11534', 'aq_36005NY12387', 'aq_36061NY12380']),
     }),
   },
