@@ -55,6 +55,16 @@ const now = () => (typeof performance !== 'undefined' ? performance.now() : Date
 /** The year / metric a step opens on: its `from` state when it has one (so the change can be watched), else its own. */
 const opening = (ch) => ({ period: ch.from?.period ?? ch.period ?? 'post_2025', metric: ch.from?.metric ?? ch.metric ?? 'change' });
 
+/**
+ * "Before -> after" replay for a step with a `from` state: the map holds the earlier year ('before'), fast-forwards
+ * to the step's own year ('ff', the flow speeds up while every route tweens), then labels the result ('after').
+ * GuidePlayer times the phases; the flow layer and the banner on the map read them.
+ */
+export const SWEEP_MS = { before: 3000, ff: 2600, after: 3600 };
+export const SWEEP_MS_REDUCED = { before: 2000, ff: 0, after: 3000 }; // reduced motion: no fast-forward, just the cut
+let sweepSeq = 0;
+const sweepFor = (ch) => (ch?.from ? { id: ++sweepSeq, phase: 'before', from: opening(ch), to: { period: ch.period ?? 'post_2025', metric: ch.metric ?? 'change' } } : null);
+
 export const initialState = {
   intro: fromUrl.skipIntro && !fromUrl.introHold ? 'done' : 'show', // 'show' | 'leaving' | 'done'
   introHold: fromUrl.introHold,
@@ -74,6 +84,7 @@ export const initialState = {
   dacMode: 'percentile', // 'designated' | 'percentile'; burden score is the primary presentation
   overlayOpacity: 1, // guided beats can soften polygon context without changing the Explore legend scale
   glyphMode: false, // map zoom >= 11 (clock glyphs on)
+  sweep: fromUrl.explore ? null : sweepFor(startChapter), // before -> after replay of the current step, or null
 };
 
 const clampStep = (i) => Math.max(0, Math.min(CHAPTERS.length - 1, Number(i) || 0));
@@ -93,13 +104,22 @@ export function reducer(state, action) {
       const ch = CHAPTERS[action.index];
       if (!ch) return state;
       if (state.activeChapter === action.index && !state.exploreMode) return state;
-      return { ...state, activeChapter: action.index, exploreMode: false, layerVisibility: { ...ch.layers }, overlayOpacity: 1, ...opening(ch), hour: null, selectedFeature: null, sourcesOpen: false };
+      return { ...state, activeChapter: action.index, exploreMode: false, layerVisibility: { ...ch.layers }, overlayOpacity: 1, ...opening(ch), hour: null, selectedFeature: null, sourcesOpen: false, sweep: sweepFor(ch) };
+    }
+    case 'SWEEP_PHASE': {
+      const sw = state.sweep;
+      if (!sw || sw.id !== action.id) return state;
+      if (action.phase === 'end') return { ...state, sweep: null };
+      if (action.phase === 'ff') return { ...state, sweep: { ...sw, phase: 'ff' }, period: sw.to.period, metric: sw.to.metric };
+      return { ...state, sweep: { ...sw, phase: action.phase } };
     }
     case 'SET_STEP_STATE':
       // Used by step transitions and tour beats: applies the requested map composition directly, without
-      // the coupling rules used by Explore controls.
+      // the coupling rules used by Explore controls. A beat that moves the year before a replay has
+      // fast-forwarded (the reader skipped ahead) cancels the replay.
       return {
         ...state,
+        sweep: state.sweep?.phase === 'before' && action.period && action.period !== state.period ? null : state.sweep,
         period: action.period ?? state.period,
         metric: action.metric ?? state.metric,
         layerVisibility: action.layers ? { ...action.layers } : state.layerVisibility,
@@ -108,7 +128,7 @@ export function reducer(state, action) {
       };
     case 'ENTER_EXPLORE':
       if (state.exploreMode) return state.autoplay.on ? { ...state, autoplay: OFF_TOUR } : state;
-      return { ...state, exploreMode: true, activeChapter: CHAPTERS.length, layerVisibility: { ...EXPLORE_LAYERS }, overlayOpacity: 1, metric: 'change', period: state.period === 'pre_2024' ? 'post_2025' : state.period, selectedFeature: null, sourcesOpen: false, autoplay: OFF_TOUR };
+      return { ...state, exploreMode: true, activeChapter: CHAPTERS.length, layerVisibility: { ...EXPLORE_LAYERS }, overlayOpacity: 1, metric: 'change', period: state.period === 'pre_2024' ? 'post_2025' : state.period, selectedFeature: null, sourcesOpen: false, autoplay: OFF_TOUR, sweep: null };
     case 'NEXT_STEP':
       if (state.autoplay.on) return reducer(state, state.autoplay.step >= CHAPTERS.length - 1 ? { type: 'AUTOPLAY_END' } : { type: 'AUTOPLAY_START', step: state.autoplay.step + 1 });
       if (state.exploreMode) return state;
@@ -152,14 +172,15 @@ export function reducer(state, action) {
     case 'AUTOPLAY_END':
       return { ...reducer({ ...state, autoplay: OFF_TOUR }, { type: 'ENTER_EXPLORE' }), autoplay: OFF_TOUR };
 
+    // The reader picking a year or color mode by hand ends any replay in progress.
     case 'SET_PERIOD': {
       const metric = action.period === 'pre_2024' ? 'absolute' : state.metric;
-      return { ...state, period: action.period, metric };
+      return { ...state, period: action.period, metric, sweep: null };
     }
     case 'SET_METRIC': {
       // The 2024 baseline has no change to show: asking for "change" moves the year to 2025.
-      if (action.metric === 'change' && state.period === 'pre_2024') return { ...state, metric: 'change', period: 'post_2025' };
-      return { ...state, metric: action.metric };
+      if (action.metric === 'change' && state.period === 'pre_2024') return { ...state, metric: 'change', period: 'post_2025', sweep: null };
+      return { ...state, metric: action.metric, sweep: null };
     }
     case 'SET_HOUR':
       return { ...state, hour: action.hour == null ? null : Math.max(0, Math.min(23, Number(action.hour))) };

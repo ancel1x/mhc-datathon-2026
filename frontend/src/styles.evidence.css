@@ -434,3 +434,208 @@
 .community__note strong {
   color: var(--text);
 }
+
+/* before -> after replay banner: centered over the free map area, above the flow canvas */
+.sweep {
+  position: absolute;
+  top: 18px;
+  left: calc(var(--story-w) + var(--inset) * 2);
+  right: calc(var(--side-w) + var(--inset) * 2);
+  z-index: 6;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  transition: left 280ms ease, right 280ms ease;
+}
+.app[data-controls='collapsed'][data-autoplay='false'] .sweep {
+  right: var(--inset);
+}
+.app[data-autoplay='true'] .sweep {
+  left: var(--inset);
+  right: var(--inset);
+}
+.sweep__pill {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 100%;
+  padding: 7px 16px 7px 7px;
+  border-radius: 999px;
+  font-family: var(--font-ui);
+  white-space: nowrap;
+  animation: sweep-pop 420ms cubic-bezier(0.2, 0.9, 0.3, 1.15) both;
+}
+.sweep__pill[data-phase='before'] {
+  padding-bottom: 11px;
+}
+/* countdown along the bottom of "Before": fills over exactly the time the map holds the earlier year (kept under
+   reduced motion, since it is a progress indicator rather than decoration) */
+.sweep__timer {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 4px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--fill-sel);
+  overflow: hidden;
+}
+.sweep__timer i {
+  position: absolute;
+  inset: 0;
+  border-radius: 1px;
+  background: var(--text-2);
+  transform-origin: left center;
+  animation: sweep-fill var(--sweep-before, 3000ms) linear both;
+}
+.sweep__pill[data-phase='after'] {
+  animation: sweep-pop 420ms cubic-bezier(0.2, 0.9, 0.3, 1.15) both, sweep-out 450ms ease var(--sweep-out, 3150ms) forwards;
+}
+.sweep__tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: var(--fill-sel);
+  color: var(--text);
+}
+.sweep__pill[data-phase='ff'] .sweep__tag {
+  background: var(--blue);
+  color: #fff;
+}
+.sweep__pill[data-phase='ff'] .sweep__tag svg {
+  animation: sweep-blink 520ms ease-in-out infinite;
+}
+.sweep__pill[data-phase='after'] .sweep__tag {
+  background: var(--text);
+  color: var(--bg);
+}
+.sweep__year {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--text);
+}
+.sweep__sub {
+  font-size: 12.5px;
+  color: var(--text-2);
+}
+.sweep__track {
+  position: relative;
+  width: 120px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--fill-sel);
+  overflow: hidden;
+}
+.sweep__track i {
+  position: absolute;
+  inset: 0;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--blue), #8ab4ff);
+  transform-origin: left center;
+  animation: sweep-fill var(--sweep-ff, 2600ms) cubic-bezier(0.45, 0, 0.55, 1) both;
+}
+.sweep__key {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: 2px;
+  padding-left: 12px;
+  border-left: 1px solid var(--sep);
+  font-size: 11.5px;
+  color: var(--text-2);
+}
+.sweep__key > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.sweep__key i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.sweep__key i[data-tone='red'] {
+  background: var(--red);
+}
+.sweep__key i[data-tone='green'] {
+  background: var(--green);
+}
+.sweep__key i[data-tone='grey'] {
+  background: var(--grey);
+}
+@keyframes sweep-pop {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes sweep-out {
+  to {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+@keyframes sweep-fill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes sweep-blink {
+  50% {
+    opacity: 0.45;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sweep__pill,
+  .sweep__pill[data-phase='after'],
+  .sweep__pill[data-phase='ff'] .sweep__tag svg {
+    animation: none;
+  }
+  .sweep__track i {
+    animation: none;
+    transform: none;
+  }
+}
+/* phone: under the timeline bar, on the left so the year stamp keeps the right-hand corner */
+@media (max-width: 720px) {
+  .sweep,
+  .app[data-autoplay='true'] .sweep {
+    top: 70px;
+    left: 12px;
+    right: 84px;
+    justify-content: flex-start;
+  }
+  .sweep__pill[data-phase='ff'] .sweep__tag-text {
+    display: none;
+  }
+  .sweep__pill {
+    gap: 8px;
+    padding: 5px 12px 5px 5px;
+  }
+  .sweep__year {
+    font-size: 18px;
+  }
+  .sweep__track {
+    width: 64px;
+  }
+  .sweep__key {
+    display: none;
+  }
+}

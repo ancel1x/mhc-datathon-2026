@@ -8,6 +8,7 @@ import { StatRow } from '../charts/StatTile.jsx';
 import IntervalBars from '../charts/IntervalBar.jsx';
 import TollTable from './TollTable.jsx';
 import { SourcesList } from './SourcesSheet.jsx';
+import { INTRO_PHOTOS } from '../../content/introPhotos.js';
 import Segmented from '../Segmented.jsx';
 import CloseButton from '../CloseButton.jsx';
 import { Chevron } from './SidePanel.jsx';
@@ -159,6 +160,15 @@ function SourcesView({ sources, onClose }) {
         <CloseButton label="Close sources" onClick={onClose} />
       </div>
       <SourcesList sources={sources} />
+      <div className="chapter__section-title">Title screen photos</div>
+      <ul className="sources-list">
+        {INTRO_PHOTOS.map((p) => (
+          <li key={p.file}>
+            <a href={p.page} target="_blank" rel="noopener noreferrer">{p.name}</a>
+            <span className="meta">{p.artist} · {p.license} · Wikimedia Commons · cropped, greyscale</span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

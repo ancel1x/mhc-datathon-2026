@@ -257,12 +257,13 @@ export function buildGuide({ summary, geo }) {
     // Chapter 3 · Where Did the Traffic Go? — regional crossings, then local corridors.
     [
       {
-        at: null, placement: 'upper-left', size: 'medium', variant: 'question', state: Y2025,
+        // no `state`: the chapter's before -> after replay (2024 -> 2025) plays under this first callout
+        at: null, placement: 'upper-left', size: 'medium', variant: 'question',
         layers: chapterLayers('zone', 'bt_facility', 'flow'), camera: { center: [-73.95, 40.74], zoom: 10.2 },
         question: 'But what happened on the roads around the zone?',
         captions: ['FEWER VEHICLES ENTERED THE CRZ.', 'THAT DID NOT MEAN EVERY ROUTE GOT QUIETER.'],
         text: 'To understand the first traffic response, we need to look at the bridges, tunnels, and local corridors around the toll zone.',
-        footer: 'Looking beyond the topline', dwell: 7500,
+        footer: 'Looking beyond the topline', dwell: 9500,
       },
       {
         at: null, placement: 'right', size: 'medium', variant: 'evidence', state: Y2025,
@@ -387,7 +388,7 @@ export function buildGuide({ summary, geo }) {
         at: null, placement: 'upper-left', size: 'medium', variant: 'question', state: Y2025,
         layers: chapterLayers('aq_monitor'), camera: { center: [-73.94, 40.735], zoom: 10.2 },
         question: 'Who was already carrying the greatest burden?',
-        captions: ['AIR QUALITY DID NOT CHANGE IN A VACUUM.', 'NEITHER DID TRAFFIC.'],
+        captions: ['THESE CHANGES HAPPENED IN REAL NEIGHBORHOODS.', 'SOME OF THEM WERE ALREADY WORSE OFF.'],
         text: 'The same traffic or pollution change can mean something very different in a neighborhood that was already facing heavier environmental and health burdens.',
         footer: 'From change to equity', dwell: 8000,
       },
@@ -555,14 +556,15 @@ export function buildGuide({ summary, geo }) {
     // Chapter 7 · One Year Later — matched Jan–Aug 2024/2025/2026 persistence evidence.
     [
       {
-        at: null, placement: 'upper-left', size: 'medium', variant: 'question', state: Y2026,
+        // no `state`: the chapter's before -> after replay (2025 -> 2026) plays under this first callout
+        at: null, placement: 'upper-left', size: 'medium', variant: 'question',
         layers: chapterLayers('bt_facility', 'flow', 'aq_monitor'), camera: { center: [-73.91, 40.82], zoom: 10.75 },
         question: 'What changed one year later?',
         captions: ['THE FIRST YEAR SHOWED US WHERE THE PATTERNS EMERGED.', 'NOW WE ASK WHICH ONES LASTED.'],
         text: '2026 lets us test whether the early traffic and air-quality patterns persisted, reversed, or remain uncertain.',
         statusBadge: '2026 SO FAR',
         note: '2026 comparisons use the available January–August period only.',
-        footer: '2026 follow-up', dwell: 8500,
+        footer: '2026 follow-up', dwell: 9500,
       },
       {
         at: null, placement: 'upper-right', size: 'wide', variant: 'trend', state: Y2026,

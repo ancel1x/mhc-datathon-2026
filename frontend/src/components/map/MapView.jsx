@@ -15,8 +15,8 @@ import PointLayers, { DIAMOND_IMAGE, ensureDiamondImage, POINT_LAYER_IDS } from 
 import FlowLayer, { FLOW_LAYER_IDS } from './FlowLayer.jsx';
 import GlyphLayer from './GlyphLayer.jsx';
 import GuideCallouts from './GuideCallouts.jsx';
+import SweepBanner, { YEAR } from './SweepBanner.jsx';
 
-const YEAR = { pre_2024: ['2024', 'before the toll'], post_2025: ['2025', 'year one'], post_2026_ytd: ['2026', 'so far'] };
 const easeInOutCubic = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 const GLYPH_ZOOM = 11;
 const NYC_BOUNDS = [[-74.7, 40.25], [-73.2, 41.15]];
@@ -277,6 +277,7 @@ function MapView({ featured, guide }) {
           <span className="yearstamp__sub">{YEAR[period][1]}</span>
         </div>
       ) : null}
+      <SweepBanner />
     </div>
   );
 }
