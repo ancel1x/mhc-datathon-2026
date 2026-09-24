@@ -73,6 +73,7 @@ export const initialState = {
   controlsOpen: fromUrl.controlsOpen, // phone: controls sheet open
   controlsCollapsed: Boolean(fromUrl.controlsCollapsed), // desktop: control panel collapsed to a pill (?controls=collapsed)
   dacMode: 'percentile', // 'designated' | 'percentile'; burden score is the primary presentation
+  overlayOpacity: 1, // guided beats can soften polygon context without changing the Explore legend scale
   glyphMode: false, // map zoom >= 11 (clock glyphs on)
 };
 
@@ -93,14 +94,23 @@ export function reducer(state, action) {
       const ch = CHAPTERS[action.index];
       if (!ch) return state;
       if (state.activeChapter === action.index && !state.exploreMode) return state;
-      return { ...state, activeChapter: action.index, exploreMode: false, layerVisibility: { ...ch.layers }, dotAll: Boolean(ch.dotAll), ...opening(ch), hour: null, selectedFeature: null, sourcesOpen: false };
+      return { ...state, activeChapter: action.index, exploreMode: false, layerVisibility: { ...ch.layers }, dotAll: Boolean(ch.dotAll), overlayOpacity: 1, ...opening(ch), hour: null, selectedFeature: null, sourcesOpen: false };
     }
     case 'SET_STEP_STATE':
-      // Used by step transitions and tour beats: sets the year / metric directly, no coupling rules.
-      return { ...state, period: action.period ?? state.period, metric: action.metric ?? state.metric };
+      // Used by step transitions and tour beats: applies the requested map composition directly, without
+      // the coupling rules used by Explore controls.
+      return {
+        ...state,
+        period: action.period ?? state.period,
+        metric: action.metric ?? state.metric,
+        layerVisibility: action.layers ? { ...action.layers } : state.layerVisibility,
+        dotAll: action.dotAll ?? state.dotAll,
+        dacMode: action.dacMode ?? state.dacMode,
+        overlayOpacity: action.overlayOpacity ?? state.overlayOpacity,
+      };
     case 'ENTER_EXPLORE':
       if (state.exploreMode) return state.autoplay.on ? { ...state, autoplay: OFF_TOUR } : state;
-      return { ...state, exploreMode: true, activeChapter: CHAPTERS.length, layerVisibility: { ...EXPLORE_LAYERS }, metric: 'change', period: state.period === 'pre_2024' ? 'post_2025' : state.period, selectedFeature: null, sourcesOpen: false, autoplay: OFF_TOUR };
+      return { ...state, exploreMode: true, activeChapter: CHAPTERS.length, layerVisibility: { ...EXPLORE_LAYERS }, overlayOpacity: 1, metric: 'change', period: state.period === 'pre_2024' ? 'post_2025' : state.period, selectedFeature: null, sourcesOpen: false, autoplay: OFF_TOUR };
     case 'NEXT_STEP':
       if (state.autoplay.on) return reducer(state, state.autoplay.step >= CHAPTERS.length - 1 ? { type: 'AUTOPLAY_END' } : { type: 'AUTOPLAY_START', step: state.autoplay.step + 1 });
       if (state.exploreMode) return state;

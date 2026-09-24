@@ -1,18 +1,10 @@
 import { useEffect, useRef } from 'react';
-import { CHAPTERS, EXPLORE_STEP } from '../../content/chapters.js';
+import { CHAPTERS } from '../../content/chapters.js';
 import { useAppState, useDispatch } from '../../state/AppState.jsx';
 
-const STOPS = [...CHAPTERS.map((c) => ({ era: c.era, short: c.short, title: c.title })), EXPLORE_STEP];
+const STOPS = CHAPTERS.map((c) => ({ era: c.era, short: c.short, title: c.title }));
 const N = STOPS.length;
 const fillScale = (p) => `scaleX(${(Math.max(0, Math.min(N - 1, p)) / (N - 1)).toFixed(4)})`;
-
-// Consecutive steps that share an era ("2025") get one label spanning their columns.
-const GROUPS = STOPS.reduce((acc, s, i) => {
-  const last = acc[acc.length - 1];
-  if (last && last.era === s.era) last.end = i;
-  else acc.push({ era: s.era, start: i, end: i });
-  return acc;
-}, []);
 
 function PlayIcon({ paused }) {
   return paused
@@ -29,7 +21,7 @@ export default function Timeline({ guide }) {
   const { activeChapter, exploreMode, autoplay } = useAppState();
   const dispatch = useDispatch();
   const fillRef = useRef(null);
-  const cur = exploreMode ? N - 1 : activeChapter;
+  const cur = exploreMode ? N - 1 : Math.min(activeChapter, N - 1);
 
   // Live fill during the tour: written straight to the DOM each frame, no React re-render.
   useEffect(() => {
@@ -49,8 +41,7 @@ export default function Timeline({ guide }) {
   }, [autoplay, guide]);
 
   const go = (i) => {
-    if (i >= CHAPTERS.length) dispatch({ type: 'ENTER_EXPLORE' });
-    else if (autoplay.on) dispatch({ type: 'AUTOPLAY_START', step: i });
+    if (autoplay.on) dispatch({ type: 'AUTOPLAY_START', step: i });
     else dispatch({ type: 'SET_CHAPTER', index: i });
   };
   const play = () => {
@@ -75,11 +66,6 @@ export default function Timeline({ guide }) {
         </span>
       ) : null}
       <div className="tl__grid">
-        <div className="tl__eras" aria-hidden="true">
-          {GROUPS.map((g) => (
-            <span key={`${g.era}-${g.start}`} className="tl__era" style={{ gridColumn: `${g.start + 1} / ${g.end + 2}` }}>{g.era}</span>
-          ))}
-        </div>
         <ol className="tl__track">
           <span className="tl__line" aria-hidden="true" />
           <span ref={fillRef} className={autoplay.on ? 'tl__fill tl__fill--live' : 'tl__fill'} aria-hidden="true" style={autoplay.on ? undefined : { transform: fillScale(cur) }} />
