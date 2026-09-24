@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef } from 'react';
-import { buildStory, EXPLORE_CARD } from '../../content/story.js';
+import { buildChapterCards, EXPLORE_CARD } from '../../content/story.js';
 import { CHAPTERS, EXPLORE_STEP } from '../../content/chapters.js';
 import { useData } from '../../lib/data.jsx';
 import { useAppState, useDispatch } from '../../state/AppState.jsx';
@@ -136,12 +136,15 @@ function ChapterView({ c, step, tolls, sources, onRestart }) {
       {c.badge ? <span className={c.badgeTone === 'warn' ? 'chapter__badge chapter__badge--warn' : 'chapter__badge'}>{c.badge}</span> : null}
       <h2 className="chapter__title" id="chapter-title">{c.title}</h2>
       {c.lede ? <p className="chapter__lede"><Rich text={c.lede} /></p> : null}
+      {c.stats?.length ? <div className="chapter__section-title chapter__section-title--main">KEY EVIDENCE</div> : null}
+      {c.stats?.length ? <StatRow items={c.stats.slice(0, 4)} /> : null}
+      <Table table={c.table} main />
+      <KList list={c.list} main />
+      {c.takeaway ? <p className="chapter__body"><Rich text={c.takeaway} /></p> : null}
+      {c.caveat ? <p className="chapter__notice"><Rich text={c.caveat} /></p> : null}
       {c.body ? <p className="chapter__body"><Rich text={c.body} /></p> : null}
       {c.bullets?.length ? <ul className="chapter__bullets">{c.bullets.map((b, i) => <li key={i}><Rich text={b} /></li>)}</ul> : null}
       {c.notice ? <p className="chapter__notice"><Rich text={c.notice} /></p> : null}
-      {c.stats?.length ? <StatRow items={c.stats.slice(0, 3)} /> : null}
-      <Table table={c.table} main />
-      <KList list={c.list} main />
       {hasDetails(c.details) ? <Details d={c.details} tolls={tolls} sources={sources} /> : null}
       {isExplore ? <button type="button" className="btn btn--fill" onClick={onRestart}>Start the story again</button> : null}
     </article>
@@ -172,7 +175,7 @@ export default function StoryPanel() {
 
   const story = useMemo(() => {
     try {
-      return buildStory({ summary, tolls, sources, geo, indexes });
+      return buildChapterCards({ summary, tolls, sources, geo, indexes });
     } catch (err) {
       console.error('story build failed', err);
       return CHAPTERS.map((c) => ({ title: c.title, kicker: c.when }));
@@ -216,7 +219,7 @@ export default function StoryPanel() {
         </div>
       </header>
       <div className="story__body" ref={bodyRef}>
-        <div className="sr-only" aria-live="polite" aria-atomic="true">{exploreMode ? 'Explore the map' : `Step ${step + 1} of ${TOTAL + 1}, ${when}: ${current.title ?? ''}`}</div>
+        <div className="sr-only" aria-live="polite" aria-atomic="true">{exploreMode ? 'Explore the map' : `Chapter ${step + 1} of ${TOTAL}, ${when}: ${current.title ?? ''}`}</div>
         {sourcesOpen ? (
           <SourcesView sources={sources} onClose={() => dispatch({ type: 'TOGGLE_SOURCES', open: false })} />
         ) : (

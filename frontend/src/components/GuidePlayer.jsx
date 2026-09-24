@@ -39,7 +39,7 @@ export default function GuidePlayer({ guide }) {
       const t = window.setTimeout(() => dispatch(step >= CHAPTERS.length - 1 ? { type: 'AUTOPLAY_END' } : { type: 'AUTOPLAY_START', step: step + 1 }), 250);
       return () => window.clearTimeout(t);
     }
-    if (b.state && elapsed === 0) dispatch({ type: 'SET_STEP_STATE', ...b.state });
+    if (elapsed === 0 && (b.state || b.layers)) dispatch({ type: 'SET_STEP_STATE', ...b.state, layers: b.layers, dotAll: b.dotAll, dacMode: b.dacMode, overlayOpacity: b.overlayOpacity });
     const map = main?.getMap?.();
     if (b.camera && map && elapsed === 0) {
       const opts = { center: b.camera.center, zoom: b.camera.zoom, padding: tourPadding() };

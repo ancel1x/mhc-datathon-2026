@@ -15,6 +15,125 @@ function resolve(at, indexes) {
   return Array.isArray(c) && c.length >= 2 ? c : null;
 }
 
+function BeatContent({ beat, chapter }) {
+  const total = beat.recordBar ? beat.recordBar.usable + beat.recordBar.unavailable : 0;
+  const comparisonMax = Math.max(...(beat.comparison ?? []).map((item) => item.amount), 1);
+  return (
+    <>
+      <div className="comic-card__chapter">{['CHAPTER 1 · BEFORE THE TOLL', 'CHAPTER 2 · THE HEADLINE', 'CHAPTER 3 · WHERE DID THE TRAFFIC GO?', 'CHAPTER 4 · FOLLOW THE AIR'][chapter]}</div>
+      {beat.question ? <div className="comic-question"><span>{beat.question}</span></div> : null}
+      {beat.captions?.length ? (
+        <div className="comic-captions">
+          {beat.captions.map((caption) => <div key={caption} className="comic-caption">{caption}</div>)}
+        </div>
+      ) : null}
+      {beat.text ? <p className="comic-card__narration">{beat.text}</p> : null}
+      {beat.mapCallout ? (
+        <div className="comic-map-callout">
+          <strong>{beat.mapCallout[0]}</strong>
+          <span>{beat.mapCallout[1]}</span>
+        </div>
+      ) : null}
+      {beat.heroValue ? (
+        <div className="comic-hero-wrap">
+          <div className="comic-hero"><strong className="num">{beat.heroValue}</strong>{beat.heroLabelOutside ? null : <span>{beat.heroLabel}</span>}</div>
+          {beat.heroLabelOutside ? <div className="comic-hero-label">{beat.heroLabel}</div> : null}
+          {beat.support ? <div className="comic-hero__support">{beat.support}</div> : null}
+          {beat.supportTile ? <div className="comic-mini-tile">{beat.supportTile}</div> : null}
+          {beat.secondaryLabel ? <div className="comic-secondary-label">{beat.secondaryLabel}</div> : null}
+          {beat.qualifier ? <div className="comic-qualifier">{beat.qualifier}</div> : null}
+        </div>
+      ) : null}
+      {beat.tollEvidence ? (
+        <div className="comic-toll-evidence">
+          <strong>{beat.tollEvidence.title}</strong>
+          <div><span className="num">{beat.tollEvidence.daytime}</span><span className="num">{beat.tollEvidence.overnight}</span></div>
+        </div>
+      ) : null}
+      {beat.comparison?.length ? (
+        <div className="comic-comparison">
+          {beat.comparison.map((item) => (
+            <div className="comic-comparison__row" key={item.title}>
+              <span>{item.title}</span><i><b style={{ width: `${(item.amount / comparisonMax) * 100}%` }} /></i><strong className="num">{item.value}</strong>
+            </div>
+          ))}
+        </div>
+      ) : null}
+      {beat.panels?.length ? (
+        <div className="comic-split">
+          {beat.panels.map((panel) => (
+            <div key={panel.title} className="comic-split__panel">
+              <strong>{panel.title}</strong>
+              <span>{panel.body}</span>
+            </div>
+          ))}
+        </div>
+      ) : null}
+      {beat.panels && beat.support ? <div className="comic-support">{beat.support}</div> : null}
+      {beat.definition ? <div className="comic-definition">{beat.definition}</div> : null}
+      {beat.legend?.length ? (
+        <ul className="comic-legend">
+          {beat.legend.map((item) => <li key={item}>{item}</li>)}
+        </ul>
+      ) : null}
+      {beat.stats?.length ? (
+        <div className="comic-stats">
+          {beat.stats.map((stat) => <div key={stat} className="comic-stat num">{stat}</div>)}
+        </div>
+      ) : null}
+      {beat.recordBar ? (
+        <div className="comic-records" aria-label={`${beat.recordBar.usable} usable 2024 records and ${beat.recordBar.unavailable} unavailable or insufficient 2024 baseline records`}>
+          <div className="comic-records__bar" aria-hidden="true">
+            <span className="comic-records__usable" style={{ width: `${(beat.recordBar.usable / total) * 100}%` }} />
+            <span className="comic-records__missing" style={{ width: `${(beat.recordBar.unavailable / total) * 100}%` }} />
+          </div>
+          <div className="comic-records__labels">
+            <span><i className="comic-records__key comic-records__key--usable" />Usable 2024 records: 13</span>
+            <span><i className="comic-records__key comic-records__key--missing" />Unavailable / insufficient 2024 baseline: 3</span>
+          </div>
+        </div>
+      ) : null}
+      {beat.statTile ? <div className="comic-baseline-tile num">{beat.statTile}</div> : null}
+      {beat.monitorCard ? (
+        <div className="comic-monitor-card" data-tone={beat.monitorCard.tone}>
+          <strong>{beat.monitorCard.name}</strong>
+          <div className="comic-monitor-values">
+            <span><small>2024</small><b className="num">{beat.monitorCard.before} µg/m³</b></span>
+            <i aria-hidden="true">→</i>
+            <span><small>2025</small><b className="num">{beat.monitorCard.after} µg/m³</b></span>
+          </div>
+          <div className="comic-monitor-change"><span>Change</span><strong className="num">{beat.monitorCard.change}</strong></div>
+          {beat.monitorCard.verdict ? <small>{beat.monitorCard.verdict}</small> : null}
+        </div>
+      ) : null}
+      {beat.explanation ? <div className="comic-explanation">{beat.explanation}</div> : null}
+      {beat.supportLine ? <div className="comic-support-line">{beat.supportLine}</div> : null}
+      {beat.evidenceLine ? <div className="comic-evidence-line num">{beat.evidenceLine}</div> : null}
+      {beat.teaser ? <div className="comic-route-teaser">{beat.teaser}</div> : null}
+      {beat.miniLegend?.length ? <div className="comic-mini-legend">{beat.miniLegend.map((item) => <span key={item.label} data-tone={item.tone}><i />{item.label}</span>)}</div> : null}
+      {beat.routeStat ? (
+        <div className="comic-route-stat" data-tone={beat.routeStat.tone}>
+          <strong className="num">{beat.routeStat.value}</strong><span>{beat.routeStat.label}</span>
+        </div>
+      ) : null}
+      {beat.localExamples?.length ? (
+        <div className="comic-local-examples">
+          {beat.localExamples.map((item) => <div key={item.label}><span>{item.label}</span><strong className="num">{item.value}</strong></div>)}
+        </div>
+      ) : null}
+      {beat.airSummary?.length ? (
+        <div className="comic-air-summary">
+          {beat.airSummary.map((item) => <div key={item.label} data-tone={item.tone}><strong className="num">{item.value}</strong><span>{item.label}</span></div>)}
+        </div>
+      ) : null}
+      {beat.note ? <div className="comic-note">{beat.note}</div> : null}
+      {beat.closeLine ? <div className="comic-close-line">{beat.closeLine}</div> : null}
+      {beat.transition ? <div className="comic-transition">{beat.transition}</div> : null}
+      {beat.footer ? <div className="comic-card__footer">{beat.footer}</div> : null}
+    </>
+  );
+}
+
 /**
  * The tour's callouts: one small card at a time, pinned beside the feature it explains (it follows the map
  * as the camera moves), with a ring on the feature itself. A beat with no place is shown at the top of the map.
@@ -45,11 +164,13 @@ function GuideCallouts({ guide }) {
       </button>
     </div>
   );
+  const variant = b.variant ? ` callout--${b.variant}` : '';
+  const content = <BeatContent beat={b} chapter={autoplay.step} />;
 
   if (!coords) {
     return (
-      <div key={key} className="callout callout--screen panel" role="status" aria-live="polite" onClick={swallow} onMouseDown={swallow}>
-        <p>{b.text}</p>
+      <div key={key} className={`callout callout--screen comic-card${variant}`} data-placement={b.placement ?? 'center'} data-size={b.size} data-tone={b.tone} role="status" aria-live="polite" onClick={swallow} onMouseDown={swallow}>
+        {content}
         {foot}
         {bar}
       </div>
@@ -62,8 +183,8 @@ function GuideCallouts({ guide }) {
         <span className="callout__ring" aria-hidden="true" />
       </Marker>
       <Marker key={`${key}-card`} longitude={coords[0]} latitude={coords[1]} anchor={ANCHOR[side]} offset={OFFSET[side]} style={{ zIndex: 8 }} onClick={swallow}>
-        <div className="callout panel" data-side={side} role="status" aria-live="polite" onMouseDown={swallow} onTouchStart={swallow}>
-          <p>{b.text}</p>
+        <div className={`callout comic-card${variant}`} data-side={side} data-size={b.size} data-tone={b.tone} role="status" aria-live="polite" onMouseDown={swallow} onTouchStart={swallow}>
+          {content}
           {foot}
           {bar}
         </div>

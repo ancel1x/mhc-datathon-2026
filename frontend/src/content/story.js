@@ -5,7 +5,7 @@
 // Each step: one strong title, ONE lede sentence, a short body, up to three stats (label + "so what"), at most
 // one compact table or list when it materially helps, then everything else under a collapsed "Details".
 // Every step answers one of the brief's requirements or questions; nothing else is in Story Mode.
-import { DASH, fmtCompact, fmtDate, fmtDelta, fmtHour, fmtInt, fmtMoney, fmtNum, fmtPct, fmtSigned, isNum, shortName } from '../lib/format.js';
+import { DASH, fmtCompact, fmtDelta, fmtHour, fmtInt, fmtMoney, fmtNum, fmtPct, fmtSigned, isNum, shortName } from '../lib/format.js';
 import { plainAir, plainAirShort, plainPct, plainPctShort, plainRate } from '../lib/plain.js';
 
 const n = (s) => `\`${s}\``;
@@ -31,8 +31,6 @@ export function buildStory({ summary, tolls, sources, geo }) {
   const eq = s.equity ?? {};
   const t = tolls ?? {};
   const car = t.ezpass_rates?.[0] ?? {};
-  const bigTruck = t.ezpass_rates?.[t.ezpass_rates.length - 1] ?? {};
-  const startDate = fmtDate(s.cp_start ?? '2025-01-05');
 
   // ---- reconciled evidence
   const traffic = rc.traffic ?? [];
@@ -102,42 +100,40 @@ export function buildStory({ summary, tolls, sources, geo }) {
         ],
       },
     },
-    // 1 · The toll begins ------------------------------------------------------------------
-    {
-      kicker: 'January 5, 2025',
-      title: 'The toll begins',
-      lede: `On ${n(startDate)}, driving into Manhattan below 60th Street started costing most cars ${n(fmtMoney(car.peak))} a day.`,
-      body: 'The official topline describes what happened inside this priced core. Our question is what happened across the rest of New York City: the crossings around it, the street-level air, and the neighborhoods that were already carrying the most.',
-      stats: [
-        { label: 'A car, daytime', value: fmtMoney(car.peak), sub: `once a day · weekdays ${t.peak_hours?.weekday ?? '5 AM – 9 PM'}, weekends ${t.peak_hours?.weekend ?? '9 AM – 9 PM'}` },
-        { label: 'A car, overnight', value: fmtMoney(car.overnight), sub: '75% off, 9 PM to 5 AM' },
-        { label: 'The largest trucks, daytime', value: fmtMoney(bigTruck.peak), sub: `tunnel crossing credit up to ${fmtMoney(bigTruck.crossing_credit)}` },
-      ],
-      details: {
-        paragraphs: [
-          `Taxis pay ${n(fmtMoney(t.per_trip?.[0]?.fee))} and app rides ${n(fmtMoney(t.per_trip?.[1]?.fee))} per trip instead of the daily toll. Drivers arriving through the four tolled tunnels get a credit of up to ${n(fmtMoney(car.crossing_credit))} for a car. The ${(t.excluded_roadways ?? []).slice(0, 2).join(' and ') || 'FDR Drive and West Side Highway'} stay free: you can drive along the island's edges without paying, but not turn into the grid.`,
-          `**External context, not our result.** The widely quoted "22% cleaner" figure is a modeled drop in daily-maximum PM2.5 inside the zone against a projected no-toll year (Cornell University, npj Clean Air, Dec 2025), and the MTA reports entry declines against a modeled baseline. Neither compares with a 2024 count. Every figure on the following steps does.`,
-        ],
-        extra: 'tolls',
-      },
-    },
-    // 2 · Inside the zone -------------------------------------------------------------------
+    // 1 · The headline ---------------------------------------------------------------------
     {
       kicker: '2025 · year one',
-      title: 'About 502,000 vehicles entered the zone each weekday',
-      lede: `In year one about ${n(fmtCompact(crz.avg_weekday_entries_2025))} vehicles still entered the zone on a typical weekday, ${n(fmtShareText(crz.peak_share_2025))} of them in the tolled daytime hours.`,
-      body: 'Nobody counted these gates before the toll, so this dataset shows the level, the daily rhythm and the vehicle mix, not a before/after change. The mixed daily picture the brief asks about starts here: the busiest hour is still the morning rush.',
+      title: 'The Headline',
+      lede: 'Overall vehicle entries into the Congestion Relief Zone fell by about 11% during the first six months.',
+      body: 'During the first six months, one published study estimated average daily maximum PM2.5 in the CRZ was 22% lower than the level its model projected without congestion pricing.',
       stats: [
-        { label: 'Vehicles entering, per weekday', value: fmtCompact(crz.avg_weekday_entries_2025), sub: `${fmtShareText(mix.taxi_fhv)} of them taxis and app rides` },
-        { label: 'Arriving in the tolled daytime hours', value: fmtShareText(crz.peak_share_2025), sub: `when the full ${fmtMoney(car.peak)} applies` },
-        { label: 'Busiest hour', value: fmtHour(peakHour), sub: 'the morning rush' },
+        { label: 'Overall vehicle entries', value: '~11% ↓', sub: 'January–June 2025', tone: -1 },
+        { label: 'Heavy-duty truck entries', value: '~18% ↓', sub: 'January–June 2025', tone: -1 },
+        { label: 'Average daily maximum PM2.5 inside the CRZ', value: '22% ↓', sub: 'compared with a modeled no-toll scenario', tone: -1 },
       ],
       details: {
         paragraphs: [
-          `Cars are ${n(fmtShareText(mix.cars))} of entries, taxis and app rides ${n(fmtShareText(mix.taxi_fhv))}, trucks ${n(fmtShareText((mix.trucks_single ?? 0) + (mix.trucks_multi ?? 0)))}. ${n(fmtShareText(crz.overnight_share_2025))} of entries arrive overnight, when the toll is a quarter of the price.`,
-          '**No pre-toll baseline exists at these gates.** The detectors were switched on with the toll, so nothing here is a change since 2024. The crossings, street counters and monitors on the next steps all have a 2024 record; year two at the gates (Jan–Aug 2026 vs 2025) is on the 2026 step.',
+          'Vehicles entering the Congestion Relief Zone were now charged based on vehicle type and time of day.',
+          'The estimated effect was strongest inside the CRZ and smaller across the rest of the city and region.',
         ],
-        list: { title: 'Busiest entry points, 2025 weekdays', rows: (crz.top_entry_points_2025 ?? []).map((p) => ({ label: p.name, value: fmtCompact(p.avg_weekday_entries), sub: `${fmtShareText(p.share)} of all entries` })) },
+      },
+    },
+    // 2 · Where did the traffic go? ----------------------------------------------------------
+    {
+      kicker: '2025 · year one',
+      title: 'Where Did the Traffic Go?',
+      lede: `Across the MTA network, ${n(fmtInt(tUp.length))} crossings had supported increases while other changes were uncertain or coverage-limited.`,
+      body: 'The map shows where volumes changed, but crossing counts do not track individual trips from one route to another. DOT street counters add local, sampled corridor evidence.',
+      stats: [
+        { label: 'Robert F. Kennedy Bridge Manhattan', value: fmtPct(tById('rfk_manhattan').pct_existing), sub: `${fmtInt(tById('rfk_manhattan').avg_daily_2025)} vehicles per day in 2025`, tone: 1 },
+        { label: 'Hugh L. Carey Tunnel', value: fmtPct(tById('hlc').pct_existing), sub: `${fmtInt(tById('hlc').avg_daily_2025)} vehicles per day · coverage-limited`, tone: -1 },
+        { label: 'Same-month DOT locations', value: fmtInt(tier1.length), sub: 'specific one-week samples, not a citywide estimate' },
+      ],
+      details: {
+        paragraphs: [
+          'MTA crossings show regional changes. DOT street counters show what changed at individual sampled locations and directions.',
+          '**Interpretation limit.** These data show a mixed geography of change, but they cannot prove that a particular trip moved from one route to another.',
+        ],
       },
     },
     // 3 · Crossings ------------------------------------------------------------------------
@@ -348,6 +344,82 @@ export function buildStory({ summary, tolls, sources, geo }) {
       details: {
         extra: 'sources',
       },
+    },
+  ];
+}
+
+/** Persistent editorial summaries used by the non-tour left panel. */
+export function buildChapterCards({ summary }) {
+  const air = summary?.reconciled?.air ?? [];
+  const traffic = summary?.reconciled?.traffic ?? [];
+  const dot = summary?.reconciled?.dot?.tiers?.same_month_2024?.rows ?? [];
+  const byTrafficId = (id) => traffic.find((row) => row.id === id) ?? {};
+  const byAirId = (id) => air.find((row) => row.id === id) ?? {};
+  const rfk = byTrafficId('rfk_manhattan');
+  const hlc = byTrafficId('hlc');
+  const east58 = dot.find((row) => row.id === 'dot_36369') ?? {};
+  const improved = air.filter((row) => row.class === 'decrease');
+  const uncertain = air.filter((row) => row.class === 'uncertain');
+  const higher = air.filter((row) => row.class === 'increase');
+  const unavailable = air.filter((row) => row.class === 'no_baseline');
+  const selected = ['aq_36061NY08552', 'aq_36061NY08454', 'aq_36061NY12380'].map(byAirId);
+
+  return [
+    {
+      kicker: '2024 · BASELINE', title: 'Chapter 1 — Before the Toll',
+      lede: 'Before congestion pricing began, New York’s traffic already moved through a dense network of bridges, tunnels, highways, and city streets. We use 2024 as the baseline for everything that follows.',
+      stats: [
+        { value: '~929k vehicles/day', label: 'Across the MTA’s nine bridges and tunnels' },
+        { value: '13 usable monitors', label: 'Out of 16 street-level PM2.5 monitoring sites in our baseline network' },
+        { value: '6.3 µg/m³', label: 'Average PM2.5 across the usable 2024 baseline records' },
+        { value: 'Future toll zone', label: 'Manhattan south of 60th Street' },
+      ],
+      takeaway: 'This chapter establishes the “before”: where traffic moved, where PM2.5 was measured, and how the future toll zone fit inside a much larger citywide system.',
+      caveat: 'No before/after conclusions are made here. This is the reference year used for later comparisons.',
+    },
+    {
+      kicker: '2025 · TOLL BEGINS', title: 'Chapter 2 — The Headline',
+      lede: 'Congestion pricing began on January 5, 2025. The first six months produced a strong topline story: fewer vehicles entered the Congestion Relief Zone, and a published study estimated a substantial PM2.5 improvement inside the zone.',
+      stats: [
+        { value: '~11% fewer entries', label: 'Overall vehicle entries into the CRZ during the first six months', tone: -1 },
+        { value: '~9% fewer car entries', label: 'Passenger-car entries fell less sharply than some heavier vehicle categories', tone: -1 },
+        { value: '~18% fewer heavy-duty truck entries', label: 'The largest decline among the vehicle groups highlighted in the study', tone: -1 },
+        { value: '22% lower', label: 'Estimated average daily maximum PM2.5 inside the CRZ compared with a modeled no-toll scenario', tone: -1 },
+      ],
+      takeaway: 'At the toll-zone level, the early results looked strong. But these aggregate results do not tell us what happened on every road, at every crossing, or in every neighborhood.',
+      caveat: 'The 22% PM2.5 result is a modeled estimate relative to a no-toll counterfactual, not a simple citywide before/after measurement.',
+    },
+    {
+      kicker: '2025 · TRAFFIC REDISTRIBUTION', title: 'Chapter 3 — Where Did the Traffic Go?',
+      lede: 'Fewer vehicles entered the Congestion Relief Zone, but the surrounding road network did not respond uniformly. Some crossings and corridors carried less traffic, while others picked up vehicles as drivers changed routes.',
+      stats: [
+        { value: `${fmtPct(rfk.pct_existing)} · ${fmtInt(rfk.avg_daily_2025)}/day`, label: rfk.name, tone: 1 },
+        { value: `${fmtPct(hlc.pct_existing)} · ${fmtInt(hlc.avg_daily_2025)}/day`, label: `${hlc.name} · coverage-limited`, tone: -1 },
+        { value: fmtPct(east58.pct_change), label: 'East 58 Street · Southbound · same-month DOT sample', tone: -1 },
+      ],
+      takeaway: 'The first traffic story was not that vehicles simply disappeared. It was a redistribution: different crossings, approaches, and local streets experienced different changes.',
+      caveat: 'Regional bridge and tunnel counts show broad movement patterns. DOT street counters help reveal what changed on specific local corridors and directions.',
+    },
+    {
+      kicker: '2025 · PM2.5 AFTER TOLLING', title: 'Chapter 4 — Follow the Air',
+      lede: 'The traffic story raises the next question: did cleaner air follow everywhere? To answer that, we stop looking at the citywide headline and compare PM2.5 at individual monitoring locations.',
+      stats: [
+        { value: `${fmtInt(improved.length)} monitors improved`, label: 'Supported weather-adjusted decreases', tone: -1 },
+        { value: `${fmtInt(uncertain.length)} uncertain`, label: 'No clear weather-adjusted change' },
+        { value: `${fmtInt(higher.length)} higher PM2.5`, label: 'Supported weather-adjusted increases', tone: higher.length ? 1 : 0 },
+        { value: `${fmtInt(unavailable.length)} without baseline`, label: 'Insufficient comparable 2024 evidence' },
+      ],
+      list: {
+        title: 'Selected monitor examples',
+        rows: selected.map((row) => ({
+          label: row.name,
+          value: `${fmtNum(row.pre_mean, 2)} → ${fmtNum(row.post_mean, 2)} µg/m³`,
+          sub: `${fmtSigned(row.delta_raw, 2)} raw change · ${row.class === 'decrease' ? 'supported decrease' : 'weather-adjusted result uncertain'}`,
+          tone: row.delta_raw,
+        })),
+      },
+      takeaway: 'The monitor-level picture is more mixed than a single citywide or CRZ average. Some locations improved more clearly than others, and some did not improve at all.',
+      caveat: 'These are observed spatial patterns. A change at one monitor does not by itself prove that congestion pricing caused that change.',
     },
   ];
 }

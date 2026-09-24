@@ -21,11 +21,6 @@ function Shell() {
   const { activeChapter, exploreMode, intro, autoplay, controlsCollapsed, selectedFeature } = useAppState();
   const controls = controlsCollapsed && !selectedFeature ? 'collapsed' : 'open';
 
-  const featured = useMemo(() => {
-    if (exploreMode || !data.indexes) return null;
-    return featuredFor(activeChapter, { summary: data.summary, aq: data.geo.aq_monitor, bt: data.geo.bt_facility, aqIds: data.indexes.aqIds });
-  }, [activeChapter, exploreMode, data.summary, data.geo.aq_monitor, data.geo.bt_facility, data.indexes]);
-
   const guide = useMemo(() => {
     try {
       return buildGuide({ summary: data.summary, tolls: data.tolls, geo: data.geo });
@@ -34,6 +29,13 @@ function Shell() {
       return [];
     }
   }, [data.summary, data.tolls, data.geo]);
+
+  const featured = useMemo(() => {
+    if (exploreMode || !data.indexes) return null;
+    const beatFeatured = autoplay.on ? guide?.[autoplay.step]?.[autoplay.beat]?.featured : null;
+    if (beatFeatured) return beatFeatured;
+    return featuredFor(activeChapter, { summary: data.summary, aq: data.geo.aq_monitor, bt: data.geo.bt_facility, aqIds: data.indexes.aqIds });
+  }, [activeChapter, exploreMode, autoplay.on, autoplay.step, autoplay.beat, guide, data.summary, data.geo.aq_monitor, data.geo.bt_facility, data.indexes]);
 
   const ready = !data.loading && Boolean(data.summary);
   const error = !data.loading && !data.summary ? `No data found (${Object.keys(data.errors).join(', ') || 'summary'}). Start the API or run: node scripts/make-mock-data.mjs` : null;
