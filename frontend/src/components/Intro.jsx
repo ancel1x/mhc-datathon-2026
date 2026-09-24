@@ -1,53 +1,75 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAppState, useDispatch } from '../state/AppState.jsx';
 import { useReducedMotion } from '../hooks/useMediaQuery.js';
 
-const MIN_HOLD_MS = 3000; // the title stays at least this long, even if the data loads instantly
-const LEAVE_MS = 1000; // fade-out; the map is already flying in underneath
+const LEAVE_MS = 1150;
 
 /**
- * Title card shown when the page opens. It carries the loading progress, then (once the data is in and the
- * title has been on screen for a moment) fades away while the map flies in to the first step. A click, Enter
- * or Space skips ahead. `?intro=hold` keeps it on screen (for screenshots); `?chapter=` skips it.
+ * Graphic-novel cover shown when the page opens. It stays in place until the reader explicitly uses the CTA;
+ * the map is already mounted underneath so the cover can turn away and reveal the first story step.
+ * `?intro=hold` keeps it on screen (for screenshots); `?chapter=` skips it.
  */
 export default function Intro({ loading, progress = 0, error = null }) {
-  const { intro, introHold } = useAppState();
+  const { intro } = useAppState();
   const dispatch = useDispatch();
   const reduced = useReducedMotion();
-  const mountedAt = useRef(performance.now());
-  const leaving = intro === 'leaving';
+  const [turning, setTurning] = useState(false);
+  const frameRef = useRef(null);
+  const nestedFrameRef = useRef(null);
+  const fallbackRef = useRef(null);
+  const leaving = turning || intro === 'leaving';
+  const ready = !loading && !error;
 
-  const leave = useCallback(() => {
-    if (intro !== 'show' || loading || error) return;
-    dispatch({ type: 'INTRO_LEAVE' });
-    window.setTimeout(() => dispatch({ type: 'INTRO_DONE' }), reduced ? 0 : LEAVE_MS);
-  }, [intro, loading, error, dispatch, reduced]);
+  useEffect(() => () => {
+    if (frameRef.current != null) window.cancelAnimationFrame(frameRef.current);
+    if (nestedFrameRef.current != null) window.cancelAnimationFrame(nestedFrameRef.current);
+    if (fallbackRef.current != null) window.clearTimeout(fallbackRef.current);
+  }, []);
 
-  useEffect(() => {
-    if (loading || error || intro !== 'show' || introHold) return undefined;
-    const wait = Math.max(0, MIN_HOLD_MS - (performance.now() - mountedAt.current));
-    const t = window.setTimeout(leave, wait);
-    return () => window.clearTimeout(t);
-  }, [loading, error, intro, introHold, leave]);
+  const finish = useCallback(() => {
+    if (fallbackRef.current != null) window.clearTimeout(fallbackRef.current);
+    fallbackRef.current = null;
+    dispatch({ type: 'INTRO_DONE' });
+  }, [dispatch]);
 
-  useEffect(() => {
-    const onKey = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); leave(); } };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [leave]);
+  const leave = useCallback((event) => {
+    if (intro !== 'show' || !ready || turning) return;
+    event?.currentTarget?.blur();
+    // Start the compositor-friendly cover animation before the context update makes the map fly and
+    // reveals every story panel. Two frames guarantee the browser paints motion before that heavier work.
+    setTurning(true);
+    frameRef.current = window.requestAnimationFrame(() => {
+      nestedFrameRef.current = window.requestAnimationFrame(() => {
+        dispatch({ type: 'INTRO_LEAVE' });
+        if (reduced) finish();
+      });
+    });
+    if (!reduced) fallbackRef.current = window.setTimeout(finish, LEAVE_MS + 300);
+  }, [intro, ready, turning, dispatch, reduced, finish]);
+
+  const onTurnEnd = useCallback((event) => {
+    if (event.target === event.currentTarget && event.animationName === 'intro-page-turn') finish();
+  }, [finish]);
 
   const pct = Math.round(progress * 100);
   return (
-    <div className="intro" data-phase={leaving ? 'out' : 'in'} onClick={leave} role="presentation" aria-hidden={leaving}>
+    <section className="intro" data-phase={leaving ? 'out' : 'in'} aria-labelledby="intro-title" aria-hidden={leaving} onAnimationEnd={onTurnEnd}>
       {loading ? <div className="intro__bar" style={{ width: `${Math.max(2, pct)}%` }} /> : null}
       <div className="intro__inner">
         <div className="intro__kicker">New York City · since January 5, 2025</div>
-        <h1 className="intro__title">The real story of congestion pricing</h1>
+        <h1 className="intro__title" id="intro-title">The real story of congestion pricing</h1>
         <p className="intro__sub">What happened to the traffic and the air after the $9 toll, where it moved, and who bears it, told from official data one year at a time.</p>
-        <div className="intro__status num" role="status" aria-live="polite">
-          {error ?? (loading ? `Loading official data · ${pct}%` : 'Click to begin')}
-        </div>
       </div>
-    </div>
+      {ready ? (
+        <button className="intro__cta" type="button" onClick={leave} disabled={leaving}>
+          <span>Begin the story</span>
+          <span className="intro__cta-arrow" aria-hidden="true">→</span>
+        </button>
+      ) : (
+        <div className="intro__status num" role="status" aria-live="polite">
+          {error ?? `Loading official data · ${pct}%`}
+        </div>
+      )}
+    </section>
   );
 }

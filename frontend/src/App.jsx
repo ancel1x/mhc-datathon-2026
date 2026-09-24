@@ -13,7 +13,7 @@ import GuidePlayer from './components/GuidePlayer.jsx';
 
 /**
  * Four things on screen: the map, the story panel (left), the timeline (bottom) and the control / detail
- * panel (right). The intro title card sits over all of them until the data is in, then fades away.
+ * panel (right). The intro cover sits over all of them until the reader begins the story.
  * During the guided tour the two panels hide and callouts on the map carry the explanation.
  */
 function Shell() {
@@ -41,13 +41,15 @@ function Shell() {
   return (
     <div className="app" data-intro={intro} data-autoplay={autoplay.on ? 'true' : 'false'} data-controls={controls}>
       {ready ? (
-        <MapProvider>
-          <MapView featured={featured} guide={guide} />
-          <StoryPanel />
-          <Timeline guide={guide} />
-          <SidePanel hasFeatured={Boolean(featured)} />
-          <GuidePlayer guide={guide} />
-        </MapProvider>
+        <div className="app__story" inert={intro !== 'done' ? true : undefined} aria-hidden={intro !== 'done'}>
+          <MapProvider>
+            <MapView featured={featured} guide={guide} />
+            <StoryPanel />
+            <Timeline guide={guide} />
+            <SidePanel hasFeatured={Boolean(featured)} />
+            <GuidePlayer guide={guide} />
+          </MapProvider>
+        </div>
       ) : null}
       {intro !== 'done' || !ready ? <Intro loading={data.loading} progress={data.progress} error={error} /> : null}
     </div>
