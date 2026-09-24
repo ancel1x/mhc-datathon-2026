@@ -8,7 +8,7 @@ import { fmtInt, fmtPct } from '../lib/format.js';
 const Y2024 = { period: 'pre_2024', metric: 'absolute' };
 const Y2025 = { period: 'post_2025', metric: 'change' };
 const Y2026 = { period: 'post_2026_ytd', metric: 'change' };
-const LAYER_KEYS = ['zone', 'crz_entry', 'bt_facility', 'flow', 'dot_segment', 'aq_monitor', 'dac', 'uhf42'];
+const LAYER_KEYS = ['zone', 'crz_entry', 'bt_facility', 'flow', 'aq_monitor', 'dac', 'uhf42'];
 const chapterLayers = (...shown) => Object.fromEntries(LAYER_KEYS.map((key) => [key, shown.includes(key)]));
 
 export function buildGuide({ summary, geo }) {
@@ -16,26 +16,12 @@ export function buildGuide({ summary, geo }) {
   const rc = s.reconciled ?? {};
   const air = rc.air ?? [];
   const traffic = rc.traffic ?? [];
-  const dotRows = rc.dot?.tiers?.same_month_2024?.rows ?? [];
   const trafficById = (id) => traffic.find((row) => row.id === id) ?? {};
-  const dotById = (id) => dotRows.find((row) => row.id === id) ?? {};
   const dotFeatureById = (id) => (geo?.dot_segment?.features ?? []).find((f) => f.properties?.id === id)?.properties ?? {};
   const increase = trafficById('rfk_manhattan');
   const decrease = trafficById('hlc');
-  const localIds = ['dot_36369', 'dot_34332', 'dot_252708'];
-  const directionNames = { NB: 'Northbound', SB: 'Southbound', EB: 'Eastbound', WB: 'Westbound' };
-  const localExamples = localIds.map((id) => {
-    const row = dotById(id);
-    const feature = dotFeatureById(id);
-    const directions = feature.directions_compared ?? feature.directions ?? [];
-    return {
-      label: `${String(row.street ?? feature.street ?? '').replace(/\b\w/g, (c) => c.toUpperCase()).replace(/\bBr\b/, 'Bridge')} · ${directions.map((d) => directionNames[d] ?? d).join(' and ')}`,
-      value: fmtPct(row.pct_change),
-    };
-  }).filter((item) => item.label && item.value !== '—');
   const aNo = air.filter((r) => r.class === 'no_baseline');
   const crossingIds = new Set((geo?.bt_facility?.features ?? []).map((f) => f.properties?.id).filter(Boolean));
-  const streetIds = new Set((geo?.dot_segment?.features ?? []).filter((f) => f.properties?.role === 'matched').slice(0, 18).map((f) => f.properties?.id).filter(Boolean));
   const noBaselineIds = new Set(aNo.map((r) => r.id).filter(Boolean));
   const usableMonitorIds = new Set(air.map((r) => r.id).filter((id) => id && !noBaselineIds.has(id)));
   const improvedAir = air.filter((row) => row.class === 'decrease');
@@ -124,17 +110,16 @@ export function buildGuide({ summary, geo }) {
         variant: 'split',
         size: 'wide',
         state: Y2024,
-        layers: chapterLayers('zone', 'bt_facility', 'flow', 'dot_segment'),
-        dotAll: false,
+        layers: chapterLayers('zone', 'bt_facility', 'flow'),
         camera: { center: [-73.96, 40.72], zoom: 10.05 },
-        featured: { bt_facility: crossingIds, dot_segment: streetIds },
-        text: 'Bridge totals are only part of the picture. We also use street-level traffic counters to see what was happening on specific corridors and in specific directions before tolling began.',
+        featured: { bt_facility: crossingIds },
+        text: 'Bridge totals are only part of the picture. Each crossing is read hour by hour and by direction of travel, so a quiet daily total can still hide a busier morning rush.',
         panels: [
-          { title: 'MTA crossings', body: 'Regional traffic flow' },
-          { title: 'DOT street counters', body: 'Local corridor conditions' },
+          { title: 'Nine MTA crossings', body: 'Regional traffic flow' },
+          { title: 'Hourly, by direction', body: 'Rush hours read separately' },
         ],
         support: 'Together they create our traffic baseline.',
-        footer: 'Two kinds of traffic evidence',
+        footer: 'The crossing baseline',
         dwell: 6500,
       },
       {
@@ -311,18 +296,8 @@ export function buildGuide({ summary, geo }) {
         footer: 'Example decrease', dwell: 8500,
       },
       {
-        at: null, placement: 'upper-right', size: 'large', variant: 'comparison', state: Y2025,
-        layers: chapterLayers('zone', 'dot_segment'), dotAll: false, camera: { center: [-73.98, 40.72], zoom: 11.35 },
-        featured: { dot_segment: new Set(localIds) },
-        captions: ['MTA CROSSINGS SHOW REGIONAL SHIFTS.', 'DOT STREET COUNTERS SHOW THE LOCAL STORY.'],
-        text: 'Street-level counters help show what changed on specific corridors and in specific directions after tolling began.',
-        supportLine: 'Local corridor conditions', localExamples,
-        note: 'These are one-week, same-month samples at specific locations—not a citywide street estimate.',
-        footer: 'Street-level change', dwell: 9000,
-      },
-      {
         at: null, placement: 'upper-right', size: 'medium', variant: 'close', state: Y2025,
-        layers: chapterLayers('zone', 'bt_facility', 'flow', 'dot_segment'), dotAll: false, camera: { center: [-73.95, 40.74], zoom: 10.05 },
+        layers: chapterLayers('zone', 'bt_facility', 'flow'), camera: { center: [-73.95, 40.74], zoom: 10.05 },
         captions: ['TRAFFIC WAS REDISTRIBUTED.', 'CHANGE CLUSTERED AROUND SPECIFIC APPROACHES TO THE ZONE.'],
         text: 'Fewer vehicles entered the Congestion Relief Zone, but some traffic shifted onto nearby bridges, tunnels, and approach roads instead of disappearing evenly across the city.',
         supportLine: 'The first traffic story was not citywide silence. It was a network reshuffling.',
@@ -499,8 +474,8 @@ export function buildGuide({ summary, geo }) {
       },
       {
         at: { layer: 'aq_monitor', id: mottHaven.id }, side: 'left', size: 'medium', variant: 'combined', state: Y2025,
-        layers: chapterLayers('dot_segment', 'aq_monitor', 'dac', 'uhf42'), dotAll: true, dacMode: 'percentile', overlayOpacity: 0.38, camera: { center: [-73.91, 40.82], zoom: 11.25 },
-        featured: { dot_segment: new Set(['dot_139020']), aq_monitor: new Set([mottHaven.id]) },
+        layers: chapterLayers('aq_monitor', 'dac', 'uhf42'), dacMode: 'percentile', overlayOpacity: 0.38, camera: { center: [-73.91, 40.82], zoom: 11.25 },
+        featured: { aq_monitor: new Set([mottHaven.id]) },
         captions: ['THIS AREA DID NOT START FROM A NEUTRAL BASELINE.'],
         text: 'The South Bronx entered 2025 with existing environmental and health burdens that make local traffic and pollution changes especially important.',
         combinedEvidence: [
@@ -512,8 +487,8 @@ export function buildGuide({ summary, geo }) {
       },
       {
         at: { layer: 'bt_facility', id: 'rfk_bronx' }, side: 'right', size: 'large', variant: 'combined', state: Y2025,
-        layers: chapterLayers('bt_facility', 'flow', 'dot_segment', 'dac'), dotAll: true, dacMode: 'percentile', overlayOpacity: 0.28, camera: { center: [-73.91, 40.81], zoom: 11.05 },
-        featured: { bt_facility: new Set(['rfk_bronx']), dot_segment: new Set(['dot_139020']) },
+        layers: chapterLayers('bt_facility', 'flow', 'dac'), dacMode: 'percentile', overlayOpacity: 0.28, camera: { center: [-73.91, 40.81], zoom: 11.05 },
+        featured: { bt_facility: new Set(['rfk_bronx']) },
         captions: ['NOW LOOK AT THE ROADS.', 'THE LOCAL TRAFFIC STORY MAY NOT MATCH THE CRZ AVERAGE.'],
         combinedEvidence: [
           { label: 'RFK Bridge Bronx approach · 2024', value: `${fmtInt(rfkBronx.avg_daily_2024)} vehicles/day` },
@@ -552,8 +527,8 @@ export function buildGuide({ summary, geo }) {
       },
       {
         at: { layer: 'aq_monitor', id: mottHaven.id }, side: 'left', size: 'large', variant: 'combined', state: Y2025,
-        layers: chapterLayers('bt_facility', 'dot_segment', 'aq_monitor', 'dac', 'uhf42'), dotAll: true, dacMode: 'percentile', overlayOpacity: 0.34, camera: { center: [-73.91, 40.82], zoom: 11.2 },
-        featured: { bt_facility: new Set(['rfk_bronx']), dot_segment: new Set(['dot_139020']), aq_monitor: new Set([mottHaven.id]) },
+        layers: chapterLayers('bt_facility', 'aq_monitor', 'dac', 'uhf42'), dacMode: 'percentile', overlayOpacity: 0.34, camera: { center: [-73.91, 40.82], zoom: 11.2 },
+        featured: { bt_facility: new Set(['rfk_bronx']), aq_monitor: new Set([mottHaven.id]) },
         captions: ['THAT DIFFERENCE MATTERS MORE WHERE THE BASELINE BURDEN WAS ALREADY HIGH.'],
         text: 'In the South Bronx, local traffic and PM2.5 observations sit on top of long-standing environmental and health disparities.',
         combinedEvidence: [
@@ -568,8 +543,8 @@ export function buildGuide({ summary, geo }) {
       },
       {
         at: null, placement: 'upper-left', size: 'large', variant: 'close', state: Y2025,
-        layers: chapterLayers('bt_facility', 'dot_segment', 'aq_monitor', 'dac'), dotAll: true, dacMode: 'percentile', overlayOpacity: 0.3, camera: { center: [-73.91, 40.82], zoom: 10.75 },
-        featured: { bt_facility: new Set(['rfk_bronx']), dot_segment: new Set(['dot_139020']), aq_monitor: new Set([mottHaven.id, crossBronx.id]) },
+        layers: chapterLayers('bt_facility', 'aq_monitor', 'dac'), dacMode: 'percentile', overlayOpacity: 0.3, camera: { center: [-73.91, 40.82], zoom: 10.75 },
+        featured: { bt_facility: new Set(['rfk_bronx']), aq_monitor: new Set([mottHaven.id, crossBronx.id]) },
         captions: ['THE AVERAGE DOES NOT DESCRIBE EVERY NEIGHBORHOOD.', 'THE NEXT QUESTION IS WHETHER THESE EARLY PATTERNS LASTED.'],
         text: 'The first year gives us a local snapshot. To understand whether these changes were temporary or persistent, we need to move forward in time.',
         closingQuestion: 'What changed one year later?',
@@ -671,7 +646,6 @@ export function buildGuide({ summary, geo }) {
         text: 'Differences in monitoring coverage, incomplete 2026 data, seasonal variation, and non-matching observation periods can limit direct year-to-year comparisons.',
         caveatList: [
           'Traffic and air comparisons use January–August 2024, 2025, and 2026—not complete 2026.',
-          'South Bronx DOT street counts are rotating snapshots without a matched local before/after pair.',
           'Hunts Point has no eligible 2024 PM2.5 baseline.',
           'Midtown West moved in July 2026, so it has no eligible Jan–Aug 2026 comparison.',
         ],
@@ -679,8 +653,8 @@ export function buildGuide({ summary, geo }) {
       },
       {
         at: null, placement: 'upper-left', size: 'large', variant: 'close', state: Y2026,
-        layers: chapterLayers('bt_facility', 'dot_segment', 'aq_monitor', 'dac'), dotAll: true, dacMode: 'percentile', overlayOpacity: 0.3, camera: { center: [-73.93, 40.75], zoom: 9.65 },
-        featured: { bt_facility: new Set(['rfk_bronx']), dot_segment: new Set(['dot_139020']), aq_monitor: new Set([mottHaven.id, crossBronx.id]) },
+        layers: chapterLayers('bt_facility', 'aq_monitor', 'dac'), dacMode: 'percentile', overlayOpacity: 0.3, camera: { center: [-73.93, 40.75], zoom: 9.65 },
+        featured: { bt_facility: new Set(['rfk_bronx']), aq_monitor: new Set([mottHaven.id, crossBronx.id]) },
         question: 'If we know where the burden is, what should New York do with that knowledge?',
         captions: ['THE FIRST SEVEN CHAPTERS ASKED WHAT HAPPENED.', 'THE FINAL QUESTION IS WHAT COULD HAPPEN INSTEAD.'],
         text: 'The evidence now gives us a way to identify where intervention could matter most.',
@@ -700,8 +674,8 @@ export function buildGuide({ summary, geo }) {
       },
       {
         at: { layer: 'dot_segment', id: 'dot_139020' }, side: 'left', size: 'large', variant: 'combined', state: Y2026,
-        layers: chapterLayers('bt_facility', 'dot_segment', 'aq_monitor', 'dac'), dotAll: true, dacMode: 'percentile', overlayOpacity: 0.42, camera: { center: [-73.928, 40.8425], zoom: 11.45 },
-        featured: { bt_facility: new Set(['rfk_bronx']), dot_segment: new Set(['dot_139020']), aq_monitor: new Set([hamilton.id, mottHaven.id, crossBronx.id]) },
+        layers: chapterLayers('bt_facility', 'aq_monitor', 'dac'), dacMode: 'percentile', overlayOpacity: 0.42, camera: { center: [-73.928, 40.8425], zoom: 11.45 },
+        featured: { bt_facility: new Set(['rfk_bronx']), aq_monitor: new Set([hamilton.id, mottHaven.id, crossBronx.id]) },
         captions: ['THIS LOCATION EMERGED FROM THE EVIDENCE.'],
         combinedEvidence: [
           { label: 'Location', value: 'Major Deegan Expressway · High Bridge' },
@@ -716,8 +690,8 @@ export function buildGuide({ summary, geo }) {
       },
       {
         at: { layer: 'dot_segment', id: 'dot_139020' }, side: 'right', size: 'large', variant: 'combined', state: Y2025,
-        layers: chapterLayers('bt_facility', 'flow', 'dot_segment', 'aq_monitor', 'dac'), dotAll: true, dacMode: 'percentile', overlayOpacity: 0.3, camera: { center: [-73.928, 40.8425], zoom: 12.0 },
-        featured: { bt_facility: new Set(['rfk_bronx']), dot_segment: new Set(['dot_139020']), aq_monitor: new Set([mottHaven.id, crossBronx.id]) },
+        layers: chapterLayers('bt_facility', 'flow', 'aq_monitor', 'dac'), dacMode: 'percentile', overlayOpacity: 0.3, camera: { center: [-73.928, 40.8425], zoom: 12.0 },
+        featured: { bt_facility: new Set(['rfk_bronx']), aq_monitor: new Set([mottHaven.id, crossBronx.id]) },
         captions: ['TODAY, THIS SPACE IS ORGANIZED AROUND MOVING VEHICLES.'],
         text: 'The same infrastructure that carries regional traffic also shapes local exposure, neighborhood connections, and how much land remains available for other uses.',
         combinedEvidence: [
@@ -731,8 +705,8 @@ export function buildGuide({ summary, geo }) {
       },
       {
         at: { layer: 'dot_segment', id: 'dot_139020' }, side: 'left', size: 'wide', variant: 'scenario', state: Y2026,
-        layers: chapterLayers('bt_facility', 'flow', 'dot_segment', 'aq_monitor', 'dac'), dotAll: true, dacMode: 'percentile', overlayOpacity: 0.3, camera: { center: [-73.928, 40.8425], zoom: 11.75 },
-        featured: { dot_segment: new Set(['dot_139020']), aq_monitor: new Set([mottHaven.id, crossBronx.id]) },
+        layers: chapterLayers('bt_facility', 'flow', 'aq_monitor', 'dac'), dacMode: 'percentile', overlayOpacity: 0.3, camera: { center: [-73.928, 40.8425], zoom: 11.75 },
+        featured: { aq_monitor: new Set([mottHaven.id, crossBronx.id]) },
         question: 'What if part of this road space were repurposed?',
         statusBadge: 'SCENARIO · NOT AN OBSERVED RESULT',
         captions: ['A REDESIGN WOULD CHANGE MORE THAN THE STREETSCAPE.'],
@@ -745,8 +719,8 @@ export function buildGuide({ summary, geo }) {
       },
       {
         at: null, placement: 'upper-right', size: 'large', variant: 'caveat', state: Y2026,
-        layers: chapterLayers('bt_facility', 'flow', 'dot_segment', 'dac'), dotAll: true, dacMode: 'percentile', overlayOpacity: 0.24, camera: { center: [-73.91, 40.82], zoom: 10.9 },
-        featured: { bt_facility: new Set(['rfk_bronx']), dot_segment: new Set(['dot_139020', 'dot_9014571']) },
+        layers: chapterLayers('bt_facility', 'flow', 'dac'), dacMode: 'percentile', overlayOpacity: 0.24, camera: { center: [-73.91, 40.82], zoom: 10.9 },
+        featured: { bt_facility: new Set(['rfk_bronx']) },
         captions: ['RECLAIMING ROAD SPACE DOES NOT MAKE TRAFFIC DISAPPEAR.', 'THE DESIGN HAS TO ACCOUNT FOR WHERE IT GOES NEXT.'],
         text: 'Any future redesign would need to evaluate nearby routes, transit alternatives, truck movement, street geometry, and potential pollution displacement before reducing major road capacity.',
         caveatList: [
@@ -758,8 +732,8 @@ export function buildGuide({ summary, geo }) {
       },
       {
         at: { layer: 'dot_segment', id: 'dot_139020' }, side: 'right', size: 'large', variant: 'opportunity', state: Y2026,
-        layers: chapterLayers('dot_segment', 'aq_monitor', 'dac'), dotAll: true, dacMode: 'percentile', overlayOpacity: 0.3, camera: { center: [-73.928, 40.8425], zoom: 12.05 },
-        featured: { dot_segment: new Set(['dot_139020']) },
+        layers: chapterLayers('aq_monitor', 'dac'), dacMode: 'percentile', overlayOpacity: 0.3, camera: { center: [-73.928, 40.8425], zoom: 12.05 },
+        featured: {},
         statusBadge: 'PHASE 2 DESIGN OPPORTUNITY',
         captions: ['BUT ROAD SPACE IS ALSO CITY SPACE.'],
         text: 'If transportation demand can be reduced or reorganized without shifting the burden elsewhere, that land becomes an opportunity for something different: green infrastructure, safer public space, stormwater management, and neighborhood reconnection.',
@@ -769,8 +743,8 @@ export function buildGuide({ summary, geo }) {
       },
       {
         at: null, placement: 'upper-left', size: 'large', variant: 'close', state: Y2026,
-        layers: chapterLayers('dot_segment', 'aq_monitor', 'dac'), dotAll: true, dacMode: 'percentile', overlayOpacity: 0.3, camera: { center: [-73.928, 40.8425], zoom: 11.45 },
-        featured: { dot_segment: new Set(['dot_139020']), aq_monitor: new Set([mottHaven.id, crossBronx.id]) },
+        layers: chapterLayers('aq_monitor', 'dac'), dacMode: 'percentile', overlayOpacity: 0.3, camera: { center: [-73.928, 40.8425], zoom: 11.45 },
+        featured: { aq_monitor: new Set([mottHaven.id, crossBronx.id]) },
         captions: ["CONGESTION PRICING CHANGED ONE PART OF NEW YORK'S TRANSPORTATION SYSTEM.", 'THE DATA SHOW WHY THE NEXT CHANGE HAS TO BE MORE LOCAL.'],
         closingQuestion: 'What could this place become?',
         text: 'Phase 1 identified the problem and the place. Phase 2 begins with the question of how to redesign it without simply moving the burden somewhere else.',

@@ -2,7 +2,7 @@
 import { isNum } from './format.js';
 import { metricColor } from './scales.js';
 
-export const POINT_LAYERS = ['aq_monitor', 'crz_entry', 'bt_facility', 'dot_segment'];
+export const POINT_LAYERS = ['aq_monitor', 'crz_entry', 'bt_facility'];
 export const GLYPH_LAYERS = ['aq_monitor', 'crz_entry', 'bt_facility'];
 
 export const LAYER_META = {

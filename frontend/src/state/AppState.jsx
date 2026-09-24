@@ -67,7 +67,6 @@ export const initialState = {
   selectedFeature: fromUrl.selectedFeature,
   hovered: null,
   layerVisibility: fromUrl.explore ? { ...EXPLORE_LAYERS } : { ...startChapter.layers },
-  dotAll: !fromUrl.explore && Boolean(startChapter.dotAll), // show the single-count DOT sites too (default: matched only)
   theme: readStoredTheme(),
   sourcesOpen: false,
   controlsOpen: fromUrl.controlsOpen, // phone: controls sheet open
@@ -94,7 +93,7 @@ export function reducer(state, action) {
       const ch = CHAPTERS[action.index];
       if (!ch) return state;
       if (state.activeChapter === action.index && !state.exploreMode) return state;
-      return { ...state, activeChapter: action.index, exploreMode: false, layerVisibility: { ...ch.layers }, dotAll: Boolean(ch.dotAll), overlayOpacity: 1, ...opening(ch), hour: null, selectedFeature: null, sourcesOpen: false };
+      return { ...state, activeChapter: action.index, exploreMode: false, layerVisibility: { ...ch.layers }, overlayOpacity: 1, ...opening(ch), hour: null, selectedFeature: null, sourcesOpen: false };
     }
     case 'SET_STEP_STATE':
       // Used by step transitions and tour beats: applies the requested map composition directly, without
@@ -104,7 +103,6 @@ export function reducer(state, action) {
         period: action.period ?? state.period,
         metric: action.metric ?? state.metric,
         layerVisibility: action.layers ? { ...action.layers } : state.layerVisibility,
-        dotAll: action.dotAll ?? state.dotAll,
         dacMode: action.dacMode ?? state.dacMode,
         overlayOpacity: action.overlayOpacity ?? state.overlayOpacity,
       };
@@ -171,10 +169,6 @@ export function reducer(state, action) {
       if (on && action.layer === 'dac') next.uhf42 = false;
       if (on && action.layer === 'uhf42') next.dac = false;
       return { ...state, layerVisibility: next };
-    }
-    case 'TOGGLE_DOT_ALL': {
-      const on = action.on ?? !state.dotAll;
-      return { ...state, dotAll: on, layerVisibility: on ? { ...state.layerVisibility, dot_segment: true } : state.layerVisibility };
     }
     case 'SET_DAC_MODE':
       return { ...state, dacMode: action.mode === 'percentile' ? 'percentile' : 'designated', layerVisibility: { ...state.layerVisibility, dac: true, uhf42: false } };

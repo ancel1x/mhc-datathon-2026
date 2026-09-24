@@ -167,28 +167,6 @@ export function buildStory({ summary, tolls, sources, geo }) {
         },
       },
     },
-    // 4 · Street level ---------------------------------------------------------------------
-    {
-      kicker: '2025 · sampled street counts',
-      title: 'Street level: what DOT counters add',
-      lede: `NYC DOT counted ${n(fmtInt(dot.matched_total))} of ${n(fmtInt(dot.on_map))} mapped street locations both before and after the toll; a strict matched-month analysis found none that qualify for a citywide estimate.`,
-      body: 'These are one-week samples at rotating spots, so they describe those spots, not the city. The most comparable pairs (same calendar month, 2024 against 2025) sit at the East River bridge approaches and around 60th Street, where the counts fell.',
-      stats: [
-        { label: 'Counted before and after the toll', value: `${fmtInt(dot.matched_total)} of ${fmtInt(dot.on_map)}`, sub: 'filled squares; hollow squares were counted once' },
-        { label: 'Same month, 2024 vs 2025', value: fmtInt(tier1.length), sub: tier1.length ? `${fmtInt(tier1.filter((r) => r.pct_change < 0).length)} fell, ${fmtInt(tier1.filter((r) => r.pct_change > 0).length)} rose` : 'none' },
-        { label: 'Citywide street-level change', value: 'not estimable', sub: 'strict matched-month rule found no eligible pairs' },
-      ],
-      list: {
-        title: 'Same calendar month, 2024 → 2025 (sampled)',
-        rows: tier1.map((r) => ({ label: `${titleStreet(r.street)} · ${r.boro}`, value: fmtPct(r.pct_change), sub: `${fmtCompact(r.pre_adv)} → ${fmtCompact(r.post_adv)} a day`, tone: r.pct_change })),
-      },
-      details: {
-        paragraphs: [
-          `The other ${n(fmtInt(tier2.length + tier3.length))} pairs compare a 2025 week with an older or different-month baseline (${joinNames(tier3.slice(0, 3).map((r) => `${titleStreet(r.street)} ${fmtPct(r.pct_change)}`))}${tier3.length > 3 ? ', …' : ''}). They are kept in Explore and in each square's detail, labelled by how comparable the pair is, but they carry no interval and are not evidence of citywide rerouting.`,
-          `Post-toll-only snapshots exist for the Major Deegan (${n(fmtCompact(dot.post_only_context?.find((p) => /DEEGAN/.test(p.street))?.latest_adv))} vehicles a day on one roadway), the Deegan entrance at the Willis Avenue Bridge and Bruckner Boulevard. They have no "before", so they appear only as context in the highway step; switch on "All DOT sites" under Layers to see every sampled spot.`,
-        ],
-      },
-    },
     // 5 · Air --------------------------------------------------------------------------------
     {
       kicker: '2025 vs 2024 · matched months',
@@ -352,12 +330,11 @@ export function buildStory({ summary, tolls, sources, geo }) {
 export function buildChapterCards({ summary, geo }) {
   const air = summary?.reconciled?.air ?? [];
   const traffic = summary?.reconciled?.traffic ?? [];
-  const dot = summary?.reconciled?.dot?.tiers?.same_month_2024?.rows ?? [];
   const byTrafficId = (id) => traffic.find((row) => row.id === id) ?? {};
   const byAirId = (id) => air.find((row) => row.id === id) ?? {};
   const rfk = byTrafficId('rfk_manhattan');
   const hlc = byTrafficId('hlc');
-  const east58 = dot.find((row) => row.id === 'dot_36369') ?? {};
+  const whitestone = byTrafficId('whitestone');
   const improved = air.filter((row) => row.class === 'decrease');
   const uncertain = air.filter((row) => row.class === 'uncertain');
   const higher = air.filter((row) => row.class === 'increase');
@@ -410,10 +387,10 @@ export function buildChapterCards({ summary, geo }) {
       stats: [
         { value: `${fmtPct(rfk.pct_existing)} · ${fmtInt(rfk.avg_daily_2025)}/day`, label: rfk.name, tone: 1 },
         { value: `${fmtPct(hlc.pct_existing)} · ${fmtInt(hlc.avg_daily_2025)}/day`, label: `${hlc.name} · coverage-limited`, tone: -1 },
-        { value: fmtPct(east58.pct_change), label: 'East 58 Street · Southbound · same-month DOT sample', tone: -1 },
+        { value: `${fmtPct(whitestone.pct_existing)} · ${fmtInt(whitestone.avg_daily_2025)}/day`, label: `${whitestone.name} · supported increase`, tone: 1 },
       ],
       takeaway: 'The first traffic story was not that vehicles simply disappeared. It was a redistribution: different crossings, approaches, and local streets experienced different changes.',
-      caveat: 'Regional bridge and tunnel counts show broad movement patterns. DOT street counters help reveal what changed on specific local corridors and directions.',
+      caveat: 'Crossing counts show where volumes changed. They count vehicles at each crossing, so they cannot follow an individual trip from one route to another.',
     },
     {
       kicker: '2025 · PM2.5 AFTER TOLLING', title: 'Chapter 4 — Follow the Air',
@@ -438,19 +415,19 @@ export function buildChapterCards({ summary, geo }) {
     },
     {
       kicker: '2025 · ENVIRONMENTAL JUSTICE', title: 'Chapter 5 — Who Bears the Burden?',
-      lede: 'Traffic and PM2.5 changes do not happen on a blank map. New York entered congestion pricing with major differences in environmental exposure, health burden, and socioeconomic vulnerability across neighborhoods.',
+      lede: 'The toll landed on a city that was already unequal. Nearly half of New York’s census tracts carry the state’s disadvantaged-community designation, awarded for pollution, poverty and health burdens that were in place long before January 2025.',
       stats: [
         { value: `${fmtInt(equity.dac_designated_tracts)} of ${fmtInt(equity.nyc_tracts)} tracts`, label: 'State-designated disadvantaged communities in the project data' },
         { value: `${rfk.name} · ${fmtPct(rfk.pct_existing)}`, label: `Selected traffic increase${rfkBurdenScore == null ? '' : ` · burden score ${rfkBurdenScore} / 100`}`, tone: 1 },
         { value: `${hamilton.name} · ${fmtSigned(hamilton.delta_raw, 2)} µg/m³`, label: `Selected PM2.5 concern · ${fmtNum(hamilton.pre_mean, 2)} → ${fmtNum(hamilton.post_mean, 2)} µg/m³ · weather-adjusted result uncertain`, tone: 1 },
         { value: `${fmtNum(hamilton.uhf42_asthma_ed_children, 1)} per 10,000`, label: 'Child asthma ER visits in Washington Heights · 2023, latest available' },
       ],
-      takeaway: 'The equity concern is not that congestion pricing created New York’s existing disparities. It is that some unfavorable traffic or air-quality changes overlap communities that were already carrying greater environmental and health burdens.',
-      caveat: 'These overlaps identify patterns that deserve closer attention. They do not by themselves establish causation. Asthma data are from 2023, the latest available year, and predate congestion pricing.',
+      takeaway: 'Congestion pricing did not create those gaps, and nothing here says it widened them. What the overlap does show is that the clearest air improvements landed in and beside the priced core, while the neighborhoods carrying the heaviest existing burden got results too uncertain to call either way.',
+      caveat: 'Overlap is not cause. This step shows where the patterns sit on top of one another, not what produced them. The asthma and poverty figures are from 2023, the newest published, so they describe the city before the toll rather than after it.',
     },
     {
       kicker: 'SOUTH BRONX · LOCAL CASE STUDY', title: 'Chapter 6 — Asthma Alley',
-      lede: 'Citywide averages can hide neighborhood-level differences. The South Bronx provides a closer look at how traffic, PM2.5, environmental vulnerability, and asthma burden intersect at the local scale.',
+      lede: 'A citywide average can bury a neighborhood. Mott Haven, the Cross Bronx Expressway and Hunts Point sit within a few miles of one another, carry some of the highest childhood asthma rates in New York, and are read here one monitor at a time instead of through the citywide figure.',
       stats: [
         { value: `${fmtInt(rfkBronx.avg_daily_2024)} → ${fmtInt(rfkBronx.avg_daily_2025)}/day`, label: `Local traffic · RFK Bridge Bronx approach · ${fmtPct(rfkBronx.pct_existing)}, statistically uncertain`, tone: 1 },
         { value: `${fmtNum(mottHaven.pre_mean, 2)} → ${fmtNum(mottHaven.post_mean, 2)} µg/m³`, label: `Local PM2.5 · Mott Haven · ${fmtSigned(mottHaven.delta_raw, 2)} raw change, weather-adjusted result uncertain`, tone: mottHaven.delta_raw },
@@ -465,8 +442,8 @@ export function buildChapterCards({ summary, geo }) {
           { label: 'Cross Bronx monitor', value: `${fmtNum(crossBronx.pre_mean, 2)} → ${fmtNum(crossBronx.post_mean, 2)} µg/m³`, sub: `${fmtSigned(crossBronx.delta_raw, 2)} raw change · weather-adjusted result uncertain`, tone: crossBronx.delta_raw },
         ],
       },
-      takeaway: 'The South Bronx illustrates why the scale of analysis matters. A favorable CRZ-wide result does not guarantee that every neighborhood experienced the same traffic or air-quality change.',
-      caveat: 'Our local map shows observed traffic, PM2.5, and vulnerability patterns. These overlaps should not be interpreted as proof that congestion pricing caused every local change. Child-asthma data are from 2023, the latest available year, and predate congestion pricing.',
+      takeaway: 'Scale changes the answer. A good result for the priced zone as a whole does not mean every neighborhood got one, and here the monitors are not clear enough to say the South Bronx got anything at all.',
+      caveat: 'None of this is proof that the toll caused a local change. Both monitors with a usable baseline came out statistically uncertain, the third has no eligible 2024 record to compare against, and the child-asthma figures are from 2023, before the toll.',
     },
     {
       kicker: '2026 SO FAR · PERSISTENCE', title: 'Chapter 7 — One Year Later',
