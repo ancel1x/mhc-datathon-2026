@@ -342,9 +342,14 @@
   right: var(--inset);
 }
 .timeline {
-  transition: right 280ms ease;
+  transition: opacity 900ms ease, left 280ms ease, right 280ms ease;
 }
 .app[data-controls='collapsed'][data-autoplay='false'] .timeline {
+  right: var(--inset);
+}
+/* during the tour both panels are hidden, so the bar spans the full width */
+.app[data-autoplay='true'] .timeline {
+  left: var(--inset);
   right: var(--inset);
 }
 .maplibregl-ctrl-bottom-right {
