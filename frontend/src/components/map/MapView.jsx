@@ -11,7 +11,7 @@ import { fmtInt, fmtNum, fmtPercentile } from '../../lib/format.js';
 import { tourPadding } from '../GuidePlayer.jsx';
 import ZoneLayer from './ZoneLayer.jsx';
 import PolygonLayers, { POLYGON_LAYER_IDS } from './PolygonLayers.jsx';
-import PointLayers, { ensureSquareImage, POINT_LAYER_IDS, SQUARE_IMAGE } from './PointLayers.jsx';
+import PointLayers, { DIAMOND_IMAGE, ensureDiamondImage, ensureSquareImage, POINT_LAYER_IDS, SQUARE_IMAGE } from './PointLayers.jsx';
 import FlowLayer, { FLOW_LAYER_IDS } from './FlowLayer.jsx';
 import GlyphLayer from './GlyphLayer.jsx';
 import GuideCallouts from './GuideCallouts.jsx';
@@ -226,7 +226,11 @@ function MapView({ featured, guide }) {
   const onLoad = useCallback((e) => {
     const map = e.target;
     ensureSquareImage(map);
-    map.on('styleimagemissing', (ev) => { if (ev.id === SQUARE_IMAGE) ensureSquareImage(map); });
+    ensureDiamondImage(map);
+    map.on('styleimagemissing', (ev) => {
+      if (ev.id === SQUARE_IMAGE) ensureSquareImage(map);
+      else if (ev.id === DIAMOND_IMAGE) ensureDiamondImage(map);
+    });
     setGlyphZoom(map.getZoom() >= GLYPH_ZOOM);
     setLoaded(true);
   }, []);
@@ -261,7 +265,10 @@ function MapView({ featured, guide }) {
         interactiveLayerIds={interactiveLayerIds}
         cursor="grab"
         onLoad={onLoad}
-        onStyleImageMissing={(e) => { if (e.id === SQUARE_IMAGE) ensureSquareImage(e.target); }}
+        onStyleImageMissing={(e) => {
+          if (e.id === SQUARE_IMAGE) ensureSquareImage(e.target);
+          else if (e.id === DIAMOND_IMAGE) ensureDiamondImage(e.target);
+        }}
         onZoom={(e) => setGlyphZoom(e.viewState.zoom >= GLYPH_ZOOM)}
         onMoveEnd={() => setViewVersion((v) => v + 1)}
         onClick={onClick}

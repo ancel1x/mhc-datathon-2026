@@ -20,7 +20,8 @@ function BeatContent({ beat, chapter }) {
   const comparisonMax = Math.max(...(beat.comparison ?? []).map((item) => item.amount), 1);
   return (
     <>
-      <div className="comic-card__chapter">{['CHAPTER 1 · BEFORE THE TOLL', 'CHAPTER 2 · THE HEADLINE', 'CHAPTER 3 · WHERE DID THE TRAFFIC GO?', 'CHAPTER 4 · FOLLOW THE AIR'][chapter]}</div>
+      <div className="comic-card__chapter">{['CHAPTER 1 · BEFORE THE TOLL', 'CHAPTER 2 · THE HEADLINE', 'CHAPTER 3 · WHERE DID THE TRAFFIC GO?', 'CHAPTER 4 · FOLLOW THE AIR', 'CHAPTER 5 · WHO BEARS THE BURDEN?', 'CHAPTER 6 · ASTHMA ALLEY', 'CHAPTER 7 · ONE YEAR LATER', 'CHAPTER 8 · WHAT COULD NYC BECOME?'][chapter]}</div>
+      {beat.statusBadge ? <div className="comic-status-badge">{beat.statusBadge}</div> : null}
       {beat.question ? <div className="comic-question"><span>{beat.question}</span></div> : null}
       {beat.captions?.length ? (
         <div className="comic-captions">
@@ -126,8 +127,62 @@ function BeatContent({ beat, chapter }) {
           {beat.airSummary.map((item) => <div key={item.label} data-tone={item.tone}><strong className="num">{item.value}</strong><span>{item.label}</span></div>)}
         </div>
       ) : null}
+      {beat.burdenLegend ? (
+        <div className="comic-burden-legend">
+          <strong>{beat.burdenLegend.value}</strong>
+          <span>{beat.burdenLegend.label}</span>
+          {beat.burdenLegend.note ? <small>{beat.burdenLegend.note}</small> : null}
+        </div>
+      ) : null}
+      {beat.combinedEvidence?.length ? (
+        <div className="comic-combined-evidence">
+          {beat.combinedEvidence.map((item) => (
+            <div key={item.label} data-tone={item.tone}>
+              <span>{item.label}</span>
+              <strong className="num">{item.value}</strong>
+            </div>
+          ))}
+        </div>
+      ) : null}
+      {beat.trendSeries?.length ? (
+        <div className="comic-trends">
+          {beat.trendSeries.map((series) => {
+            const max = Math.max(...series.values.map((item) => Number(item.amount) || 0), 1);
+            return (
+              <section key={series.title} className="comic-trend" data-tone={series.tone}>
+                <header><strong>{series.title}</strong><b>{series.status}</b></header>
+                <div className="comic-trend__values">
+                  {series.values.map((item) => (
+                    <div key={item.year}><span>{item.year}</span><i><b style={{ width: `${Math.max(8, ((Number(item.amount) || 0) / max) * 100)}%` }} /></i><strong className="num">{item.value}</strong></div>
+                  ))}
+                </div>
+                <small>{series.detail}</small>
+              </section>
+            );
+          })}
+        </div>
+      ) : null}
+      {beat.statusColumns?.length ? (
+        <div className="comic-status-columns">
+          {beat.statusColumns.map((column) => (
+            <section key={column.title} data-tone={column.tone}>
+              <strong>{column.title}</strong>
+              <ul>{column.items.map((item) => <li key={item}>{item}</li>)}</ul>
+            </section>
+          ))}
+        </div>
+      ) : null}
+      {beat.scenarioPanels?.length ? (
+        <div className="comic-scenario-panels">
+          {beat.scenarioPanels.map((panel) => <section key={panel.title}><strong>{panel.title}</strong><span>{panel.body}</span></section>)}
+        </div>
+      ) : null}
+      {beat.opportunityList?.length ? <div className="comic-opportunities">{beat.opportunityList.map((item) => <span key={item}>{item}</span>)}</div> : null}
+      {beat.caveatList?.length ? <ul className="comic-caveat-list">{beat.caveatList.map((item) => <li key={item}>{item}</li>)}</ul> : null}
       {beat.note ? <div className="comic-note">{beat.note}</div> : null}
       {beat.closeLine ? <div className="comic-close-line">{beat.closeLine}</div> : null}
+      {beat.closingQuestion ? <div className="comic-question"><span>{beat.closingQuestion}</span></div> : null}
+      {beat.finalLabel ? <div className="comic-final-label">{beat.finalLabel}</div> : null}
       {beat.transition ? <div className="comic-transition">{beat.transition}</div> : null}
       {beat.footer ? <div className="comic-card__footer">{beat.footer}</div> : null}
     </>

@@ -349,7 +349,7 @@ export function buildStory({ summary, tolls, sources, geo }) {
 }
 
 /** Persistent editorial summaries used by the non-tour left panel. */
-export function buildChapterCards({ summary }) {
+export function buildChapterCards({ summary, geo }) {
   const air = summary?.reconciled?.air ?? [];
   const traffic = summary?.reconciled?.traffic ?? [];
   const dot = summary?.reconciled?.dot?.tiers?.same_month_2024?.rows ?? [];
@@ -363,6 +363,21 @@ export function buildChapterCards({ summary }) {
   const higher = air.filter((row) => row.class === 'increase');
   const unavailable = air.filter((row) => row.class === 'no_baseline');
   const selected = ['aq_36061NY08552', 'aq_36061NY08454', 'aq_36061NY12380'].map(byAirId);
+  const equity = summary?.equity ?? {};
+  const rfkFeature = (geo?.bt_facility?.features ?? []).find((feature) => feature.properties?.id === 'rfk_manhattan')?.properties ?? {};
+  const rfkBurdenScore = isNum(rfkFeature.dac_combined_pct) ? Math.round(rfkFeature.dac_combined_pct * 100) : null;
+  const hamilton = byAirId('aq_36061NY12380');
+  const rfkBronx = byTrafficId('rfk_bronx');
+  const mottHaven = byAirId('aq_36005NY11534');
+  const crossBronx = byAirId('aq_36005NY12387');
+  const mottFeature = (geo?.aq_monitor?.features ?? []).find((feature) => feature.properties?.id === 'aq_36005NY11534')?.properties ?? {};
+  const deegan = (geo?.dot_segment?.features ?? []).find((feature) => feature.properties?.id === 'dot_139020')?.properties ?? {};
+  const mottBurdenScore = isNum(mottFeature.dac_combined_pct) ? Math.round(mottFeature.dac_combined_pct * 100) : null;
+  const crossBay = byTrafficId('cross_bay');
+  const qmt = byTrafficId('qmt');
+  const williamsburg = byAirId('aq_36061NY08552');
+  const highBridge = (geo?.uhf42?.features ?? []).find((feature) => feature.properties?.name === 'High Bridge - Morrisania')?.properties ?? {};
+  const deeganBurdenScore = isNum(deegan.dac_combined_pct) ? Math.round(deegan.dac_combined_pct * 100) : null;
 
   return [
     {
@@ -420,6 +435,71 @@ export function buildChapterCards({ summary }) {
       },
       takeaway: 'The monitor-level picture is more mixed than a single citywide or CRZ average. Some locations improved more clearly than others, and some did not improve at all.',
       caveat: 'These are observed spatial patterns. A change at one monitor does not by itself prove that congestion pricing caused that change.',
+    },
+    {
+      kicker: '2025 · ENVIRONMENTAL JUSTICE', title: 'Chapter 5 — Who Bears the Burden?',
+      lede: 'Traffic and PM2.5 changes do not happen on a blank map. New York entered congestion pricing with major differences in environmental exposure, health burden, and socioeconomic vulnerability across neighborhoods.',
+      stats: [
+        { value: `${fmtInt(equity.dac_designated_tracts)} of ${fmtInt(equity.nyc_tracts)} tracts`, label: 'State-designated disadvantaged communities in the project data' },
+        { value: `${rfk.name} · ${fmtPct(rfk.pct_existing)}`, label: `Selected traffic increase${rfkBurdenScore == null ? '' : ` · burden score ${rfkBurdenScore} / 100`}`, tone: 1 },
+        { value: `${hamilton.name} · ${fmtSigned(hamilton.delta_raw, 2)} µg/m³`, label: `Selected PM2.5 concern · ${fmtNum(hamilton.pre_mean, 2)} → ${fmtNum(hamilton.post_mean, 2)} µg/m³ · weather-adjusted result uncertain`, tone: 1 },
+        { value: `${fmtNum(hamilton.uhf42_asthma_ed_children, 1)} per 10,000`, label: 'Child asthma ER visits in Washington Heights · 2023, latest available' },
+      ],
+      takeaway: 'The equity concern is not that congestion pricing created New York’s existing disparities. It is that some unfavorable traffic or air-quality changes overlap communities that were already carrying greater environmental and health burdens.',
+      caveat: 'These overlaps identify patterns that deserve closer attention. They do not by themselves establish causation. Asthma data are from 2023, the latest available year, and predate congestion pricing.',
+    },
+    {
+      kicker: 'SOUTH BRONX · LOCAL CASE STUDY', title: 'Chapter 6 — Asthma Alley',
+      lede: 'Citywide averages can hide neighborhood-level differences. The South Bronx provides a closer look at how traffic, PM2.5, environmental vulnerability, and asthma burden intersect at the local scale.',
+      stats: [
+        { value: `${fmtInt(rfkBronx.avg_daily_2024)} → ${fmtInt(rfkBronx.avg_daily_2025)}/day`, label: `Local traffic · RFK Bridge Bronx approach · ${fmtPct(rfkBronx.pct_existing)}, statistically uncertain`, tone: 1 },
+        { value: `${fmtNum(mottHaven.pre_mean, 2)} → ${fmtNum(mottHaven.post_mean, 2)} µg/m³`, label: `Local PM2.5 · Mott Haven · ${fmtSigned(mottHaven.delta_raw, 2)} raw change, weather-adjusted result uncertain`, tone: mottHaven.delta_raw },
+        { value: mottBurdenScore == null ? 'Designated community' : `${mottBurdenScore} / 100`, label: 'Environmental burden · Mott Haven–Port Morris · disadvantaged community', tone: 0 },
+        { value: `${fmtNum(mottHaven.uhf42_asthma_ed_children, 1)} per 10,000`, label: 'Child asthma ER visits in Hunts Point–Mott Haven · 2023, latest available' },
+      ],
+      list: {
+        title: 'Scale comparison',
+        rows: [
+          { label: 'CRZ headline', value: '~11% fewer entries', sub: '22% lower modeled average daily maximum PM2.5' },
+          { label: 'Major Deegan context', value: `${fmtInt(deegan.latest_adv)} vehicles/day`, sub: 'Northbound · Oct–Nov 2025 snapshot · no before/after comparison' },
+          { label: 'Cross Bronx monitor', value: `${fmtNum(crossBronx.pre_mean, 2)} → ${fmtNum(crossBronx.post_mean, 2)} µg/m³`, sub: `${fmtSigned(crossBronx.delta_raw, 2)} raw change · weather-adjusted result uncertain`, tone: crossBronx.delta_raw },
+        ],
+      },
+      takeaway: 'The South Bronx illustrates why the scale of analysis matters. A favorable CRZ-wide result does not guarantee that every neighborhood experienced the same traffic or air-quality change.',
+      caveat: 'Our local map shows observed traffic, PM2.5, and vulnerability patterns. These overlaps should not be interpreted as proof that congestion pricing caused every local change. Child-asthma data are from 2023, the latest available year, and predate congestion pricing.',
+    },
+    {
+      kicker: '2026 SO FAR · PERSISTENCE', title: 'Chapter 7 — One Year Later',
+      lede: 'The first year showed where traffic and air-quality patterns changed. The 2026 data let us ask a different question: which of those early patterns persisted, which moved back toward earlier conditions, and which remain too uncertain to classify?',
+      stats: [
+        { value: 'PERSISTED', label: `Queens Midtown Tunnel · ${fmtPct(qmt.jan_aug?.['2025']?.pct)} in 2025 → ${fmtPct(qmt.jan_aug?.['2026']?.pct)} in 2026, each vs Jan–Aug 2024`, tone: -1 },
+        { value: 'REVERSED', label: `Cross Bay Bridge · ${fmtPct(crossBay.jan_aug?.['2025']?.pct)} → ${fmtPct(crossBay.jan_aug?.['2026']?.pct)}, each vs Jan–Aug 2024`, tone: -1 },
+        { value: 'PERSISTED', label: `Williamsburg Bridge PM2.5 · ${fmtSigned(williamsburg.jan_aug?.['2025']?.delta_raw, 2)} → ${fmtSigned(williamsburg.jan_aug?.['2026']?.delta_raw, 2)} µg/m³, each vs Jan–Aug 2024`, tone: -1 },
+        { value: 'STILL UNCERTAIN', label: `South Bronx · RFK traffic, Mott Haven PM2.5, and Cross Bronx PM2.5 intervals include zero` },
+      ],
+      takeaway: 'A second year adds depth to the story. Some early patterns may persist, others may shift, and incomplete data can leave important questions unresolved.',
+      caveat: 'Where 2026 data are partial, comparisons use matching periods where possible and should not be interpreted as full-year results.',
+    },
+    {
+      kicker: 'FROM EVIDENCE TO INTERVENTION', title: 'Chapter 8 — What Could NYC Become?',
+      lede: 'Seven chapters of traffic, air-quality, environmental-justice, and health evidence point toward a more specific question: where could changing the physical city address a burden revealed by the data?',
+      badge: 'SCENARIO · DESIGN HYPOTHESIS',
+      stats: [
+        { value: 'Major Deegan Expressway', label: 'Selected intervention location · High Bridge, South Bronx' },
+        { value: `${fmtInt(deegan.latest_adv)} vehicles/day`, label: 'Northbound · Oct–Nov 2025 snapshot · no matched pre-toll count' },
+        { value: `${fmtNum(hamilton.pre_mean, 2)} → ${fmtNum(hamilton.post_mean, 2)} µg/m³`, label: `Nearby Hamilton Bridge PM2.5 · ${fmtSigned(hamilton.delta_raw, 2)} raw change · weather-adjusted result uncertain`, tone: hamilton.delta_raw },
+        { value: deeganBurdenScore == null ? 'Designated community' : `${deeganBurdenScore} / 100`, label: `Environmental burden · ${fmtNum(highBridge.asthma_ed_children, 1)} child asthma ER visits per 10,000 in 2023`, tone: 0 },
+      ],
+      list: {
+        title: 'Why here',
+        rows: [
+          { label: 'Traffic context', value: `${fmtInt(rfkBronx.avg_daily_2025)} vehicles/day`, sub: 'Nearby RFK Bronx approach · full-year 2025' },
+          { label: 'PM2.5 context', value: `${fmtSigned(mottHaven.delta_raw, 2)} / ${fmtSigned(crossBronx.delta_raw, 2)} µg/m³`, sub: 'Mott Haven / Cross Bronx raw changes · both weather-adjusted results uncertain' },
+          { label: 'Persistence', value: 'Still uncertain', sub: 'Selected South Bronx traffic and PM2.5 intervals include zero in Jan–Aug 2026 comparisons' },
+        ],
+      },
+      takeaway: 'Repurposing road space here could potentially reduce local traffic exposure and create space for green or public infrastructure, but any redesign would have to account for displaced traffic, truck movement, transit alternatives, and air-quality effects on nearby streets.',
+      caveat: 'This is a data-grounded intervention hypothesis, not a modeled prediction. Phase 2 will test and design the intervention in more detail.',
     },
   ];
 }

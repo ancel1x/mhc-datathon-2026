@@ -9,9 +9,9 @@ const TICKS = [0, 6, 12, 18];
 const PEAK = [5, 21];
 const OUTLINE = 'rgba(11,13,16,0.9)';
 
-/** Center mark that matches the layer's symbol below the glyph zoom: ring (entries) or disc (the rest). */
+/** Center mark that matches the layer's symbol below the glyph zoom: diamond (entries) or disc (the rest). */
 function CenterMark({ shape, color, hollow }) {
-  if (shape === 'entry') return <circle r={4} fill="none" stroke={color} strokeWidth={2} />;
+  if (shape === 'entry') return <polygon points="0,-4 4,0 0,4 -4,0" fill="none" stroke={color} strokeWidth={2} strokeLinejoin="round" />;
   if (hollow) return <circle r={3.5} fill="none" stroke={color} strokeWidth={1.5} />;
   return <circle r={3.5} fill={color} stroke={OUTLINE} strokeWidth={1} />;
 }
