@@ -7,6 +7,8 @@ import { changeColor, CLASS_LABELS, COLORS, sqrtSize, themeColors } from '../../
 import { fmtCompact, fmtMonth, fmtNum, fmtPct, fmtTrafficK, isNum, shortName } from '../../lib/format.js';
 
 export const SQUARE_IMAGE = 'dot-square';
+export const DIAMOND_IMAGE = 'dot-diamond';
+const DIAMOND_HALF = 6;
 export const POINT_LAYER_IDS = { aq_monitor: 'pt-aq_monitor', crz_entry: 'pt-crz_entry', bt_facility: 'pt-bt_facility', dot_segment: 'pt-dot_segment' };
 export const LABEL_ZOOM = 10.4;
 const GLYPH_SWITCH_ZOOM = 11;
@@ -40,6 +42,26 @@ export function squareSDF(size = 20, half = 2.5, corner = 0.8) {
 
 export function ensureSquareImage(map) {
   if (map && !map.hasImage(SQUARE_IMAGE)) map.addImage(SQUARE_IMAGE, squareSDF(), { sdf: true });
+}
+
+/** SDF diamond used for zone entries so they remain distinct from circular crossings and monitors. */
+export function diamondSDF(size = 20, half = DIAMOND_HALF, corner = 0.6) {
+  const data = new Uint8ClampedArray(size * size * 4);
+  const c = (size - 1) / 2;
+  const radius = 8;
+  const cutoff = 0.25;
+  for (let y = 0; y < size; y += 1) {
+    for (let x = 0; x < size; x += 1) {
+      const d = Math.abs(x - c) + Math.abs(y - c) - half - corner;
+      const a = Math.max(0, Math.min(1, 1 - (d / radius + cutoff)));
+      data[(y * size + x) * 4 + 3] = Math.round(a * 255);
+    }
+  }
+  return { width: size, height: size, data };
+}
+
+export function ensureDiamondImage(map) {
+  if (map && !map.hasImage(DIAMOND_IMAGE)) map.addImage(DIAMOND_IMAGE, diamondSDF(), { sdf: true });
 }
 
 /**
@@ -111,10 +133,15 @@ const radiusExpr = (extra = 0) => ['interpolate', ['linear'], ['zoom'], 9, ['*',
 const FEATURED = ['==', ['get', '_featured'], 1];
 const HOLLOW = ['==', ['get', '_hollow'], 1];
 const fade = { duration: 600 };
+const diamondSizeExpr = (extra = 0) => [
+  'interpolate', ['linear'], ['zoom'],
+  9, ['/', ['*', ['+', ['get', '_r'], extra], 0.8], DIAMOND_HALF],
+  11, ['/', ['+', ['get', '_r'], extra], DIAMOND_HALF],
+];
 
 /**
  * Point layers below the glyph zoom. One plain style: filled discs in the result color with a 1 px dark
- * separation stroke (monitors r = 5, bridges r = 4–9 by volume), zone entries as 2 px rings, DOT counts as
+ * separation stroke (monitors r = 5, bridges r = 4–9 by volume), zone entries as 2 px diamond outlines, DOT counts as
  * 5 px squares (matched only unless `dotAll`). Uncertain crossings and monitors without a baseline are rings.
  * Featured = full opacity, the rest 35 %. Text labels for bridges and monitors from zoom 10.4 to 11.
  */
@@ -170,20 +197,25 @@ function PointLayers({ featured, imageReady = true, glyphs = true }) {
 
   return (
     <>
-      {/* Zone entry points: 2 px ring in the change color, transparent center */}
-      <Source id="pts-crz_entry" type="geojson" data={data.crz_entry}>
+      {/* Zone entry points: volume-sized hollow diamonds, distinct from circular crossings and monitors. */}
+      <Source id="pts-crz_entry" type="geojson" data={imageReady ? data.crz_entry : EMPTY}>
         <Layer
           id={POINT_LAYER_IDS.crz_entry}
-          type="circle"
+          type="symbol"
           maxzoom={maxzoom}
           beforeId="labels-highways"
+          layout={{
+            'icon-image': DIAMOND_IMAGE,
+            'icon-size': diamondSizeExpr(1),
+            'icon-allow-overlap': true,
+            'icon-ignore-placement': true,
+          }}
           paint={{
-            'circle-radius': radiusExpr(1),
-            'circle-color': TRANSPARENT,
-            'circle-stroke-color': ['get', '_color'],
-            'circle-stroke-width': 2,
-            'circle-stroke-opacity': crzOn ? dimCase(DIM, 1) : 0,
-            'circle-stroke-opacity-transition': fade,
+            'icon-color': TRANSPARENT,
+            'icon-halo-color': ['get', '_color'],
+            'icon-halo-width': 2,
+            'icon-opacity': crzOn ? dimCase(DIM, 1) : 0,
+            'icon-opacity-transition': fade,
           }}
         />
       </Source>

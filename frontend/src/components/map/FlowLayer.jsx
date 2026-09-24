@@ -334,6 +334,20 @@ function FlowLayer({ featured }) {
         ctx.lineTo(ex + Math.cos(ang - 2.55) * ah, ey + Math.sin(ang - 2.55) * ah);
         ctx.closePath();
         ctx.fill();
+        // Flow arrows end at zone-entry coordinates. Redraw the diamond over them so the marker
+        // remains legible without changing the route geometry or click target.
+        if (r.kind === 'crz_entry') {
+          const half = Math.max(6, s.w * 1.6);
+          ctx.strokeStyle = rgba(s.rgb, s.a);
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(ex, ey - half);
+          ctx.lineTo(ex + half, ey);
+          ctx.lineTo(ex, ey + half);
+          ctx.lineTo(ex - half, ey);
+          ctx.closePath();
+          ctx.stroke();
+        }
       }
       geometryDirty = false;
     };

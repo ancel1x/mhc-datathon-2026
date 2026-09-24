@@ -2,8 +2,25 @@ import { useEffect, useRef } from 'react';
 import { CHAPTERS } from '../../content/chapters.js';
 import { useAppState, useDispatch } from '../../state/AppState.jsx';
 
-const STOPS = CHAPTERS.map((c) => ({ era: c.era, short: c.short, title: c.title }));
+const DISPLAY_LABELS = [
+  <>1. BEFORE<br />THE TOLL</>,
+  <>2. THE<br />HEADLINE</>,
+  <>3. WHERE DID<br />TRAFFIC GO?</>,
+  <>4. FOLLOW<br />THE AIR</>,
+  <>5. WHO BEARS<br />THE BURDEN?</>,
+  <>6. ASTHMA<br />ALLEY</>,
+  <>7. ONE YEAR<br />LATER</>,
+  <>8. WHAT COULD NYC<br />BECOME?</>,
+];
+const STOPS = CHAPTERS.map((c, index) => ({ era: c.era, short: c.short, title: c.title, display: DISPLAY_LABELS[index] ?? c.short }));
 const N = STOPS.length;
+const GROUPS = [
+  { label: 'BASELINE', start: 0, count: 1 },
+  { label: 'THE SHIFT', start: 1, count: 3 },
+  { label: 'LOCAL IMPACT', start: 4, count: 2 },
+  { label: 'WHAT LASTED', start: 6, count: 1 },
+  { label: 'WHAT NEXT', start: 7, count: 1 },
+];
 const fillScale = (p) => `scaleX(${(Math.max(0, Math.min(N - 1, p)) / (N - 1)).toFixed(4)})`;
 
 function PlayIcon({ paused }) {
@@ -66,6 +83,18 @@ export default function Timeline({ guide }) {
         </span>
       ) : null}
       <div className="tl__grid">
+        <div className="tl__groups" aria-hidden="true">
+          {GROUPS.map((group) => (
+            <span
+              key={group.label}
+              className="tl__group"
+              data-current={cur >= group.start && cur < group.start + group.count ? 'true' : 'false'}
+              style={{ gridColumn: `${group.start + 1} / span ${group.count}` }}
+            >
+              {group.label}
+            </span>
+          ))}
+        </div>
         <ol className="tl__track">
           <span className="tl__line" aria-hidden="true" />
           <span ref={fillRef} className={autoplay.on ? 'tl__fill tl__fill--live' : 'tl__fill'} aria-hidden="true" style={autoplay.on ? undefined : { transform: fillScale(cur) }} />
@@ -85,8 +114,12 @@ export default function Timeline({ guide }) {
             </li>
           ))}
         </ol>
-        <div className="tl__titles" aria-hidden="true">
-          {STOPS.map((s, i) => <span key={i} className="tl__title" data-current={i === cur ? 'true' : 'false'}>{s.short}</span>)}
+        <div className="tl__titles">
+          {STOPS.map((s, i) => (
+            <button key={i} type="button" className="tl__title" data-current={i === cur ? 'true' : 'false'} aria-current={i === cur ? 'step' : undefined} title={s.title} onClick={() => go(i)}>
+              {s.display}
+            </button>
+          ))}
         </div>
       </div>
       {autoplay.on ? (

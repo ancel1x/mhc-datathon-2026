@@ -2,15 +2,17 @@ import { COLORS } from '../lib/scales.js';
 
 /**
  * Plain 10 px symbol in the neutral color, matching the layer's map symbol:
- * disc (monitors, bridges), ring (zone entries), square (DOT), plus outline / fill / steps variants.
+ * disc (monitors, bridges), diamond (zone entries), square (DOT), plus outline / fill / steps variants.
  */
 export function LayerSymbol({ kind, color = COLORS.neutral, size = 10 }) {
   const c = size / 2;
   let body;
   switch (kind) {
-    case 'entry':
-      body = <circle cx={c} cy={c} r={c - 1.25} fill="none" stroke={color} strokeWidth={2} />;
+    case 'entry': {
+      const h = c - 1.25;
+      body = <polygon points={`${c},${c - h} ${c + h},${c} ${c},${c + h} ${c - h},${c}`} fill="none" stroke={color} strokeWidth={2} strokeLinejoin="round" />;
       break;
+    }
     case 'line':
       body = <path d={`M1.5 ${c} H${size - 1.5}`} fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeDasharray="3 2.5" />;
       break;

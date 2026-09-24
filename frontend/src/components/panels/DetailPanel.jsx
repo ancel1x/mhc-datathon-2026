@@ -4,7 +4,7 @@ import { useData, useLazyJson } from '../../lib/data.jsx';
 import { COMMUNITY_META, dotTier, featureMetrics, LAYER_META, metaLine } from '../../lib/metrics.js';
 import { fmtCompact, fmtDelta, fmtInt, fmtMonth, fmtMonthList, fmtNum, fmtPct, fmtShare, fmtTrafficK, isNum, shortName } from '../../lib/format.js';
 import { CLASS_LABELS } from '../../lib/scales.js';
-import { plainAir, plainPct, plainRate, plainRush } from '../../lib/plain.js';
+import { plainAir, plainRate } from '../../lib/plain.js';
 import { StatRow } from '../charts/StatTile.jsx';
 import TimelineChart from '../charts/TimelineChart.jsx';
 import HourProfileChart from '../charts/HourProfileChart.jsx';
@@ -61,42 +61,21 @@ function Section({ title, aside, children }) {
 /** Row for IntervalBars from a {pct, ci_low, ci_high, status} block. */
 const ivl = (label, v, sub) => (v ? { label, sub, est: v.pct, lo: v.ci_low, hi: v.ci_high, status: v.status } : null);
 
-/** Second-pipeline evidence for a crossing: the supported / uncertain verdict, rush windows, Jan–Aug persistence. */
-function TrafficEvidence({ p, period }) {
+/** Compact supported / uncertain verdict for a crossing, shown beside its top-level comparison. */
+function TrafficSupport({ p, period }) {
   const ev = p.evidence;
-  if (!ev?.full_year) {
-    return <Section title="Is the change supported?"><p className="detail__hint">No interval-based estimate exists for this crossing.</p></Section>;
-  }
+  if (!ev?.full_year) return null;
   const fy = ev.full_year;
   const j25 = ev.jan_aug?.['2025'] ?? null;
   const j26 = ev.jan_aug?.['2026'] ?? null;
   const is26 = period === 'post_2026_ytd';
-  const limited = fy.status === 'limited';
   const main = is26 && j26
-    ? ivl('Jan–Aug 2026 vs 2024', j26, limited ? 'complete weekend days only' : `${fmtInt(j26.days_2024)} + ${fmtInt(j26.days_2026)} matched days`)
-    : ivl('2025 vs 2024', fy, limited ? 'complete weekend days only' : `${fmtInt(fy.matched_days_2024)} + ${fmtInt(fy.matched_days_2025)} matched days`);
+    ? ivl('Jan–Aug 2026 vs 2024', j26, `${fmtInt(j26.days_2024)} + ${fmtInt(j26.days_2026)} matched days`)
+    : ivl('2025 vs 2024', fy, `${fmtInt(fy.matched_days_2024)} + ${fmtInt(fy.matched_days_2025)} matched days`);
   return (
-    <>
-      <Section title="Is the change supported?" aside={<StatusBadge status={main?.status} />}>
-        {limited ? (
-          <p className="warn">
-            Coverage warning: only {fmtInt(fy.complete_days_2024)} days in 2024 and {fmtInt(fy.complete_days_2025)} in 2025 met the completeness rule here, and only Saturdays and Sundays could be matched. The strict estimate below is a selected-day comparison, not a full-year change. The all-days average above is context, not a supported estimate.
-          </p>
-        ) : null}
-        <IntervalBars rows={[main]} />
-        <p className="detail__plain"><strong>In plain words:</strong> <span className="num">{fmtPct(main?.est)}</span> means {plainPct(main?.est, { status: main?.status, base: is26 ? 'Jan–Aug 2024' : '2024' })}.</p>
-        <p className="detail__hint">The bar is the 95% interval, the range of doubt around the estimate (matched-day analysis, equal month × weekday weights, seven-day-cluster bootstrap). Green or red = the whole range stays on one side of zero; grey = it includes zero. Counts are crossing events, not tracked trips.</p>
-      </Section>
-      <Section title="Rush hours vs the rest of the day">
-        <IntervalBars rows={[ivl('AM rush', fy.peak?.am, 'weekdays 7–10 AM'), ivl('PM rush', fy.peak?.pm, 'weekdays 4–7 PM'), ivl('Other hours', fy.peak?.other, limited ? 'weekend days only' : 'incl. weekends')]} />
-        {plainRush(fy.peak) ? <p className="detail__plain"><strong>In plain words:</strong> {plainRush(fy.peak)}, compared with the same hours in 2024.</p> : null}
-        <p className="detail__hint">2025 vs 2024 on complete weekdays. This is the daily-vs-peak-hour evidence the brief asks about.</p>
-      </Section>
-      <Section title="Jan–Aug, three years" aside={<StatusBadge status={ev.persistence} text={PERS_TEXT[ev.persistence] ?? ev.persistence} />}>
-        <IntervalBars rows={[ivl('2025 vs 2024', j25, 'Jan 5–Aug 31'), ivl('2026 vs 2024', j26, 'Jan 5–Aug 31')]} />
-        <p className="detail__hint">Both years against the same months of 2024; 2026 is not a complete year. "Inconclusive" means at least one interval includes zero.</p>
-      </Section>
-    </>
+    <Section title="Is the change supported?" aside={<StatusBadge status={main?.status} />}>
+      <IntervalBars rows={[main]} />
+    </Section>
   );
 }
 
@@ -303,12 +282,6 @@ export default function DetailContent({ layer, feature, onClose }) {
   if (layer === 'crz_entry') {
     const mix = p.periods?.[period === 'pre_2024' ? 'ytd_2025' : period]?.class_mix ?? p.periods?.post_2025?.class_mix;
     if (Object.values(mix ?? {}).some((v) => isNum(v) && v > 0)) breakdown = <ClassMixBar mix={mix} />;
-  } else if (layer === 'bt_facility' && isBridgeBefore && p.by_direction) {
-    const rows = Object.entries(p.by_direction).filter(([, d]) => isNum(d?.avg_daily_2024)).map(([dir, d]) => ({ label: dir, after: d.avg_daily_2024 }));
-    if (rows.length) breakdown = <BeforeAfterBars rows={rows} beforeLabel="2024" afterLabel="2024" color={m.color} showBefore={false} valueFormatter={fmtTrafficK} />;
-  } else if (layer === 'bt_facility' && p.by_direction) {
-    const rows = Object.entries(p.by_direction).map(([dir, d]) => ({ label: dir, before: d?.avg_daily_2024 ?? null, after: d?.avg_daily_2025 ?? null }));
-    breakdown = <BeforeAfterBars rows={rows} beforeLabel="2024" afterLabel="2025" color={m.color} valueFormatter={fmtTrafficK} />;
   } else if (layer === 'dot_segment' && matched?.by_direction) {
     const rows = Object.entries(matched.by_direction).map(([dir, d]) => ({ label: DOT_DIRECTIONS[dir] ?? dir, before: isBaseline ? null : d?.pre_adv ?? null, after: isBaseline ? d?.pre_adv ?? null : d?.post_adv ?? null }));
     if (rows.some((r) => isNum(r.before) || isNum(r.after))) breakdown = <BeforeAfterBars rows={rows} beforeLabel="2024 baseline" afterLabel={isBaseline ? '2024 baseline' : '2025 follow-up'} color={m.color} showBefore={!isBaseline} valueFormatter={fmtDot} />;
@@ -356,8 +329,7 @@ export default function DetailContent({ layer, feature, onClose }) {
     const per = p.periods?.[period === 'pre_2024' ? 'ytd_2025' : period];
     note = isEntryBefore ? null : `${fmtInt(per?.days)} days in period; ${fmtShare(per?.excluded_share)} of entries on excluded roadways; peak share ${fmtShare(per?.peak_share)}. ${m.note ?? ''}`;
   } else if (layer === 'bt_facility') {
-    const per = p.periods?.[period];
-    note = `${fmtInt(per?.days)} days in period; truck share ${fmtShare(per?.truck_share, 1)}; peak share ${fmtShare(per?.peak_share)}${p.role ? ` · ${p.role}` : ''}${p.evidence?.limitation ? ` · ${p.evidence.limitation}` : ''}`;
+    note = null;
   } else if (layer === 'dot_segment') {
     const tier = dotTier(p);
     const pre = (p.pre_months ?? []).map((x) => fmtMonth(x, { short: true })).join(', ');
@@ -385,7 +357,7 @@ export default function DetailContent({ layer, feature, onClose }) {
       {isEntryBefore ? <p className="detail__meta">Entry-point counts begin Jan. 5, 2025, so there is no comparable point-level 2024 entry count.</p> : null}
       <StatRow items={tiles} panel />
 
-      {isBT && period !== 'pre_2024' ? <TrafficEvidence p={p} period={period} /> : null}
+      {isBT && period !== 'pre_2024' ? <TrafficSupport p={p} period={period} /> : null}
       {isAQ && breakdown ? (
         <section className="side__section">
           <h3 className="side__section-title">Comparison with the citywide trend</h3>

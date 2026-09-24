@@ -44,6 +44,18 @@ export default function KeyLegend({ hasFeatured = false }) {
 
   return (
     <div className="key">
+      {points ? (
+        <div className="key__block">
+          <div className="key__label">Marker type</div>
+          <div className="key__classes">
+            {v.crz_entry ? <span className="key__class"><LayerSymbol kind="entry" />diamond = zone entry</span> : null}
+            {v.bt_facility ? <span className="key__class"><LayerSymbol kind="disc" />disc = bridge or tunnel</span> : null}
+            {v.dot_segment ? <span className="key__class"><LayerSymbol kind="square" />square = street counter</span> : null}
+            {v.aq_monitor ? <span className="key__class"><LayerSymbol kind="disc" />disc = air monitor</span> : null}
+          </div>
+          {v.crz_entry || v.bt_facility ? <div className="key__note">Larger zone-entry diamonds and bridge/tunnel discs represent more vehicles.</div> : null}
+        </div>
+      ) : null}
       {traffic && isChange ? (
         <div className="key__block">
           <div className="key__label">Color = change since the toll · {when}</div>

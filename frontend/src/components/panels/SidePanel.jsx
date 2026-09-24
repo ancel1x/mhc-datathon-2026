@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { useAppState, useDispatch } from '../../state/AppState.jsx';
 import { useData } from '../../lib/data.jsx';
 import { usePhone } from '../../hooks/useMediaQuery.js';
@@ -82,6 +82,7 @@ function LayerRow({ label, hint, on, onClick, sub = false, accent = 'blue' }) {
 function ControlsContent({ onCollapse, onClose, hasFeatured }) {
   const { period, metric, hour, layerVisibility, dotAll, dacMode, exploreMode } = useAppState();
   const dispatch = useDispatch();
+  const [view, setView] = useState('layers');
   return (
     <>
       <header className="side__head">
@@ -104,7 +105,14 @@ function ControlsContent({ onCollapse, onClose, hasFeatured }) {
         </Section>
       ) : null}
 
-      <Section title="Layers">
+      <Segmented
+        label="Panel view"
+        value={view}
+        options={[{ value: 'layers', label: 'Layers' }, { value: 'key', label: 'Key' }]}
+        onChange={setView}
+      />
+
+      {view === 'layers' ? <Section title="Layers">
         <ul className="rows">
           {LAYER_KEYS.flatMap((k) => {
             const on = Boolean(layerVisibility[k]);
@@ -116,11 +124,9 @@ function ControlsContent({ onCollapse, onClose, hasFeatured }) {
             return rows;
           })}
         </ul>
-      </Section>
-
-      <Section title="Key">
+      </Section> : <Section title="Key">
         <KeyLegend hasFeatured={hasFeatured} />
-      </Section>
+      </Section>}
       </div>
 
       <footer className="side__foot">
