@@ -3,20 +3,24 @@ import { useAppState, useDispatch } from '../state/AppState.jsx';
 import { useReducedMotion } from '../hooks/useMediaQuery.js';
 
 const LEAVE_MS = 1150;
+/** The cover turns itself once the data is in; the CTA is a way to go sooner, not a gate. */
+const AUTO_MS = 3500;
 
 /**
- * Graphic-novel cover shown when the page opens. It stays in place until the reader explicitly uses the CTA;
- * the map is already mounted underneath so the cover can turn away and reveal the first story step.
- * `?intro=hold` keeps it on screen (for screenshots); `?chapter=` skips it.
+ * Graphic-novel cover shown when the page opens. It turns away on its own AUTO_MS after the data is ready, or
+ * as soon as the reader uses the CTA; the map is already mounted underneath so the cover can turn away and
+ * reveal the first story step.
+ * `?intro=hold` keeps it on screen indefinitely (for screenshots); `?chapter=` skips it.
  */
 export default function Intro({ loading, progress = 0, error = null }) {
-  const { intro } = useAppState();
+  const { intro, introHold } = useAppState();
   const dispatch = useDispatch();
   const reduced = useReducedMotion();
   const [turning, setTurning] = useState(false);
   const frameRef = useRef(null);
   const nestedFrameRef = useRef(null);
   const fallbackRef = useRef(null);
+  const autoRef = useRef(null);
   const leaving = turning || intro === 'leaving';
   const ready = !loading && !error;
 
@@ -24,6 +28,7 @@ export default function Intro({ loading, progress = 0, error = null }) {
     if (frameRef.current != null) window.cancelAnimationFrame(frameRef.current);
     if (nestedFrameRef.current != null) window.cancelAnimationFrame(nestedFrameRef.current);
     if (fallbackRef.current != null) window.clearTimeout(fallbackRef.current);
+    if (autoRef.current != null) window.clearTimeout(autoRef.current);
   }, []);
 
   const finish = useCallback(() => {
@@ -46,6 +51,18 @@ export default function Intro({ loading, progress = 0, error = null }) {
     });
     if (!reduced) fallbackRef.current = window.setTimeout(finish, LEAVE_MS + 300);
   }, [intro, ready, turning, dispatch, reduced, finish]);
+
+  // The cover turns itself once the data has loaded, so reaching the story needs no input. The countdown
+  // starts at `ready` rather than on mount, so a slow load still leaves AUTO_MS to actually read the title.
+  // `?intro=hold` opts out, keeping the cover up for screenshots.
+  useEffect(() => {
+    if (intro !== 'show' || !ready || turning || introHold) return undefined;
+    autoRef.current = window.setTimeout(leave, AUTO_MS);
+    return () => {
+      if (autoRef.current != null) window.clearTimeout(autoRef.current);
+      autoRef.current = null;
+    };
+  }, [intro, ready, turning, introHold, leave]);
 
   const onTurnEnd = useCallback((event) => {
     if (event.target === event.currentTarget && event.animationName === 'intro-page-turn') finish();
