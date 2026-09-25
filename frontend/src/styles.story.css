@@ -495,7 +495,7 @@
   letter-spacing: 0;
   line-height: 1.2;
   text-align: center;
-  transition: color var(--dur) ease, background var(--dur) ease;
+  transition: color var(--dur) ease;
 }
 
 @media (min-width: 721px) {
@@ -525,7 +525,6 @@
 .tl__title:focus-visible,
 .tl__title[data-hot='true'] {
   color: var(--blue-hover);
-  background: var(--blue-soft);
 }
 .tl__title[data-current='true'] {
   color: var(--blue-hover);
