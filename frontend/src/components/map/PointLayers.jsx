@@ -3,7 +3,7 @@ import { Layer, Source } from 'react-map-gl/maplibre';
 import { useData } from '../../lib/data.jsx';
 import { useAppState } from '../../state/AppState.jsx';
 import { featureMetrics, POINT_LAYERS } from '../../lib/metrics.js';
-import { CLASS_LABELS, COLORS, sqrtSize, themeColors } from '../../lib/scales.js';
+import { COLORS, resultLabel, sqrtSize, themeColors } from '../../lib/scales.js';
 import { fmtCompact, fmtNum, fmtPct, fmtTrafficK, isNum, shortName } from '../../lib/format.js';
 
 export const DIAMOND_IMAGE = 'dot-diamond';
@@ -53,7 +53,7 @@ export function isHollow(layer, m, metric, period) {
 export function pointLabel(layer, name, m, metric) {
   const short = shortName(name);
   if (metric === 'absolute') return `${short} ${layer === 'aq_monitor' ? (isNum(m.value) ? fmtNum(m.value, 1) : 'No data available for this period') : fmtTraffic(layer, m.value)}`;
-  if (layer === 'aq_monitor') return `${short} ${CLASS_LABELS[m.classification] ?? 'no data'}`;
+  if (layer === 'aq_monitor') return `${short} ${resultLabel(layer, m.classification ?? 'no_baseline')}`;
   if (!isNum(m.change) && isNum(m.value)) return `${short} ${fmtTraffic(layer, m.value)}`;
   return `${short} ${fmtPct(m.change)}`;
 }
@@ -70,7 +70,7 @@ function derive(fc, layer, { period, hour, metric, featuredSet, maxima }) {
     const hollow = isHollow(layer, m, metric, period);
     const r = layer === 'aq_monitor' ? AQ_R : Math.max(4, size(isNum(m.value) ? m.value : isNum(m.baseline) ? m.baseline : 0));
     const color = m.color;
-    const supportText = layer === 'bt_facility' && m.support ? ` · ${CLASS_LABELS[m.support] ?? m.support}` : '';
+    const supportText = layer === 'bt_facility' && m.support ? ` · ${resultLabel(layer, m.support)}` : '';
     features.push({
       type: 'Feature',
       geometry: f.geometry,
@@ -86,7 +86,7 @@ function derive(fc, layer, { period, hour, metric, featuredSet, maxima }) {
         _label: pointLabel(layer, p.name ?? p.id, m, metric),
         _valueText: layer === 'aq_monitor' ? (isNum(m.value) ? `${fmtNum(m.value, 2)} µg/m³` : 'No data available for this period') : fmtTraffic(layer, m.value),
         _baseText: layer === 'aq_monitor' ? (isNum(m.baseline) ? `${fmtNum(m.baseline, 2)} µg/m³` : 'No data available for this period') : fmtTraffic(layer, m.baseline),
-        _changeText: layer === 'aq_monitor' && metric === 'change' ? `${isNum(m.change) ? fmtPct(m.change) : 'No data available for this period'} · ${CLASS_LABELS[m.classification] ?? 'no data'}` : `${fmtPct(m.change)}${metric === 'change' ? supportText : ''}`,
+        _changeText: layer === 'aq_monitor' && metric === 'change' ? `${isNum(m.change) ? fmtPct(m.change) : 'No data available for this period'} · ${resultLabel(layer, m.classification ?? 'no_baseline')}` : `${fmtPct(m.change)}${metric === 'change' ? supportText : ''}`,
         _baseLabel: m.baselineLabel,
         _curLabel: m.currentLabel,
         _class: m.classification ?? m.support ?? '',

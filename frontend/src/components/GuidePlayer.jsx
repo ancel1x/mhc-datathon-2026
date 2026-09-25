@@ -1,11 +1,11 @@
 import { useEffect } from 'react';
 import { useMap } from 'react-map-gl/maplibre';
 import { CHAPTERS } from '../content/chapters.js';
-import { useAppState, useDispatch } from '../state/AppState.jsx';
+import { SWEEP_MS, SWEEP_MS_REDUCED, useAppState, useDispatch } from '../state/AppState.jsx';
 import { useReducedMotion } from '../hooks/useMediaQuery.js';
 
 const easeInOutCubic = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
-const STEP_HOLD_MS = 2200; // how long a step shows its "before" year before tweening to its own
+const NEXT_PHASE = { before: 'ff', ff: 'after', after: 'end' };
 
 /** Camera padding while the tour runs: the panels are hidden, only the timeline bar is on screen. */
 export function tourPadding() {
@@ -20,11 +20,11 @@ export function tourPadding() {
  * year / metric so the map visibly changes, moves the camera for beats that ask for it, and hands over to
  * Explore at the end. Space pauses, Escape leaves the tour, the arrow keys (or Enter, or the "Next" button on a
  * callout) skip to the next / previous callout without waiting for its bar.
- * Outside the tour it also plays each step's own "before -> after" transition: a step with a `from` state
- * opens on the earlier year and tweens to its own after a short hold.
+ * It also times Chapter 3 Card 1's guided "before -> after" replay: the earlier year holds, fast-forwards to
+ * the chapter year, then labels the result.
  */
 export default function GuidePlayer({ guide }) {
-  const { autoplay, activeChapter, exploreMode, intro } = useAppState();
+  const { autoplay, intro, sweep } = useAppState();
   const dispatch = useDispatch();
   const { main } = useMap();
   const reduced = useReducedMotion();
@@ -67,14 +67,15 @@ export default function GuidePlayer({ guide }) {
     return () => window.removeEventListener('keydown', onKey);
   }, [on, step, guide, dispatch]);
 
-  // ---- step transitions when paging by hand: show the "before" year, then tween to the step's own ----
+  // ---- before -> after replay: hold the earlier year, fast-forward, label the result, done ----
+  const sweepId = sweep?.id;
+  const sweepPhase = sweep?.phase;
+  const sweepActive = on && step === 2 && beat === 0;
   useEffect(() => {
-    if (on || exploreMode || intro !== 'done') return undefined;
-    const ch = CHAPTERS[activeChapter];
-    if (!ch?.from) return undefined;
-    const t = window.setTimeout(() => dispatch({ type: 'SET_STEP_STATE', period: ch.period, metric: ch.metric }), reduced ? 0 : STEP_HOLD_MS);
+    if (!sweepActive || !sweepId || intro !== 'done') return undefined;
+    const t = window.setTimeout(() => dispatch({ type: 'SWEEP_PHASE', id: sweepId, phase: NEXT_PHASE[sweepPhase] }), (reduced ? SWEEP_MS_REDUCED : SWEEP_MS)[sweepPhase] ?? 0);
     return () => window.clearTimeout(t);
-  }, [on, exploreMode, intro, activeChapter, dispatch, reduced]);
+  }, [sweepActive, sweepId, sweepPhase, intro, dispatch, reduced]);
 
   return null;
 }

@@ -95,7 +95,11 @@ try {
   await evaluate("{ const flow = [...document.querySelectorAll('[role=switch]')].find(e => e.textContent.includes('Traffic flow')); if (flow.getAttribute('aria-checked') === 'true') flow.click(); }");
   await sleep(1800);
   const flowOff = await sample();
-  await send('Input.dispatchMouseEvent', { type: 'mouseWheel', x: 820, y: 450, deltaX: 0, deltaY: -600 });
+  // Two notches: the explore camera sits at ~10.3 and the clock glyphs switch on at zoom 11.
+  for (let i = 0; i < 2; i += 1) {
+    await send('Input.dispatchMouseEvent', { type: 'mouseWheel', x: 820, y: 450, deltaX: 0, deltaY: -600 });
+    await sleep(400);
+  }
   await waitFor("document.querySelector('.glyph')");
   await sleep(1000);
   await evaluate("document.querySelector('.glyph').click()");

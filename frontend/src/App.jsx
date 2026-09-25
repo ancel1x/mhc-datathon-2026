@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { MapProvider } from 'react-map-gl/maplibre';
 import { AppStateProvider, useAppState } from './state/AppState.jsx';
 import { DataProvider, useData } from './lib/data.jsx';
@@ -8,8 +8,9 @@ import MapView from './components/map/MapView.jsx';
 import StoryPanel from './components/panels/StoryPanel.jsx';
 import SidePanel from './components/panels/SidePanel.jsx';
 import Timeline from './components/panels/Timeline.jsx';
-import Intro from './components/Intro.jsx';
+import Intro, { INTRO_SETTLE_MS } from './components/Intro.jsx';
 import GuidePlayer from './components/GuidePlayer.jsx';
+import { useReducedMotion } from './hooks/useMediaQuery.js';
 
 /**
  * Four things on screen: the map, the story panel (left), the timeline (bottom) and the control / detail
@@ -20,6 +21,16 @@ function Shell() {
   const data = useData();
   const { activeChapter, exploreMode, intro, autoplay, controlsCollapsed, selectedFeature } = useAppState();
   const controls = controlsCollapsed && !selectedFeature ? 'collapsed' : 'open';
+  const reduced = useReducedMotion();
+
+  // The map and panels mount under the cover once its title has settled: their first render holds the main
+  // thread for a moment, and doing that mid-entrance made the words jump in instead of rising.
+  const [settled, setSettled] = useState(intro === 'done');
+  useEffect(() => {
+    if (settled) return undefined;
+    const t = window.setTimeout(() => setSettled(true), reduced ? 0 : INTRO_SETTLE_MS);
+    return () => window.clearTimeout(t);
+  }, [settled, reduced]);
 
   const guide = useMemo(() => {
     try {
@@ -42,7 +53,7 @@ function Shell() {
 
   return (
     <div className="app" data-intro={intro} data-autoplay={autoplay.on ? 'true' : 'false'} data-controls={controls}>
-      {ready ? (
+      {ready && settled ? (
         <div className="app__story" inert={intro !== 'done' ? true : undefined} aria-hidden={intro !== 'done'}>
           <MapProvider>
             <MapView featured={featured} guide={guide} />
@@ -53,7 +64,7 @@ function Shell() {
           </MapProvider>
         </div>
       ) : null}
-      {intro !== 'done' || !ready ? <Intro loading={data.loading} progress={data.progress} error={error} /> : null}
+      {intro !== 'done' || !ready || !settled ? <Intro loading={data.loading} progress={data.progress} error={error} /> : null}
     </div>
   );
 }

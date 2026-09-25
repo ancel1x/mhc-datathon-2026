@@ -48,11 +48,19 @@ export function buildGuide({ summary, geo }) {
   const rfkBronxFeature = trafficFeatureById('rfk_bronx');
   const highBridge = (geo?.uhf42?.features ?? []).find((f) => f.properties?.name === 'High Bridge - Morrisania')?.properties ?? {};
   const burdenScore = (feature) => feature.dac_combined_pct == null ? '—' : `${Math.round(feature.dac_combined_pct * 100)} / 100`;
+  const rawPercent = (before, after) => {
+    const start = Number(before);
+    const end = Number(after);
+    if (!Number.isFinite(start) || !Number.isFinite(end) || start === 0) return null;
+    const pct = ((end - start) / start) * 100;
+    return `${pct > 0 ? '+' : '−'}${Math.abs(pct).toFixed(1)}%`;
+  };
   const monitorCard = (row, tone, verdict) => ({
     name: row.name,
     before: row.pre_mean?.toFixed(2) ?? '—',
     after: row.post_mean?.toFixed(2) ?? '—',
     change: row.delta_raw == null ? '—' : `${row.delta_raw > 0 ? '+' : '−'}${Math.abs(row.delta_raw).toFixed(2)} µg/m³`,
+    percent: rawPercent(row.pre_mean, row.post_mean),
     tone,
     verdict,
   });
@@ -72,7 +80,7 @@ export function buildGuide({ summary, geo }) {
         captions: ['IN 2024, THE TOLL HAD NOT BEGUN.', 'TRAFFIC WAS ALREADY MOVING THROUGH A DENSE CITYWIDE NETWORK.'],
         legend: ['Moving lines show traffic flow', 'Thicker lines show higher volume', 'Arrows show direction'],
         footer: '2024 baseline traffic conditions',
-        dwell: 7000,
+        dwell: 8000,
       },
       {
         at: [-73.985, 40.742],
@@ -85,7 +93,7 @@ export function buildGuide({ summary, geo }) {
         text: 'Congestion pricing had not started yet. But one part of this network was about to change: the Congestion Relief Zone, the part of Manhattan south of 60th Street.',
         mapCallout: ['Future toll zone', 'Manhattan south of 60th Street'],
         footer: 'Zone geography before tolling begins',
-        dwell: 6500,
+        dwell: 7500,
       },
       {
         at: null,
@@ -102,7 +110,7 @@ export function buildGuide({ summary, geo }) {
         support: 'Across the MTA’s 9 bridges and tunnels',
         supportTile: '9 crossings',
         footer: 'Baseline bridge and tunnel traffic',
-        dwell: 7500,
+        dwell: 8500,
       },
       {
         at: null,
@@ -120,7 +128,7 @@ export function buildGuide({ summary, geo }) {
         ],
         support: 'Together they create our traffic baseline.',
         footer: 'The crossing baseline',
-        dwell: 6500,
+        dwell: 7500,
       },
       {
         at: null,
@@ -134,7 +142,7 @@ export function buildGuide({ summary, geo }) {
         definition: 'PM2.5 = fine particulate pollution',
         text: 'Fine particulate matter small enough to reach deep into the lungs, measured in micrograms per cubic meter (µg/m³).',
         footer: 'Baseline air-quality measurement',
-        dwell: 7000,
+        dwell: 8000,
       },
       {
         at: null,
@@ -151,7 +159,7 @@ export function buildGuide({ summary, geo }) {
         statTile: 'Average baseline PM2.5: 6.3 µg/m³',
         explanation: 'These are the baseline air-quality records we compare against later.',
         footer: '2024 PM2.5 baseline',
-        dwell: 8000,
+        dwell: 10000,
       },
       {
         at: null,
@@ -166,7 +174,7 @@ export function buildGuide({ summary, geo }) {
         text: 'New York did not begin 2025 from a level playing field. Traffic, pollution, and health burdens were already distributed unevenly across neighborhoods.',
         note: 'Where change happens will matter, not just how much change occurs.',
         footer: 'Why geography matters',
-        dwell: 6500,
+        dwell: 7500,
       },
       {
         at: null,
@@ -181,7 +189,7 @@ export function buildGuide({ summary, geo }) {
         closeLine: 'THE NEIGHBORHOODS AROUND THEM DID NOT ALL START FROM THE SAME PLACE.',
         transition: 'On January 5, 2025, New York changed one part of that system.',
         footer: 'Next: Chapter 2 — The Headline',
-        dwell: 6500,
+        dwell: 7500,
       },
     ],
     // Chapter 2 · The Headline — seven beats, moving into the CRZ and back out again.
@@ -194,7 +202,7 @@ export function buildGuide({ summary, geo }) {
         text: 'Vehicles entering the Congestion Relief Zone were now charged based on vehicle type and time of day.',
         tollEvidence: { title: 'Standard E-ZPass passenger vehicle', daytime: '$9.00 daytime', overnight: '$2.25 overnight' },
         supportLine: 'The zone covers Manhattan south of 60th Street.',
-        footer: 'January 5, 2025 · congestion pricing begins', dwell: 8000,
+        footer: 'January 5, 2025 · congestion pricing begins', dwell: 9000,
       },
       {
         at: null, placement: 'right', size: 'compact', variant: 'hero', tone: 'green', state: Y2025,
@@ -224,14 +232,14 @@ export function buildGuide({ summary, geo }) {
         qualifier: 'Compared with a modeled no-toll scenario',
         explanation: 'During the first six months, one published study estimated average daily maximum PM2.5 in the CRZ was 22% lower than the level its model projected without congestion pricing.',
         evidenceLine: 'Estimated difference: −3.05 µg/m³',
-        footer: 'Published six-month PM2.5 estimate', dwell: 9000,
+        footer: 'Published six-month PM2.5 estimate', dwell: 10000,
       },
       {
         at: null, placement: 'upper-left', size: 'large', variant: 'comparison', tone: 'green', state: Y2025,
         layers: chapterLayers('zone', 'aq_monitor'), camera: { center: [-73.95, 40.72], zoom: 10.05 },
         captions: ['THE STUDY ALSO ESTIMATED IMPROVEMENT BEYOND THE TOLL ZONE.'],
         comparison: [
-          { title: 'CRZ', value: '−3.05 µg/m³', amount: 3.05 },
+          { title: 'CRZ', value: '−3.05 µg/m³', subvalue: '22% lower', amount: 3.05 },
           { title: 'FIVE BOROUGHS', value: '−1.07 µg/m³', amount: 1.07 },
           { title: 'BROADER METRO AREA', value: '−0.70 µg/m³', amount: 0.7 },
         ],
@@ -242,7 +250,7 @@ export function buildGuide({ summary, geo }) {
         at: null, placement: 'upper-right', size: 'compact', variant: 'close', state: Y2025,
         layers: chapterLayers('zone', 'crz_entry', 'flow'), camera: { center: [-73.975, 40.73], zoom: 10.6 },
         captions: ['LESS TRAFFIC ENTERED THE ZONE.', 'THE STUDY ESTIMATED LOWER PM2.5.', 'ON THE SURFACE, THE POLICY LOOKED LIKE A CLEAR WIN.'],
-        supportLine: 'That is the headline.', dwell: 6000,
+        supportLine: 'That is the headline.', dwell: 7000,
       },
       {
         at: { layer: 'bt_facility', id: 'rfk_manhattan' }, side: 'right', size: 'medium', variant: 'question', state: Y2025,
@@ -251,18 +259,18 @@ export function buildGuide({ summary, geo }) {
         captions: ['A TOPLINE RESULT CANNOT TELL US WHAT HAPPENED ON EVERY ROAD, AT EVERY CROSSING, OR IN EVERY NEIGHBORHOOD.'],
         supportLine: 'The next question is not whether traffic entering the toll zone fell. It is how traffic patterns changed around it.',
         teaser: 'Some nearby corridors increased.',
-        transition: 'Next: Chapter 3 — Where Did the Traffic Go?', dwell: 7000,
+        transition: 'Next: Chapter 3 — Where Did the Traffic Go?', dwell: 8000,
       },
     ],
     // Chapter 3 · Where Did the Traffic Go? — regional crossings, then local corridors.
     [
       {
-        at: null, placement: 'upper-left', size: 'medium', variant: 'question', state: Y2025,
+        at: null, placement: 'upper-left', size: 'medium', variant: 'question',
         layers: chapterLayers('zone', 'bt_facility', 'flow'), camera: { center: [-73.95, 40.74], zoom: 10.2 },
         question: 'But what happened on the roads around the zone?',
         captions: ['FEWER VEHICLES ENTERED THE CRZ.', 'THAT DID NOT MEAN EVERY ROUTE GOT QUIETER.'],
         text: 'To understand the first traffic response, we need to look at the bridges, tunnels, and local corridors around the toll zone.',
-        footer: 'Looking beyond the topline', dwell: 7500,
+        footer: 'Looking beyond the topline', dwell: 9500,
       },
       {
         at: null, placement: 'right', size: 'medium', variant: 'evidence', state: Y2025,
@@ -272,7 +280,7 @@ export function buildGuide({ summary, geo }) {
         text: 'Across the MTA’s bridges and tunnels, some crossings carried fewer vehicles after tolling began, while others picked up traffic as drivers adjusted their routes.',
         supportLine: 'Regional traffic shifts',
         miniLegend: [{ label: 'decrease', tone: 'green' }, { label: 'increase', tone: 'red' }],
-        footer: 'MTA bridges and tunnels', dwell: 7500,
+        footer: 'MTA bridges and tunnels', dwell: 8500,
       },
       {
         at: { layer: 'bt_facility', id: 'rfk_manhattan' }, side: 'left', size: 'compact', variant: 'route', state: Y2025,
@@ -282,7 +290,7 @@ export function buildGuide({ summary, geo }) {
         text: `In 2025, ${increase.name ?? 'Robert F. Kennedy Bridge Manhattan'} averaged ${fmtInt(increase.avg_daily_2025)} vehicles per day, up ${fmtPct(increase.pct_existing, { signed: false })} from 2024.`,
         supportLine: 'This is one example of traffic shifting onto routes around the toll zone.',
         routeStat: { value: fmtPct(increase.pct_existing), label: '2025 vs 2024', tone: 'red' },
-        footer: 'Example increase', dwell: 8000,
+        footer: 'Example increase', dwell: 9000,
       },
       {
         at: { layer: 'bt_facility', id: 'hlc' }, side: 'right', size: 'compact', variant: 'route', state: Y2025,
@@ -293,7 +301,7 @@ export function buildGuide({ summary, geo }) {
         supportLine: 'That is why a single citywide headline would miss the actual geography of change.',
         routeStat: { value: fmtPct(decrease.pct_existing), label: '2025 vs 2024 · coverage-limited', tone: 'green' },
         note: 'Coverage is limited to comparable selected days, so treat this as an example—not a full-year verdict.',
-        footer: 'Example decrease', dwell: 8500,
+        footer: 'Example decrease', dwell: 9500,
       },
       {
         at: null, placement: 'upper-right', size: 'medium', variant: 'close', state: Y2025,
@@ -302,7 +310,7 @@ export function buildGuide({ summary, geo }) {
         text: 'Fewer vehicles entered the Congestion Relief Zone, but some traffic shifted onto nearby bridges, tunnels, and approach roads instead of disappearing evenly across the city.',
         supportLine: 'The first traffic story was not citywide silence. It was a network reshuffling.',
         note: 'The counts show where volumes changed; they do not track individual trips from one route to another.',
-        footer: 'Reading the rerouting pattern', dwell: 8000,
+        footer: 'Reading the rerouting pattern', dwell: 9500,
       },
       {
         at: null, placement: 'upper-left', size: 'medium', variant: 'question', state: Y2025,
@@ -310,7 +318,7 @@ export function buildGuide({ summary, geo }) {
         question: 'So what did those traffic shifts mean for the air?',
         captions: ['TRAFFIC CHANGE WAS ONLY PART OF THE STORY.', 'NEXT WE FOLLOW THE MONITORS.'],
         text: 'The next chapter looks at where air quality improved, where it did not, and how those changes were distributed across the city.',
-        footer: 'Next: air quality', dwell: 7500,
+        footer: 'Next: air quality', dwell: 9000,
       },
     ],
     // Chapter 4 · Follow the Air — from the network to individual monitoring locations.
@@ -321,7 +329,7 @@ export function buildGuide({ summary, geo }) {
         question: 'Did air quality improve everywhere?',
         captions: ['THE HEADLINE SAID THE AIR GOT CLEANER.', 'NOW WE CHECK THE MONITORS ONE BY ONE.'],
         text: 'Citywide and CRZ averages can summarize a broad trend. Individual monitoring sites show whether that improvement was experienced consistently across locations.',
-        footer: 'Monitor-level PM2.5', dwell: 8000,
+        footer: 'Monitor-level PM2.5', dwell: 9000,
       },
       {
         at: null, placement: 'right', size: 'medium', variant: 'evidence', state: Y2025,
@@ -335,7 +343,7 @@ export function buildGuide({ summary, geo }) {
           { value: higherAir.length, label: 'Supported higher', tone: 'red' },
           { value: aNo.length, label: 'No baseline', tone: 'neutral' },
         ],
-        footer: '2024 → 2025 monitor comparison', dwell: 8000,
+        footer: '2024 → 2025 monitor comparison', dwell: 9000,
       },
       {
         at: { layer: 'aq_monitor', id: williamsburg.id }, side: 'right', size: 'compact', variant: 'monitor', tone: 'green', state: Y2025,
@@ -362,7 +370,7 @@ export function buildGuide({ summary, geo }) {
         monitorCard: monitorCard(hamilton, 'red', 'Raw increase; weather-adjusted verdict uncertain'),
         supportLine: 'At this location, PM2.5 was higher in 2025 than in the 2024 baseline.',
         note: 'The raw value increased, but the weather-adjusted comparison remains uncertain.',
-        footer: 'Selected monitor · higher PM2.5', dwell: 8500,
+        footer: 'Selected monitor · higher PM2.5', dwell: 10500,
       },
       {
         at: null, placement: 'upper-right', size: 'medium', variant: 'close', state: Y2025,
@@ -370,7 +378,7 @@ export function buildGuide({ summary, geo }) {
         captions: ['THE AVERAGE DOES NOT DESCRIBE EVERY LOCATION.', 'AIR-QUALITY CHANGE WAS GEOGRAPHICALLY UNEVEN.'],
         text: 'The topline improvement is real at the scale it measures, but monitor-level data show a more varied local picture.',
         note: 'Spatial overlap is evidence of a pattern, not proof that congestion pricing caused every PM2.5 change.',
-        footer: 'Reading the local air-quality pattern', dwell: 8000,
+        footer: 'Reading the local air-quality pattern', dwell: 9000,
       },
       {
         at: null, placement: 'upper-left', size: 'medium', variant: 'question', state: Y2025,
@@ -378,7 +386,7 @@ export function buildGuide({ summary, geo }) {
         question: 'Who was already carrying the greatest burden?',
         captions: ['THE NEXT QUESTION IS NOT ONLY WHERE AIR CHANGED.', 'IT IS WHO LIVED AROUND THOSE CHANGES.'],
         text: 'Next we compare traffic and PM2.5 patterns with neighborhoods that were already environmentally vulnerable before congestion pricing began.',
-        footer: 'Next: Who Bears the Burden?', dwell: 8000,
+        footer: 'Next: Who Bears the Burden?', dwell: 9000,
       },
     ],
     // Chapter 5 · Who Bears the Burden? — layer observed changes over pre-existing vulnerability.
@@ -387,9 +395,9 @@ export function buildGuide({ summary, geo }) {
         at: null, placement: 'upper-left', size: 'medium', variant: 'question', state: Y2025,
         layers: chapterLayers('aq_monitor'), camera: { center: [-73.94, 40.735], zoom: 10.2 },
         question: 'Who was already carrying the greatest burden?',
-        captions: ['AIR QUALITY DID NOT CHANGE IN A VACUUM.', 'NEITHER DID TRAFFIC.'],
+        captions: ['THESE CHANGES HAPPENED IN REAL NEIGHBORHOODS.', 'SOME OF THEM WERE ALREADY WORSE OFF.'],
         text: 'The same traffic or pollution change can mean something very different in a neighborhood that was already facing heavier environmental and health burdens.',
-        footer: 'From change to equity', dwell: 8000,
+        footer: 'From change to equity', dwell: 9000,
       },
       {
         at: null, placement: 'upper-right', size: 'medium', variant: 'burden', state: Y2025,
@@ -410,23 +418,20 @@ export function buildGuide({ summary, geo }) {
           { label: 'Community burden score', value: burdenScore(rfkFeature), tone: 'purple' },
           { label: 'Status', value: increase.dac_designated ? 'Disadvantaged community' : 'Not designated' },
         ],
-        footer: 'Traffic + vulnerability overlap', dwell: 9500,
+        footer: 'Traffic + vulnerability overlap', dwell: 11500,
       },
       {
-        at: { layer: 'aq_monitor', id: hamilton.id }, side: 'right', size: 'large', variant: 'combined', state: Y2025,
+        at: { layer: 'aq_monitor', id: hamilton.id }, side: 'right', size: 'large', variant: 'combined', cardClass: 'callout--air-burden', state: Y2025,
         layers: chapterLayers('aq_monitor', 'dac'), dacMode: 'percentile', overlayOpacity: 0.58, camera: { center: [-73.93, 40.85], zoom: 11.35 },
         featured: { aq_monitor: new Set([hamilton.id]) },
         captions: ['THE SAME QUESTION APPLIES TO THE AIR.'],
-        text: 'Where PM2.5 stayed elevated or increased, the equity question is whether those monitoring locations sit within or near communities that were already environmentally vulnerable.',
+        text: 'This monitor pairs an observed air-quality change with local environmental-justice context.',
+        monitorCard: monitorCard(hamilton, 'red', null),
         combinedEvidence: [
-          { label: 'Monitor', value: hamilton.name },
-          { label: '2024 PM2.5', value: `${hamilton.pre_mean?.toFixed(2) ?? '—'} µg/m³` },
-          { label: '2025 PM2.5', value: `${hamilton.post_mean?.toFixed(2) ?? '—'} µg/m³` },
-          { label: 'Raw change', value: `+${hamilton.delta_raw?.toFixed(2) ?? '—'} µg/m³`, tone: 'red' },
-          { label: 'Local burden score', value: burdenScore(hamiltonFeature), tone: 'purple' },
-          { label: 'Community status', value: hamilton.dac_designated ? 'Disadvantaged community' : 'Not designated' },
+          { label: 'Burden', value: burdenScore(hamiltonFeature), tone: 'purple' },
+          { label: 'Status', value: hamilton.dac_designated ? 'Disadvantaged community' : 'Not designated', tone: 'purple' },
         ],
-        note: 'Spatial overlap shows a pattern. It does not prove that congestion pricing caused the observed PM2.5 change.',
+        note: 'Raw PM2.5 increased, but the weather-adjusted verdict remains uncertain. Spatial overlap does not prove congestion pricing caused the change.',
         footer: 'Air quality + vulnerability', dwell: 10500,
       },
       {
@@ -435,7 +440,7 @@ export function buildGuide({ summary, geo }) {
         captions: ['ENVIRONMENTAL BURDEN IS ALSO A HEALTH STORY.', 'SOME OF THESE COMMUNITIES ALREADY FACE HIGHER ASTHMA BURDEN.'],
         text: 'Child asthma ER visit rates provide additional context for neighborhoods where traffic exposure and particulate pollution were already public-health concerns.',
         note: '2023 is the latest available year and predates congestion pricing. This layer shows pre-existing health burden, not an effect of the toll.',
-        footer: 'Existing health burden', dwell: 9000,
+        footer: 'Existing health burden', dwell: 10000,
       },
       {
         at: { layer: 'aq_monitor', id: hamilton.id }, side: 'left', size: 'large', variant: 'combined', state: Y2025,
@@ -459,7 +464,7 @@ export function buildGuide({ summary, geo }) {
         text: 'That is the environmental-justice question: not simply whether New York improved on average, but whether unfavorable local changes overlapped neighborhoods already facing greater environmental and health burdens.',
         closingQuestion: 'What happens when we stop looking citywide and zoom into the South Bronx?',
         transition: 'Next: Chapter 6 — Asthma Alley',
-        footer: 'From citywide overlap to one neighborhood', dwell: 10000,
+        footer: 'From citywide overlap to one neighborhood', dwell: 12000,
       },
     ],
     // Chapter 6 · Asthma Alley — a South Bronx case study grounded in mapped project evidence.
@@ -470,7 +475,7 @@ export function buildGuide({ summary, geo }) {
         question: 'What changes when we stop looking citywide?',
         captions: ['THE CITYWIDE AVERAGE DOES NOT DESCRIBE EVERY NEIGHBORHOOD.', 'SO WE ZOOM INTO THE SOUTH BRONX.'],
         text: 'Mott Haven, Port Morris, and surrounding highway corridors have long carried heavy traffic, industrial activity, and elevated asthma burden.',
-        footer: 'South Bronx close-up', dwell: 8500,
+        footer: 'South Bronx close-up', dwell: 9500,
       },
       {
         at: { layer: 'aq_monitor', id: mottHaven.id }, side: 'left', size: 'medium', variant: 'combined', state: Y2025,
@@ -505,13 +510,13 @@ export function buildGuide({ summary, geo }) {
         featured: { aq_monitor: new Set([mottHaven.id, crossBronx.id]) },
         captions: ['THEN LOOK AT THE AIR.'],
         combinedEvidence: [
-          { label: mottHaven.name, value: `${mottHaven.pre_mean?.toFixed(2) ?? '—'} → ${mottHaven.post_mean?.toFixed(2) ?? '—'} µg/m³ · +${mottHaven.delta_raw?.toFixed(2) ?? '—'} (${mottHaven.pct_raw?.toFixed(1) ?? '—'}%)` },
+          { label: mottHaven.name, value: `${mottHaven.pre_mean?.toFixed(2) ?? '—'} → ${mottHaven.post_mean?.toFixed(2) ?? '—'} µg/m³ · +${mottHaven.delta_raw?.toFixed(2) ?? '—'} (${mottHaven.pct_raw?.toFixed(1) ?? '—'}%)`, tone: 'red' },
           { label: 'Mott Haven verdict', value: 'No clear weather-adjusted change' },
-          { label: crossBronx.name, value: `${crossBronx.pre_mean?.toFixed(2) ?? '—'} → ${crossBronx.post_mean?.toFixed(2) ?? '—'} µg/m³ · −${Math.abs(crossBronx.delta_raw ?? 0).toFixed(2)} (${crossBronx.pct_raw?.toFixed(1) ?? '—'}%)` },
+          { label: crossBronx.name, value: `${crossBronx.pre_mean?.toFixed(2) ?? '—'} → ${crossBronx.post_mean?.toFixed(2) ?? '—'} µg/m³ · −${Math.abs(crossBronx.delta_raw ?? 0).toFixed(2)} (${crossBronx.pct_raw?.toFixed(1) ?? '—'}%)`, tone: 'green' },
           { label: 'Cross Bronx verdict', value: 'No clear weather-adjusted change' },
         ],
         text: 'Mott Haven was slightly higher and Cross Bronx was slightly lower in the raw readings, but neither monitor showed a statistically clear weather-adjusted change.',
-        footer: 'South Bronx PM2.5', dwell: 11000,
+        footer: 'South Bronx PM2.5', dwell: 12000,
       },
       {
         at: null, placement: 'upper-right', size: 'wide', variant: 'split', state: Y2025,
@@ -533,8 +538,10 @@ export function buildGuide({ summary, geo }) {
         text: 'In the South Bronx, local traffic and PM2.5 observations sit on top of long-standing environmental and health disparities.',
         combinedEvidence: [
           { label: 'Location', value: 'Mott Haven–Port Morris' },
-          { label: 'Traffic', value: `RFK Bronx ${fmtPct(rfkBronx.pct_existing)} · uncertain` },
-          { label: 'PM2.5', value: `Mott Haven ${mottHaven.pre_mean?.toFixed(2) ?? '—'} → ${mottHaven.post_mean?.toFixed(2) ?? '—'} µg/m³ · uncertain` },
+          { label: 'Traffic', value: `RFK Bronx ${fmtPct(rfkBronx.pct_existing)}`, tone: 'red' },
+          { label: 'Traffic verdict', value: 'Uncertain' },
+          { label: 'PM2.5', value: `Mott Haven ${mottHaven.pre_mean?.toFixed(2) ?? '—'} → ${mottHaven.post_mean?.toFixed(2) ?? '—'} µg/m³`, tone: 'red' },
+          { label: 'Air verdict', value: 'Uncertain' },
           { label: 'Disadvantage', value: `${burdenScore(mottFeature)} · designated`, tone: 'purple' },
           { label: 'Asthma', value: `${mottHaven.uhf42_asthma_ed_children?.toFixed(1) ?? '—'} ER visits per 10,000 children · 2023`, tone: 'purple' },
         ],
@@ -555,14 +562,14 @@ export function buildGuide({ summary, geo }) {
     // Chapter 7 · One Year Later — matched Jan–Aug 2024/2025/2026 persistence evidence.
     [
       {
-        at: null, placement: 'upper-left', size: 'medium', variant: 'question', state: Y2026,
+        at: null, placement: 'upper-left', size: 'medium', variant: 'question',
         layers: chapterLayers('bt_facility', 'flow', 'aq_monitor'), camera: { center: [-73.91, 40.82], zoom: 10.75 },
         question: 'What changed one year later?',
         captions: ['THE FIRST YEAR SHOWED US WHERE THE PATTERNS EMERGED.', 'NOW WE ASK WHICH ONES LASTED.'],
         text: '2026 lets us test whether the early traffic and air-quality patterns persisted, reversed, or remain uncertain.',
         statusBadge: '2026 SO FAR',
         note: '2026 comparisons use the available January–August period only.',
-        footer: '2026 follow-up', dwell: 8500,
+        footer: '2026 follow-up', dwell: 9500,
       },
       {
         at: null, placement: 'upper-right', size: 'wide', variant: 'trend', state: Y2026,
@@ -601,9 +608,9 @@ export function buildGuide({ summary, geo }) {
           {
             title: williamsburg.name,
             values: [
-              { year: '2024', value: `${williamsburgFeature.periods?.ytd_2024?.mean?.toFixed(2) ?? '—'} µg/m³`, amount: williamsburgFeature.periods?.ytd_2024?.mean },
-              { year: '2025', value: `${williamsburgFeature.periods?.ytd_2025?.mean?.toFixed(2) ?? '—'} µg/m³`, amount: williamsburgFeature.periods?.ytd_2025?.mean },
-              { year: '2026', value: `${williamsburgFeature.periods?.post_2026_ytd?.mean?.toFixed(2) ?? '—'} µg/m³`, amount: williamsburgFeature.periods?.post_2026_ytd?.mean },
+              { year: '2024', value: `${williamsburgFeature.periods?.ytd_2024?.mean?.toFixed(2) ?? '—'} µg/m³`, context: 'baseline', amount: williamsburgFeature.periods?.ytd_2024?.mean },
+              { year: '2025', value: `${williamsburgFeature.periods?.ytd_2025?.mean?.toFixed(2) ?? '—'} µg/m³`, context: `${rawPercent(williamsburgFeature.periods?.ytd_2024?.mean, williamsburgFeature.periods?.ytd_2025?.mean)} vs 2024`, amount: williamsburgFeature.periods?.ytd_2025?.mean },
+              { year: '2026', value: `${williamsburgFeature.periods?.post_2026_ytd?.mean?.toFixed(2) ?? '—'} µg/m³`, context: `${rawPercent(williamsburgFeature.periods?.ytd_2024?.mean, williamsburgFeature.periods?.post_2026_ytd?.mean)} vs 2024`, amount: williamsburgFeature.periods?.post_2026_ytd?.mean },
             ],
             status: 'PERSISTED', tone: 'green', detail: `${williamsburg.jan_aug?.['2025']?.delta_raw?.toFixed(2) ?? '—'} → ${williamsburg.jan_aug?.['2026']?.delta_raw?.toFixed(2) ?? '—'} µg/m³ vs Jan–Aug 2024`,
           },
@@ -618,17 +625,17 @@ export function buildGuide({ summary, geo }) {
         captions: ['WHAT ABOUT THE SOUTH BRONX?'],
         text: 'The local case study matters most if we can see whether its early pattern continued.',
         combinedEvidence: [
-          { label: 'RFK Bronx traffic', value: `${fmtPct(rfkBronx.jan_aug?.['2025']?.pct)} → ${fmtPct(rfkBronx.jan_aug?.['2026']?.pct)} vs Jan–Aug 2024` },
+          { label: 'RFK Bronx traffic', value: `${fmtPct(rfkBronx.jan_aug?.['2025']?.pct)} → ${fmtPct(rfkBronx.jan_aug?.['2026']?.pct)} vs Jan–Aug 2024`, tone: Number(rfkBronx.jan_aug?.['2026']?.pct) > 0 ? 'red' : 'green' },
           { label: 'Traffic status', value: 'STILL UNCERTAIN' },
-          { label: 'Mott Haven PM2.5', value: `+${mottHaven.jan_aug?.['2025']?.delta_raw?.toFixed(2) ?? '—'} → +${mottHaven.jan_aug?.['2026']?.delta_raw?.toFixed(2) ?? '—'} µg/m³ vs 2024` },
-          { label: 'Cross Bronx PM2.5', value: `${crossBronx.jan_aug?.['2025']?.delta_raw?.toFixed(2) ?? '—'} → ${crossBronx.jan_aug?.['2026']?.delta_raw?.toFixed(2) ?? '—'} µg/m³ vs 2024` },
+          { label: 'Mott Haven PM2.5', value: `+${mottHaven.jan_aug?.['2025']?.delta_raw?.toFixed(2) ?? '—'} → +${mottHaven.jan_aug?.['2026']?.delta_raw?.toFixed(2) ?? '—'} µg/m³ vs 2024`, tone: 'red' },
+          { label: 'Cross Bronx PM2.5', value: `${crossBronx.jan_aug?.['2025']?.delta_raw?.toFixed(2) ?? '—'} → ${crossBronx.jan_aug?.['2026']?.delta_raw?.toFixed(2) ?? '—'} µg/m³ vs 2024`, tone: 'green' },
           { label: 'Air status', value: 'STILL UNCERTAIN' },
         ],
         note: 'All three 2026 intervals include zero; the available January–August evidence does not support a clear persistence or reversal verdict.',
-        footer: 'South Bronx · 2026 follow-up', dwell: 11500,
+        footer: 'South Bronx · 2026 follow-up', dwell: 12500,
       },
       {
-        at: null, placement: 'upper-right', size: 'wide', variant: 'status', state: Y2026,
+        at: null, placement: 'upper-right', size: 'wide', variant: 'status', cardClass: 'callout--readable-status', state: Y2026,
         layers: chapterLayers('bt_facility', 'aq_monitor'), camera: { center: [-73.94, 40.73], zoom: 9.55 },
         featured: { bt_facility: new Set(['qmt', 'cross_bay', 'rfk_bronx']), aq_monitor: new Set([williamsburg.id, mottHaven.id, crossBronx.id]) },
         captions: ['ONE YEAR LATER, THE STORY IS NOT ONE OF SIMPLE CONTINUATION.', 'SOME PATTERNS LASTED. SOME CHANGED. SOME STILL NEED MORE DATA.'],
@@ -637,10 +644,10 @@ export function buildGuide({ summary, geo }) {
           { title: 'REVERSED', tone: 'green', items: ['Cross Bay traffic: increase → decrease'] },
           { title: 'STILL UNCERTAIN', tone: 'neutral', items: ['RFK Bronx traffic', 'Mott Haven PM2.5', 'Cross Bronx PM2.5'] },
         ],
-        footer: '2026 status check', dwell: 10500,
+        footer: '2026 status check', dwell: 11500,
       },
       {
-        at: null, placement: 'upper-left', size: 'large', variant: 'caveat', state: Y2026,
+        at: null, placement: 'upper-left', size: 'large', variant: 'caveat', cardClass: 'callout--readable-caveat', state: Y2026,
         layers: chapterLayers('bt_facility', 'aq_monitor'), camera: { center: [-73.94, 40.73], zoom: 9.8 },
         captions: ['TIME ADDS EVIDENCE — BUT NOT CERTAINTY EVERYWHERE.'],
         text: 'Differences in monitoring coverage, incomplete 2026 data, seasonal variation, and non-matching observation periods can limit direct year-to-year comparisons.',
@@ -649,7 +656,7 @@ export function buildGuide({ summary, geo }) {
           'Hunts Point has no eligible 2024 PM2.5 baseline.',
           'Midtown West moved in July 2026, so it has no eligible Jan–Aug 2026 comparison.',
         ],
-        footer: 'What remains uncertain', dwell: 10000,
+        footer: 'What remains uncertain', dwell: 11000,
       },
       {
         at: null, placement: 'upper-left', size: 'large', variant: 'close', state: Y2026,
@@ -680,13 +687,14 @@ export function buildGuide({ summary, geo }) {
         combinedEvidence: [
           { label: 'Location', value: 'Major Deegan Expressway · High Bridge' },
           { label: 'Traffic', value: `${fmtInt(deegan.latest_adv)} northbound vehicles/day · Oct–Nov 2025 snapshot` },
-          { label: 'Nearby PM2.5 concern', value: `Hamilton Bridge ${hamilton.pre_mean?.toFixed(2) ?? '—'} → ${hamilton.post_mean?.toFixed(2) ?? '—'} µg/m³ · uncertain` },
+          { label: 'Nearby PM2.5 concern', value: `Hamilton Bridge ${hamilton.pre_mean?.toFixed(2) ?? '—'} → ${hamilton.post_mean?.toFixed(2) ?? '—'} µg/m³ · +${hamilton.delta_raw?.toFixed(2) ?? '—'} µg/m³`, tone: 'red' },
+          { label: 'Weather-adjusted verdict', value: 'Uncertain' },
           { label: 'Environmental burden', value: `${burdenScore(deegan)} · disadvantaged community`, tone: 'purple' },
           { label: 'Asthma context', value: `${highBridge.asthma_ed_children?.toFixed(1) ?? '—'} ER visits per 10,000 children · 2023`, tone: 'purple' },
           { label: '2026 status', value: 'STILL UNCERTAIN' },
         ],
         text: 'No single metric selected this place. The case comes from the overlap of transportation, air-quality, environmental-justice, and health evidence.',
-        footer: 'Why this site', dwell: 11500,
+        footer: 'Why this site', dwell: 12500,
       },
       {
         at: { layer: 'dot_segment', id: 'dot_139020' }, side: 'right', size: 'large', variant: 'combined', state: Y2025,
@@ -701,10 +709,10 @@ export function buildGuide({ summary, geo }) {
           { label: 'Nearby communities', value: 'High Bridge–Morrisania · Mott Haven–Port Morris · Crotona–Tremont' },
         ],
         note: 'The Deegan record has no matched pre-toll count, so its volume is context—not evidence of a traffic increase.',
-        footer: 'Existing condition', dwell: 11000,
+        footer: 'Existing condition', dwell: 13000,
       },
       {
-        at: { layer: 'dot_segment', id: 'dot_139020' }, side: 'left', size: 'wide', variant: 'scenario', state: Y2026,
+        at: { layer: 'dot_segment', id: 'dot_139020' }, side: 'left', size: 'wide', variant: 'scenario', cardClass: 'callout--readable-scenario', state: Y2026,
         layers: chapterLayers('bt_facility', 'flow', 'aq_monitor', 'dac'), dacMode: 'percentile', overlayOpacity: 0.3, camera: { center: [-73.928, 40.8425], zoom: 11.75 },
         featured: { aq_monitor: new Set([mottHaven.id, crossBronx.id]) },
         question: 'What if part of this road space were repurposed?',
@@ -715,10 +723,10 @@ export function buildGuide({ summary, geo }) {
           { title: 'AIR QUALITY', body: 'Less local vehicle exposure could reduce traffic-related pollution, but benefits depend on where displaced traffic moves and how exposure changes.' },
           { title: 'EQUITY', body: `A ${burdenScore(deegan)} disadvantaged-community corridor with ${highBridge.asthma_ed_children?.toFixed(1) ?? '—'} child asthma ER visits per 10,000 could receive public investment instead of additional exposure.` },
         ],
-        footer: 'Scenario reasoning · traffic + air + equity', dwell: 12500,
+        footer: 'Scenario reasoning · traffic + air + equity', dwell: 14500,
       },
       {
-        at: null, placement: 'upper-right', size: 'large', variant: 'caveat', state: Y2026,
+        at: null, placement: 'upper-right', size: 'large', variant: 'caveat', cardClass: 'callout--readable-caveat', state: Y2026,
         layers: chapterLayers('bt_facility', 'flow', 'dac'), dacMode: 'percentile', overlayOpacity: 0.24, camera: { center: [-73.91, 40.82], zoom: 10.9 },
         featured: { bt_facility: new Set(['rfk_bronx']) },
         captions: ['RECLAIMING ROAD SPACE DOES NOT MAKE TRAFFIC DISAPPEAR.', 'THE DESIGN HAS TO ACCOUNT FOR WHERE IT GOES NEXT.'],
@@ -728,7 +736,7 @@ export function buildGuide({ summary, geo }) {
           'Truck access and regional travel would need explicit alternatives.',
           'Moving traffic into nearby disadvantaged communities would recreate the same equity problem.',
         ],
-        footer: 'The displacement problem', dwell: 11000,
+        footer: 'The displacement problem', dwell: 12000,
       },
       {
         at: { layer: 'dot_segment', id: 'dot_139020' }, side: 'right', size: 'large', variant: 'opportunity', state: Y2026,
@@ -751,6 +759,21 @@ export function buildGuide({ summary, geo }) {
         finalLabel: 'PHASE 1 COMPLETE',
         transition: 'Next: Reimagining the corridor',
         footer: 'Major Deegan Expressway · High Bridge', dwell: 11000,
+      },
+      {
+        at: null, placement: 'center', size: 'wide', variant: 'conclusion', cardClass: 'callout--readable-conclusion', state: Y2026,
+        layers: chapterLayers('zone', 'bt_facility', 'aq_monitor', 'dac'), dacMode: 'percentile', overlayOpacity: 0.22, camera: { center: [-73.94, 40.75], zoom: 9.55 },
+        statusBadge: 'WHAT WE FOUND',
+        findings: [
+          'Traffic entering the Congestion Relief Zone fell after congestion pricing began.',
+          'Traffic changes across the wider network were not geographically uniform.',
+          'PM2.5 improved at some monitoring locations and not at others.',
+          'Some unfavorable local traffic or air-quality patterns overlapped communities already carrying greater environmental and health burdens.',
+          'The South Bronx showed why a citywide average does not describe every neighborhood.',
+        ],
+        thesis: 'THE TOPLINE IMPROVEMENT IS REAL — BUT IT IS NOT THE WHOLE STORY.',
+        supportLine: 'The evidence points toward a more local question: where should New York intervene so that future improvements do not simply move the burden somewhere else?',
+        footer: 'Phase 1 conclusion', dwell: 15500,
       },
     ],
   ];

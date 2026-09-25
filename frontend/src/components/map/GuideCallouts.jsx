@@ -29,6 +29,8 @@ function BeatContent({ beat, chapter }) {
         </div>
       ) : null}
       {beat.text ? <p className="comic-card__narration">{beat.text}</p> : null}
+      {beat.findings?.length ? <ul className="comic-findings">{beat.findings.map((item) => <li key={item}>{item}</li>)}</ul> : null}
+      {beat.thesis ? <div className="comic-thesis">{beat.thesis}</div> : null}
       {beat.mapCallout ? (
         <div className="comic-map-callout">
           <strong>{beat.mapCallout[0]}</strong>
@@ -55,7 +57,7 @@ function BeatContent({ beat, chapter }) {
         <div className="comic-comparison">
           {beat.comparison.map((item) => (
             <div className="comic-comparison__row" key={item.title}>
-              <span>{item.title}</span><i><b style={{ width: `${(item.amount / comparisonMax) * 100}%` }} /></i><strong className="num">{item.value}</strong>
+              <span>{item.title}</span><i><b style={{ width: `${(item.amount / comparisonMax) * 100}%` }} /></i><strong className="num">{item.value}{item.subvalue ? <small>{item.subvalue}</small> : null}</strong>
             </div>
           ))}
         </div>
@@ -104,6 +106,7 @@ function BeatContent({ beat, chapter }) {
             <span><small>2025</small><b className="num">{beat.monitorCard.after} µg/m³</b></span>
           </div>
           <div className="comic-monitor-change"><span>Change</span><strong className="num">{beat.monitorCard.change}</strong></div>
+          {beat.monitorCard.percent ? <div className="comic-monitor-percent num">{beat.monitorCard.percent}</div> : null}
           {beat.monitorCard.verdict ? <small>{beat.monitorCard.verdict}</small> : null}
         </div>
       ) : null}
@@ -153,7 +156,7 @@ function BeatContent({ beat, chapter }) {
                 <header><strong>{series.title}</strong><b>{series.status}</b></header>
                 <div className="comic-trend__values">
                   {series.values.map((item) => (
-                    <div key={item.year}><span>{item.year}</span><i><b style={{ width: `${Math.max(8, ((Number(item.amount) || 0) / max) * 100)}%` }} /></i><strong className="num">{item.value}</strong></div>
+                    <div key={item.year}><span>{item.year}</span><i><b style={{ width: `${Math.max(8, ((Number(item.amount) || 0) / max) * 100)}%` }} /></i><strong className="num">{item.value}{item.context ? <small>{item.context}</small> : null}</strong></div>
                   ))}
                 </div>
                 <small>{series.detail}</small>
@@ -224,7 +227,7 @@ function GuideCallouts({ guide }) {
 
   if (!coords) {
     return (
-      <div key={key} className={`callout callout--screen comic-card${variant}`} data-placement={b.placement ?? 'center'} data-size={b.size} data-tone={b.tone} role="status" aria-live="polite" onClick={swallow} onMouseDown={swallow}>
+      <div key={key} className={`callout callout--screen comic-card${variant}${b.cardClass ? ` ${b.cardClass}` : ''}`} data-placement={b.placement ?? 'center'} data-size={b.size} data-tone={b.tone} role="status" aria-live="polite" onClick={swallow} onMouseDown={swallow}>
         {content}
         {foot}
         {bar}
@@ -238,7 +241,7 @@ function GuideCallouts({ guide }) {
         <span className="callout__ring" aria-hidden="true" />
       </Marker>
       <Marker key={`${key}-card`} longitude={coords[0]} latitude={coords[1]} anchor={ANCHOR[side]} offset={OFFSET[side]} style={{ zIndex: 8 }} onClick={swallow}>
-        <div className={`callout comic-card${variant}`} data-side={side} data-size={b.size} data-tone={b.tone} role="status" aria-live="polite" onMouseDown={swallow} onTouchStart={swallow}>
+        <div className={`callout comic-card${variant}${b.cardClass ? ` ${b.cardClass}` : ''}`} data-side={side} data-size={b.size} data-tone={b.tone} role="status" aria-live="polite" onMouseDown={swallow} onTouchStart={swallow}>
           {content}
           {foot}
           {bar}

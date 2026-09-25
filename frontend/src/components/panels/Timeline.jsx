@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { CHAPTERS } from '../../content/chapters.js';
 import { useAppState, useDispatch } from '../../state/AppState.jsx';
 
@@ -19,7 +19,7 @@ const GROUPS = [
   { label: 'THE SHIFT', start: 1, count: 3 },
   { label: 'LOCAL IMPACT', start: 4, count: 2 },
   { label: 'WHAT LASTED', start: 6, count: 1 },
-  { label: 'WHAT NEXT', start: 7, count: 1 },
+  { label: 'WHAT’S NEXT', start: 7, count: 1 },
 ];
 const fillScale = (p) => `scaleX(${(Math.max(0, Math.min(N - 1, p)) / (N - 1)).toFixed(4)})`;
 
@@ -38,6 +38,8 @@ export default function Timeline({ guide }) {
   const { activeChapter, exploreMode, autoplay } = useAppState();
   const dispatch = useDispatch();
   const fillRef = useRef(null);
+  const [hot, setHot] = useState(null);
+  const hover = (i) => ({ onMouseEnter: () => setHot(i), onMouseLeave: () => setHot(null), onFocus: () => setHot(i), onBlur: () => setHot(null) });
   const cur = exploreMode ? N - 1 : Math.min(activeChapter, N - 1);
 
   // Live fill during the tour: written straight to the DOM each frame, no React re-render.
@@ -63,7 +65,7 @@ export default function Timeline({ guide }) {
   };
   const play = () => {
     if (autoplay.on) dispatch({ type: 'AUTOPLAY_TOGGLE_PAUSE' });
-    else dispatch({ type: 'AUTOPLAY_START', step: exploreMode ? 0 : activeChapter });
+    else dispatch({ type: 'AUTOPLAY_START', step: 0 });
   };
 
   return (
@@ -107,7 +109,9 @@ export default function Timeline({ guide }) {
                 data-past={i < cur ? 'true' : 'false'}
                 aria-label={`${s.era}: ${s.title}`}
                 title={s.title}
+                data-hot={hot === i ? 'true' : 'false'}
                 onClick={() => go(i)}
+                {...hover(i)}
               >
                 <i />
               </button>
@@ -116,7 +120,7 @@ export default function Timeline({ guide }) {
         </ol>
         <div className="tl__titles">
           {STOPS.map((s, i) => (
-            <button key={i} type="button" className="tl__title" data-current={i === cur ? 'true' : 'false'} aria-current={i === cur ? 'step' : undefined} title={s.title} onClick={() => go(i)}>
+            <button key={i} type="button" className="tl__title" data-current={i === cur ? 'true' : 'false'} aria-current={i === cur ? 'step' : undefined} title={s.title} data-hot={hot === i ? 'true' : 'false'} onClick={() => go(i)} {...hover(i)}>
               {s.display}
             </button>
           ))}
@@ -124,7 +128,9 @@ export default function Timeline({ guide }) {
       </div>
       {autoplay.on ? (
         <button type="button" className="text-btn text-btn--quiet tl__exit" onClick={() => dispatch({ type: 'AUTOPLAY_STOP' })}>Exit tour</button>
-      ) : null}
+      ) : (
+        <button type="button" className="tl__explore" onClick={() => dispatch({ type: 'ENTER_EXPLORE' })}>Explore the map <span aria-hidden="true">→</span></button>
+      )}
     </nav>
   );
 }

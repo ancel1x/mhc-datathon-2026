@@ -123,7 +123,7 @@ export function buildStory({ summary, tolls, sources, geo }) {
       kicker: '2025 · year one',
       title: 'Where Did the Traffic Go?',
       lede: `Across the MTA network, ${n(fmtInt(tUp.length))} crossings had supported increases while other changes were uncertain or coverage-limited.`,
-      body: 'The map shows where volumes changed, but crossing counts do not track individual trips from one route to another. DOT street counters add local, sampled corridor evidence.',
+      body: 'The map shows where crossing volumes changed, but those counts do not track individual trips from one route to another.',
       stats: [
         { label: 'Robert F. Kennedy Bridge Manhattan', value: fmtPct(tById('rfk_manhattan').pct_existing), sub: `${fmtInt(tById('rfk_manhattan').avg_daily_2025)} vehicles per day in 2025`, tone: 1 },
         { label: 'Hugh L. Carey Tunnel', value: fmtPct(tById('hlc').pct_existing), sub: `${fmtInt(tById('hlc').avg_daily_2025)} vehicles per day · coverage-limited`, tone: -1 },
@@ -131,7 +131,7 @@ export function buildStory({ summary, tolls, sources, geo }) {
       ],
       details: {
         paragraphs: [
-          'MTA crossings show regional changes. DOT street counters show what changed at individual sampled locations and directions.',
+          'MTA crossing counts show how regional traffic changed across specific bridges and tunnels.',
           '**Interpretation limit.** These data show a mixed geography of change, but they cannot prove that a particular trip moved from one route to another.',
         ],
       },
@@ -355,11 +355,22 @@ export function buildChapterCards({ summary, geo }) {
   const williamsburg = byAirId('aq_36061NY08552');
   const highBridge = (geo?.uhf42?.features ?? []).find((feature) => feature.properties?.name === 'High Bridge - Morrisania')?.properties ?? {};
   const deeganBurdenScore = isNum(deegan.dac_combined_pct) ? Math.round(deegan.dac_combined_pct * 100) : null;
+  const rawPercent = (before, after) => {
+    const start = Number(before);
+    const end = Number(after);
+    if (!Number.isFinite(start) || !Number.isFinite(end) || start === 0) return DASH;
+    const pct = ((end - start) / start) * 100;
+    return `${pct > 0 ? '+' : '−'}${Math.abs(pct).toFixed(1)}%`;
+  };
+  const rowRawPercent = (row) => isNum(row?.pct_raw)
+    ? `${row.pct_raw > 0 ? '+' : '−'}${Math.abs(row.pct_raw).toFixed(1)}%`
+    : rawPercent(row?.pre_mean, row?.post_mean);
 
   return [
     {
       kicker: '2024 · BASELINE', title: 'Chapter 1 — Before the Toll',
       lede: 'Before congestion pricing began, New York’s traffic already moved through a dense network of bridges, tunnels, highways, and city streets. We use 2024 as the baseline for everything that follows.',
+      definition: 'PM2.5 is fine particulate pollution 2.5 micrometers or smaller. Lower µg/m³ means less PM2.5 in the air.',
       stats: [
         { value: '~929k vehicles/day', label: 'Across the MTA’s nine bridges and tunnels' },
         { value: '13 usable monitors', label: 'Out of 16 street-level PM2.5 monitoring sites in our baseline network' },
@@ -372,6 +383,7 @@ export function buildChapterCards({ summary, geo }) {
     {
       kicker: '2025 · TOLL BEGINS', title: 'Chapter 2 — The Headline',
       lede: 'Congestion pricing began on January 5, 2025. The first six months produced a strong topline story: fewer vehicles entered the Congestion Relief Zone, and a published study estimated a substantial PM2.5 improvement inside the zone.',
+      showTolls: true,
       stats: [
         { value: '~11% fewer entries', label: 'Overall vehicle entries into the CRZ during the first six months', tone: -1 },
         { value: '~9% fewer car entries', label: 'Passenger-car entries fell less sharply than some heavier vehicle categories', tone: -1 },
@@ -417,9 +429,9 @@ export function buildChapterCards({ summary, geo }) {
       kicker: '2025 · ENVIRONMENTAL JUSTICE', title: 'Chapter 5 — Who Bears the Burden?',
       lede: 'The toll landed on a city that was already unequal. Nearly half of New York’s census tracts carry the state’s disadvantaged-community designation, awarded for pollution, poverty and health burdens that were in place long before January 2025.',
       stats: [
-        { value: `${fmtInt(equity.dac_designated_tracts)} of ${fmtInt(equity.nyc_tracts)} tracts`, label: 'State-designated disadvantaged communities in the project data' },
-        { value: `${rfk.name} · ${fmtPct(rfk.pct_existing)}`, label: `Selected traffic increase${rfkBurdenScore == null ? '' : ` · burden score ${rfkBurdenScore} / 100`}`, tone: 1 },
-        { value: `${hamilton.name} · ${fmtSigned(hamilton.delta_raw, 2)} µg/m³`, label: `Selected PM2.5 concern · ${fmtNum(hamilton.pre_mean, 2)} → ${fmtNum(hamilton.post_mean, 2)} µg/m³ · weather-adjusted result uncertain`, tone: 1 },
+        { value: `${fmtInt(equity.dac_designated_tracts)} of ${fmtInt(equity.nyc_tracts)} census tracts`, label: 'State-designated disadvantaged communities in the project data', sub: 'Census tracts are small census-defined neighborhood areas.' },
+        { value: `${fmtPct(rfk.pct_existing)} · ${fmtInt(rfk.avg_daily_2025)}/day`, label: 'RFK Bridge · Manhattan span', raw: rfkBurdenScore == null ? null : `Burden score ${rfkBurdenScore} / 100`, rawTone: 0, tone: 1 },
+        { value: `${fmtNum(hamilton.pre_mean, 2)} → ${fmtNum(hamilton.post_mean, 2)} µg/m³`, label: hamilton.name, raw: `${fmtSigned(hamilton.delta_raw, 2)} µg/m³ · ${rowRawPercent(hamilton)} raw change`, rawTone: 1, verdict: 'Weather-adjusted result uncertain' },
         { value: `${fmtNum(hamilton.uhf42_asthma_ed_children, 1)} per 10,000`, label: 'Child asthma ER visits in Washington Heights · 2023, latest available' },
       ],
       takeaway: 'Congestion pricing did not create those gaps, and nothing here says it widened them. What the overlap does show is that the clearest air improvements landed in and beside the priced core, while the neighborhoods carrying the heaviest existing burden got results too uncertain to call either way.',
@@ -430,7 +442,7 @@ export function buildChapterCards({ summary, geo }) {
       lede: 'A citywide average can bury a neighborhood. Mott Haven, the Cross Bronx Expressway and Hunts Point sit within a few miles of one another, carry some of the highest childhood asthma rates in New York, and are read here one monitor at a time instead of through the citywide figure.',
       stats: [
         { value: `${fmtInt(rfkBronx.avg_daily_2024)} → ${fmtInt(rfkBronx.avg_daily_2025)}/day`, label: `Local traffic · RFK Bridge Bronx approach · ${fmtPct(rfkBronx.pct_existing)}, statistically uncertain`, tone: 1 },
-        { value: `${fmtNum(mottHaven.pre_mean, 2)} → ${fmtNum(mottHaven.post_mean, 2)} µg/m³`, label: `Local PM2.5 · Mott Haven · ${fmtSigned(mottHaven.delta_raw, 2)} raw change, weather-adjusted result uncertain`, tone: mottHaven.delta_raw },
+        { value: `${fmtNum(mottHaven.pre_mean, 2)} → ${fmtNum(mottHaven.post_mean, 2)} µg/m³`, label: 'Local PM2.5 · Mott Haven', raw: `${fmtSigned(mottHaven.delta_raw, 2)} µg/m³ · ${rowRawPercent(mottHaven)} raw change`, rawTone: 1, verdict: 'Weather-adjusted result uncertain' },
         { value: mottBurdenScore == null ? 'Designated community' : `${mottBurdenScore} / 100`, label: 'Environmental burden · Mott Haven–Port Morris · disadvantaged community', tone: 0 },
         { value: `${fmtNum(mottHaven.uhf42_asthma_ed_children, 1)} per 10,000`, label: 'Child asthma ER visits in Hunts Point–Mott Haven · 2023, latest available' },
       ],
@@ -439,7 +451,7 @@ export function buildChapterCards({ summary, geo }) {
         rows: [
           { label: 'CRZ headline', value: '~11% fewer entries', sub: '22% lower modeled average daily maximum PM2.5' },
           { label: 'Major Deegan context', value: `${fmtInt(deegan.latest_adv)} vehicles/day`, sub: 'Northbound · Oct–Nov 2025 snapshot · no before/after comparison' },
-          { label: 'Cross Bronx monitor', value: `${fmtNum(crossBronx.pre_mean, 2)} → ${fmtNum(crossBronx.post_mean, 2)} µg/m³`, sub: `${fmtSigned(crossBronx.delta_raw, 2)} raw change · weather-adjusted result uncertain`, tone: crossBronx.delta_raw },
+          { label: 'Cross Bronx monitor', value: `${fmtNum(crossBronx.pre_mean, 2)} → ${fmtNum(crossBronx.post_mean, 2)} µg/m³`, raw: `${fmtSigned(crossBronx.delta_raw, 2)} µg/m³ · ${rowRawPercent(crossBronx)} raw change`, rawTone: -1, verdict: 'Weather-adjusted result uncertain' },
         ],
       },
       takeaway: 'Scale changes the answer. A good result for the priced zone as a whole does not mean every neighborhood got one, and here the monitors are not clear enough to say the South Bronx got anything at all.',
@@ -449,9 +461,9 @@ export function buildChapterCards({ summary, geo }) {
       kicker: '2026 SO FAR · PERSISTENCE', title: 'Chapter 7 — One Year Later',
       lede: 'The first year showed where traffic and air-quality patterns changed. The 2026 data let us ask a different question: which of those early patterns persisted, which moved back toward earlier conditions, and which remain too uncertain to classify?',
       stats: [
-        { value: 'PERSISTED', label: `Queens Midtown Tunnel · ${fmtPct(qmt.jan_aug?.['2025']?.pct)} in 2025 → ${fmtPct(qmt.jan_aug?.['2026']?.pct)} in 2026, each vs Jan–Aug 2024`, tone: -1 },
-        { value: 'REVERSED', label: `Cross Bay Bridge · ${fmtPct(crossBay.jan_aug?.['2025']?.pct)} → ${fmtPct(crossBay.jan_aug?.['2026']?.pct)}, each vs Jan–Aug 2024`, tone: -1 },
-        { value: 'PERSISTED', label: `Williamsburg Bridge PM2.5 · ${fmtSigned(williamsburg.jan_aug?.['2025']?.delta_raw, 2)} → ${fmtSigned(williamsburg.jan_aug?.['2026']?.delta_raw, 2)} µg/m³, each vs Jan–Aug 2024`, tone: -1 },
+        { value: 'PERSISTED', label: 'Queens Midtown Tunnel', sub: `${fmtPct(qmt.jan_aug?.['2025']?.pct)} in 2025 → ${fmtPct(qmt.jan_aug?.['2026']?.pct)} in 2026, each vs Jan–Aug 2024`, subTone: 'directional' },
+        { value: 'REVERSED', label: 'Cross Bay Bridge', sub: `${fmtPct(crossBay.jan_aug?.['2025']?.pct)} → ${fmtPct(crossBay.jan_aug?.['2026']?.pct)}, each vs Jan–Aug 2024`, subTone: 'directional' },
+        { value: 'PERSISTED', label: 'Williamsburg Bridge PM2.5', sub: `${fmtSigned(williamsburg.jan_aug?.['2025']?.delta_raw, 2)} → ${fmtSigned(williamsburg.jan_aug?.['2026']?.delta_raw, 2)} µg/m³, each vs Jan–Aug 2024` },
         { value: 'STILL UNCERTAIN', label: `South Bronx · RFK traffic, Mott Haven PM2.5, and Cross Bronx PM2.5 intervals include zero` },
       ],
       takeaway: 'A second year adds depth to the story. Some early patterns may persist, others may shift, and incomplete data can leave important questions unresolved.',
@@ -464,7 +476,7 @@ export function buildChapterCards({ summary, geo }) {
       stats: [
         { value: 'Major Deegan Expressway', label: 'Selected intervention location · High Bridge, South Bronx' },
         { value: `${fmtInt(deegan.latest_adv)} vehicles/day`, label: 'Northbound · Oct–Nov 2025 snapshot · no matched pre-toll count' },
-        { value: `${fmtNum(hamilton.pre_mean, 2)} → ${fmtNum(hamilton.post_mean, 2)} µg/m³`, label: `Nearby Hamilton Bridge PM2.5 · ${fmtSigned(hamilton.delta_raw, 2)} raw change · weather-adjusted result uncertain`, tone: hamilton.delta_raw },
+        { value: `${fmtNum(hamilton.pre_mean, 2)} → ${fmtNum(hamilton.post_mean, 2)} µg/m³`, label: 'Nearby Hamilton Bridge PM2.5', raw: `${fmtSigned(hamilton.delta_raw, 2)} µg/m³ · ${rowRawPercent(hamilton)} raw change`, rawTone: 1, verdict: 'Weather-adjusted result uncertain' },
         { value: deeganBurdenScore == null ? 'Designated community' : `${deeganBurdenScore} / 100`, label: `Environmental burden · ${fmtNum(highBridge.asthma_ed_children, 1)} child asthma ER visits per 10,000 in 2023`, tone: 0 },
       ],
       list: {
@@ -483,9 +495,9 @@ export function buildChapterCards({ summary, geo }) {
 
 export const EXPLORE_CARD = {
   kicker: 'Explore',
-  title: 'Now the map is yours',
-  lede: 'Everything you switch on from here stays on.',
-  body: 'Pick the year on the right, turn layers on or off, and click any crossing, monitor, street counter or neighborhood for its full evidence: intervals, matched months, rush windows, monthly series and 2026 status. Zoom in past level 11 and the points become 24-hour clocks: grey ring = 2024, colored ring = the year shown.',
+  title: 'Explore the evidence',
+  lede: 'The guided story is finished. Now you can inspect the data yourself.',
+  body: 'Switch years, turn layers on and off, and click crossings, monitors, and neighborhoods to see the evidence behind the story.',
 };
 
 // ---- small helpers -------------------------------------------------------------------------

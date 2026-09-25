@@ -52,15 +52,26 @@ const startChapter = CHAPTERS[startIndex] ?? CHAPTERS[0];
 const OFF_TOUR = { on: false, paused: false, step: 0, beat: 0, startedAt: 0, elapsed: 0 };
 const now = () => (typeof performance !== 'undefined' ? performance.now() : Date.now());
 
-/** The year / metric a step opens on: its `from` state when it has one (so the change can be watched), else its own. */
-const opening = (ch) => ({ period: ch.from?.period ?? ch.period ?? 'post_2025', metric: ch.from?.metric ?? ch.metric ?? 'change' });
+/** The normal static year / metric for a chapter. */
+const chapterState = (ch) => ({ period: ch?.period ?? 'post_2025', metric: ch?.metric ?? 'change' });
+/** The earlier state used only by Chapter 3 Card 1 during the guided tour. */
+const tourOpening = (ch) => ({ period: ch?.from?.period ?? chapterState(ch).period, metric: ch?.from?.metric ?? chapterState(ch).metric });
+const isChapter3Card1 = (step, beat = 0) => step === 2 && beat === 0;
+
+export const SWEEP_MS = { before: 3000, ff: 2600, after: 3600 };
+export const SWEEP_MS_REDUCED = { before: 2000, ff: 0, after: 3000 };
+let sweepSeq = 0;
+const sweepFor = (ch) => (ch?.from ? { id: ++sweepSeq, phase: 'before', from: tourOpening(ch), to: chapterState(ch) } : null);
+
+const initialTourSweep = fromUrl.play != null && isChapter3Card1(fromUrl.play) ? sweepFor(startChapter) : null;
+const initialChapterState = initialTourSweep ? tourOpening(startChapter) : chapterState(startChapter);
 
 export const initialState = {
   intro: fromUrl.skipIntro && !fromUrl.introHold ? 'done' : 'show', // 'show' | 'leaving' | 'done'
   introHold: fromUrl.introHold,
   autoplay: fromUrl.play != null ? { ...OFF_TOUR, on: true, step: fromUrl.play, startedAt: now() } : OFF_TOUR,
-  period: fromUrl.explore ? 'post_2025' : opening(startChapter).period,
-  metric: fromUrl.explore ? 'change' : opening(startChapter).metric,
+  period: fromUrl.explore ? 'post_2026_ytd' : initialChapterState.period,
+  metric: fromUrl.explore ? 'change' : initialChapterState.metric,
   hour: null,
   activeChapter: fromUrl.explore ? CHAPTERS.length : startIndex,
   exploreMode: fromUrl.explore,
@@ -74,6 +85,7 @@ export const initialState = {
   dacMode: 'percentile', // 'designated' | 'percentile'; burden score is the primary presentation
   overlayOpacity: 1, // guided beats can soften polygon context without changing the Explore legend scale
   glyphMode: false, // map zoom >= 11 (clock glyphs on)
+  sweep: fromUrl.explore ? null : initialTourSweep,
 };
 
 const clampStep = (i) => Math.max(0, Math.min(CHAPTERS.length - 1, Number(i) || 0));
@@ -93,13 +105,21 @@ export function reducer(state, action) {
       const ch = CHAPTERS[action.index];
       if (!ch) return state;
       if (state.activeChapter === action.index && !state.exploreMode) return state;
-      return { ...state, activeChapter: action.index, exploreMode: false, layerVisibility: { ...ch.layers }, overlayOpacity: 1, ...opening(ch), hour: null, selectedFeature: null, sourcesOpen: false };
+      return { ...state, activeChapter: action.index, exploreMode: false, layerVisibility: { ...ch.layers }, overlayOpacity: 1, ...chapterState(ch), hour: null, selectedFeature: null, sourcesOpen: false, sweep: null };
+    }
+    case 'SWEEP_PHASE': {
+      const sw = state.sweep;
+      if (!sw || sw.id !== action.id) return state;
+      if (action.phase === 'end') return { ...state, sweep: null };
+      if (action.phase === 'ff') return { ...state, sweep: { ...sw, phase: 'ff' }, period: sw.to.period, metric: sw.to.metric };
+      return { ...state, sweep: { ...sw, phase: action.phase } };
     }
     case 'SET_STEP_STATE':
       // Used by step transitions and tour beats: applies the requested map composition directly, without
       // the coupling rules used by Explore controls.
       return {
         ...state,
+        sweep: state.sweep?.phase === 'before' && action.period && action.period !== state.period ? null : state.sweep,
         period: action.period ?? state.period,
         metric: action.metric ?? state.metric,
         layerVisibility: action.layers ? { ...action.layers } : state.layerVisibility,
@@ -108,7 +128,7 @@ export function reducer(state, action) {
       };
     case 'ENTER_EXPLORE':
       if (state.exploreMode) return state.autoplay.on ? { ...state, autoplay: OFF_TOUR } : state;
-      return { ...state, exploreMode: true, activeChapter: CHAPTERS.length, layerVisibility: { ...EXPLORE_LAYERS }, overlayOpacity: 1, metric: 'change', period: state.period === 'pre_2024' ? 'post_2025' : state.period, selectedFeature: null, sourcesOpen: false, autoplay: OFF_TOUR };
+      return { ...state, exploreMode: true, activeChapter: CHAPTERS.length, layerVisibility: { ...EXPLORE_LAYERS }, overlayOpacity: 1, metric: 'change', period: 'post_2026_ytd', selectedFeature: null, sourcesOpen: false, controlsCollapsed: false, controlsOpen: true, autoplay: OFF_TOUR, sweep: null };
     case 'NEXT_STEP':
       if (state.autoplay.on) return reducer(state, state.autoplay.step >= CHAPTERS.length - 1 ? { type: 'AUTOPLAY_END' } : { type: 'AUTOPLAY_START', step: state.autoplay.step + 1 });
       if (state.exploreMode) return state;
@@ -126,10 +146,16 @@ export function reducer(state, action) {
     case 'AUTOPLAY_START': {
       const step = clampStep(action.step ?? 0);
       const base = reducer({ ...state, exploreMode: true }, { type: 'SET_CHAPTER', index: step });
-      return { ...base, autoplay: { on: true, paused: false, step, beat: 0, startedAt: now(), elapsed: 0 }, selectedFeature: null, sourcesOpen: false };
+      const ch = CHAPTERS[step];
+      const sweep = isChapter3Card1(step) ? sweepFor(ch) : null;
+      return { ...base, ...(sweep ? tourOpening(ch) : chapterState(ch)), sweep, autoplay: { on: true, paused: false, step, beat: 0, startedAt: now(), elapsed: 0 }, selectedFeature: null, sourcesOpen: false };
     }
-    case 'AUTOPLAY_BEAT':
-      return state.autoplay.on ? { ...state, autoplay: { ...state.autoplay, beat: Math.max(0, Number(action.beat) || 0), startedAt: now(), elapsed: 0 } } : state;
+    case 'AUTOPLAY_BEAT': {
+      if (!state.autoplay.on) return state;
+      const beat = Math.max(0, Number(action.beat) || 0);
+      const leavingSweepBeat = state.sweep && !isChapter3Card1(state.autoplay.step, beat);
+      return { ...state, ...(leavingSweepBeat ? chapterState(CHAPTERS[state.autoplay.step]) : {}), sweep: leavingSweepBeat ? null : state.sweep, autoplay: { ...state.autoplay, beat, startedAt: now(), elapsed: 0 } };
+    }
     case 'AUTOPLAY_SKIP': {
       // Skip to the next / previous callout without waiting for its bar; past the last one, move on to the next
       // step (or Explore); before the first, back to the previous step. Skipping resumes a paused tour.
@@ -138,7 +164,8 @@ export function reducer(state, action) {
       const next = state.autoplay.beat + (action.dir < 0 ? -1 : 1);
       if (next >= n) return reducer(state, state.autoplay.step >= CHAPTERS.length - 1 ? { type: 'AUTOPLAY_END' } : { type: 'AUTOPLAY_START', step: state.autoplay.step + 1 });
       if (next < 0) return reducer(state, { type: 'AUTOPLAY_START', step: Math.max(0, state.autoplay.step - 1) });
-      return { ...state, autoplay: { ...state.autoplay, beat: next, paused: false, startedAt: now(), elapsed: 0 } };
+      const leavingSweepBeat = state.sweep && !isChapter3Card1(state.autoplay.step, next);
+      return { ...state, ...(leavingSweepBeat ? chapterState(CHAPTERS[state.autoplay.step]) : {}), sweep: leavingSweepBeat ? null : state.sweep, autoplay: { ...state.autoplay, beat: next, paused: false, startedAt: now(), elapsed: 0 } };
     }
     case 'AUTOPLAY_TOGGLE_PAUSE': {
       if (!state.autoplay.on) return state;
@@ -148,18 +175,18 @@ export function reducer(state, action) {
         : { ...state, autoplay: { ...a, paused: true, elapsed: a.elapsed + (now() - a.startedAt) } };
     }
     case 'AUTOPLAY_STOP':
-      return state.autoplay.on ? { ...state, autoplay: OFF_TOUR } : state;
+      return state.autoplay.on ? { ...state, ...chapterState(CHAPTERS[state.activeChapter]), autoplay: OFF_TOUR, sweep: null } : state;
     case 'AUTOPLAY_END':
       return { ...reducer({ ...state, autoplay: OFF_TOUR }, { type: 'ENTER_EXPLORE' }), autoplay: OFF_TOUR };
 
     case 'SET_PERIOD': {
       const metric = action.period === 'pre_2024' ? 'absolute' : state.metric;
-      return { ...state, period: action.period, metric };
+      return { ...state, period: action.period, metric, sweep: null };
     }
     case 'SET_METRIC': {
       // The 2024 baseline has no change to show: asking for "change" moves the year to 2025.
-      if (action.metric === 'change' && state.period === 'pre_2024') return { ...state, metric: 'change', period: 'post_2025' };
-      return { ...state, metric: action.metric };
+      if (action.metric === 'change' && state.period === 'pre_2024') return { ...state, metric: 'change', period: 'post_2025', sweep: null };
+      return { ...state, metric: action.metric, sweep: null };
     }
     case 'SET_HOUR':
       return { ...state, hour: action.hour == null ? null : Math.max(0, Math.min(23, Number(action.hour))) };
@@ -174,7 +201,9 @@ export function reducer(state, action) {
       return { ...state, dacMode: action.mode === 'percentile' ? 'percentile' : 'designated', layerVisibility: { ...state.layerVisibility, dac: true, uhf42: false } };
     case 'SELECT_FEATURE':
       // Clicking something during the tour hands control back to the reader so the detail panel can show.
-      return { ...state, selectedFeature: action.feature ?? null, autoplay: action.feature && state.autoplay.on ? OFF_TOUR : state.autoplay };
+      return action.feature && state.autoplay.on
+        ? { ...state, ...chapterState(CHAPTERS[state.activeChapter]), selectedFeature: action.feature, autoplay: OFF_TOUR, sweep: null }
+        : { ...state, selectedFeature: action.feature ?? null };
     case 'SET_HOVER':
       return { ...state, hovered: action.hovered ?? null };
     case 'SET_THEME':

@@ -83,7 +83,7 @@ export default function KeyLegend({ hasFeatured = false }) {
         </div>
       ) : null}
       {v.flow && (v.bt_facility || v.crz_entry) ? (
-        <div className="key__note"><LayerSymbol kind="line" size={12} /> Moving lines show which way traffic goes; thicker = more vehicles{isChange && v.bt_facility ? '; grey = change not supported' : ''}.</div>
+        <div className="key__note"><LayerSymbol kind="line" size={12} /> Moving lines show which way traffic goes. Thicker lines and slower, closer cars = more vehicles{isChange && v.bt_facility ? '; red = busier than 2024, green = quieter (paler when the data are limited), grey = no clear change' : ''}.</div>
       ) : null}
       {v.dac && !purplePct ? (
         <div className="key__block">

@@ -1,6 +1,7 @@
 // Story steps, in time order. Each step sets the camera, which layers are on, which year the map shows
 // (`period`), whether symbols are colored by change or just sized by amount (`metric`), and which ids are
-// "featured" (everything else is faded). The Timeline bar groups steps by `era`.
+// "featured" (everything else is faded). A step with `from` opens on that earlier year and replays the change
+// (before -> fast-forward -> after). The Timeline bar groups steps by `era`.
 //
 // Every step answers one part of the Phase 1 brief: the three required layers (NYCCAS PM2.5 before/after,
 // MTA traffic, the zone + toll) and the four questions (headline vs daily/peak picture; eliminated vs
@@ -74,6 +75,7 @@ export const CHAPTERS = [
     title: 'Chapter 3 — Where Did the Traffic Go?',
     camera: { center: [-73.95, 40.74], zoom: 10.2 },
     layers: layers(['zone', 'bt_facility', 'flow']),
+    from: { period: 'pre_2024', metric: 'absolute' },
     period: 'post_2025',
     metric: 'change',
     featured: () => null,
@@ -125,6 +127,7 @@ export const CHAPTERS = [
     title: 'Chapter 7 — One Year Later',
     camera: { center: [-73.91, 40.82], zoom: 10.75 },
     layers: layers(['bt_facility', 'flow', 'aq_monitor']),
+    from: { period: 'post_2025', metric: 'change' },
     period: 'post_2026_ytd',
     metric: 'change',
     featured: () => ({
@@ -151,7 +154,7 @@ export const CHAPTERS = [
 
 export const EXPLORE_STEP = { era: 'Explore', when: 'Explore', short: 'Explore', title: 'Explore the map' };
 export const EXPLORE_CAMERA = { center: [-73.95, 40.73], zoom: 10.4 };
-export const EXPLORE_LAYERS = layers(['zone', 'crz_entry', 'bt_facility', 'aq_monitor']);
+export const EXPLORE_LAYERS = layers(['zone', 'bt_facility', 'aq_monitor']);
 /** Wide view of the whole city shown behind the intro title; the map flies from here to step 1. */
 export const INTRO_CAMERA = { center: [-73.93, 40.69], zoom: 9.4 };
 

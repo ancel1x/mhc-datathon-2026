@@ -8,6 +8,7 @@ import { StatRow } from '../charts/StatTile.jsx';
 import IntervalBars from '../charts/IntervalBar.jsx';
 import TollTable from './TollTable.jsx';
 import { SourcesList } from './SourcesSheet.jsx';
+import { INTRO_PHOTOS } from '../../content/introPhotos.js';
 import Segmented from '../Segmented.jsx';
 import CloseButton from '../CloseButton.jsx';
 import { Chevron } from './SidePanel.jsx';
@@ -56,6 +57,8 @@ function KList({ list, main = false }) {
           <li key={i}>
             <span>{r.label}</span>
             <span className={`num ${r.cls ? `cls-${r.cls}` : toneClass(r.tone)}`}>{r.value}</span>
+            {r.raw ? <span className={`num klist__raw ${toneClass(r.rawTone)}`}>{r.raw}</span> : null}
+            {r.verdict ? <span className="klist__verdict">{r.verdict}</span> : null}
             <span className="num sub">{r.sub}</span>
           </li>
         ))}
@@ -129,13 +132,14 @@ function Details({ d, tolls, sources }) {
  * Step template: optional badge, title, lede, body, bullets, three stat rows, at most one compact table or list,
  * then Details. (The date lives in the footer.)
  */
-function ChapterView({ c, step, tolls, sources, onRestart }) {
-  const isExplore = step >= TOTAL;
+function ChapterView({ c, tolls, sources }) {
   return (
     <article className="chapter" aria-labelledby="chapter-title">
       {c.badge ? <span className={c.badgeTone === 'warn' ? 'chapter__badge chapter__badge--warn' : 'chapter__badge'}>{c.badge}</span> : null}
       <h2 className="chapter__title" id="chapter-title">{c.title}</h2>
       {c.lede ? <p className="chapter__lede"><Rich text={c.lede} /></p> : null}
+      {c.definition ? <p className="chapter__definition">{c.definition}</p> : null}
+      {c.showTolls ? <TollTable tolls={tolls} /> : null}
       {c.stats?.length ? <div className="chapter__section-title chapter__section-title--main">KEY EVIDENCE</div> : null}
       {c.stats?.length ? <StatRow items={c.stats.slice(0, 4)} /> : null}
       <Table table={c.table} main />
@@ -146,7 +150,6 @@ function ChapterView({ c, step, tolls, sources, onRestart }) {
       {c.bullets?.length ? <ul className="chapter__bullets">{c.bullets.map((b, i) => <li key={i}><Rich text={b} /></li>)}</ul> : null}
       {c.notice ? <p className="chapter__notice"><Rich text={c.notice} /></p> : null}
       {hasDetails(c.details) ? <Details d={c.details} tolls={tolls} sources={sources} /> : null}
-      {isExplore ? <button type="button" className="btn btn--fill" onClick={onRestart}>Start the story again</button> : null}
     </article>
   );
 }
@@ -159,6 +162,15 @@ function SourcesView({ sources, onClose }) {
         <CloseButton label="Close sources" onClick={onClose} />
       </div>
       <SourcesList sources={sources} />
+      <div className="chapter__section-title">Title screen photos</div>
+      <ul className="sources-list">
+        {INTRO_PHOTOS.map((p) => (
+          <li key={p.file}>
+            <a href={p.page} target="_blank" rel="noopener noreferrer">{p.name}</a>
+            <span className="meta">{p.artist} · {p.license} · Wikimedia Commons · cropped, greyscale</span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
@@ -223,7 +235,7 @@ export default function StoryPanel() {
         {sourcesOpen ? (
           <SourcesView sources={sources} onClose={() => dispatch({ type: 'TOGGLE_SOURCES', open: false })} />
         ) : (
-          <ChapterView key={step} c={current} step={step} tolls={tolls} sources={sources} onRestart={() => dispatch({ type: 'RESTART' })} />
+          <ChapterView key={step} c={current} tolls={tolls} sources={sources} />
         )}
       </div>
       <footer className="story__foot">

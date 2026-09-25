@@ -3,7 +3,7 @@ import { useAppState } from '../../state/AppState.jsx';
 import { useData, useLazyJson } from '../../lib/data.jsx';
 import { COMMUNITY_META, dotTier, featureMetrics, LAYER_META, metaLine } from '../../lib/metrics.js';
 import { fmtCompact, fmtDelta, fmtInt, fmtMonth, fmtMonthList, fmtNum, fmtPct, fmtShare, fmtTrafficK, isNum, shortName } from '../../lib/format.js';
-import { CLASS_LABELS } from '../../lib/scales.js';
+import { resultLabel } from '../../lib/scales.js';
 import { plainAir, plainRate } from '../../lib/plain.js';
 import { StatRow } from '../charts/StatTile.jsx';
 import TimelineChart from '../charts/TimelineChart.jsx';
@@ -73,7 +73,7 @@ function TrafficSupport({ p, period }) {
     ? ivl('Jan–Aug 2026 vs 2024', j26, `${fmtInt(j26.days_2024)} + ${fmtInt(j26.days_2026)} matched days`)
     : ivl('2025 vs 2024', fy, `${fmtInt(fy.matched_days_2024)} + ${fmtInt(fy.matched_days_2025)} matched days`);
   return (
-    <Section title="Is the change supported?" aside={<StatusBadge status={main?.status} />}>
+    <Section title="Is the change supported?" aside={<StatusBadge status={main?.status} what="traffic" />}>
       <IntervalBars rows={[main]} />
     </Section>
   );
@@ -88,7 +88,7 @@ function AirEvidence({ p, period }) {
   const c26 = p.comparisons?.post_2026ytd_vs_ytd_2025;
   if (!ev || !e) {
     return (
-      <Section title="Is the change supported?" aside={<StatusBadge status="no_baseline" />}>
+      <Section title="Is the change supported?" aside={<StatusBadge status="no_baseline" what="PM2.5" />}>
         <p className="detail__hint">This monitor is outside the validated 15-site set: too little data for a before/after comparison. Shown as not available, never as zero.</p>
       </Section>
     );
@@ -104,7 +104,7 @@ function AirEvidence({ p, period }) {
   const persLabel = STRONG.has(ev.persistence) ? ev.persistence : STRONG.has(ev.persistence_adjusted) ? ev.persistence_adjusted : ev.persistence;
   return (
     <>
-      <Section title={is26 ? 'Jan–Aug 2026 vs 2024' : 'Raw vs weather-adjusted'} aside={<StatusBadge status={e.class} />}>
+      <Section title={is26 ? 'Jan–Aug 2026 vs 2024' : 'Raw vs weather-adjusted'} aside={<StatusBadge status={e.class} what="PM2.5" />}>
         {noBase ? (
           <>
             <p className="detail__hint">{e.note ? `${e.note}.` : 'No eligible 2024 baseline: the monitor was offline or moved, so no before/after estimate exists.'} Missing data are shown as unavailable, never as zero.</p>
@@ -185,7 +185,7 @@ function CommunityDetail({ p, onClose, closeRef }) {
                 return (
                   <li key={`${layer}:${props.id}`}>
                     <span>{shortName(props.name)}</span>
-                    <span className={`num cls-${key ?? 'no_baseline'}`}>{CLASS_LABELS[key] ?? 'not available'}</span>
+                    <span className={`num cls-${key ?? 'no_baseline'}`}>{key ? resultLabel(layer, key) : 'not available'}</span>
                     <span className="num sub">{layer === 'aq_monitor' ? (isNum(m.evidence?.adj_delta) ? fmtDelta(m.evidence.adj_delta, 'µg/m³', 2) : isNum(m.change) ? fmtPct(m.change) : '—') : fmtPct(m.change)}</span>
                   </li>
                 );

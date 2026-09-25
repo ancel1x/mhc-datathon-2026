@@ -5,7 +5,7 @@ import { isHollow } from './PointLayers.jsx';
 import { useData } from '../../lib/data.jsx';
 import { useAppState, useDispatch } from '../../state/AppState.jsx';
 import { featureMetrics, GLYPH_LAYERS, LAYER_META } from '../../lib/metrics.js';
-import { CLASS_LABELS } from '../../lib/scales.js';
+import { resultLabel } from '../../lib/scales.js';
 import { fmtCompact, fmtNum, fmtPct, fmtTrafficK, isNum, shortName } from '../../lib/format.js';
 
 const SIZES = { crz_entry: 64, bt_facility: 70, aq_monitor: 58 };
@@ -16,7 +16,7 @@ const fmtVal = (layer, v) => (layer === 'aq_monitor' ? (isNum(v) ? `${fmtNum(v, 
 /** Caption text under the ring: change for traffic, class for monitors, value when the metric is absolute. */
 function captionFor(layer, m, metric) {
   if (metric === 'absolute') return layer === 'aq_monitor' ? (isNum(m.value) ? `${fmtNum(m.value, 1)} µg/m³` : 'No data available for this period') : layer === 'bt_facility' || layer === 'crz_entry' ? fmtTrafficK(m.value) : fmtCompact(m.value);
-  if (layer === 'aq_monitor') return CLASS_LABELS[m.classification] ?? 'no data';
+  if (layer === 'aq_monitor') return resultLabel(layer, m.classification ?? 'no_baseline');
   if (!isNum(m.change) && isNum(m.value)) return layer === 'bt_facility' || layer === 'crz_entry' ? fmtTrafficK(m.value) : fmtCompact(m.value);
   return fmtPct(m.change);
 }
@@ -57,7 +57,7 @@ function GlyphLayer({ featured, viewVersion }) {
     const isSelected = selectedFeature?.layer === it.layer && selectedFeature?.id === it.id;
     const isHovered = hovered === it.key;
     const caption = captionFor(it.layer, it.m, metric);
-    const support = it.layer === 'bt_facility' && metric === 'change' && it.m.support ? CLASS_LABELS[it.m.support] ?? it.m.support : null;
+    const support = it.layer === 'bt_facility' && metric === 'change' && it.m.support ? resultLabel(it.layer, it.m.support) : null;
     const showBaseline = period !== 'pre_2024' && isNum(it.m.baseline);
     const showChange = period !== 'pre_2024' && isNum(it.m.change);
     return (
